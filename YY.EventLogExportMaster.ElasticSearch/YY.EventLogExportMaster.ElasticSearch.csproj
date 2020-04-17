@@ -6,4 +6,8 @@
     <RootNamespace>YY.EventLogExportMaster.ElasticSearch</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YY.EventLogExportMaster.Core\YY.EventLogExportMaster.Core.csproj" />
+  </ItemGroup>
+
 </Project>

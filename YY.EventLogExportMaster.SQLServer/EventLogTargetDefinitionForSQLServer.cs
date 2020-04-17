@@ -2,7 +2,7 @@
 
 namespace YY.EventLogExportMaster.SQLServer
 {
-    public class EventLogTargetDefinitionForSQLServer
+    public class EventLogTargetDefinitionForSQLServer : EventLogTargetDefinition
     {
     }
 }

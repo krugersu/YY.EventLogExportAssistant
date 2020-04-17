@@ -2,7 +2,7 @@
 
 namespace YY.EventLogExportMaster.PostgreSQL
 {
-    public class EventLogTargetDefinitionForPostgreSQL
+    public class EventLogTargetDefinitionForPostgreSQL : EventLogTargetDefinition
     {
     }
 }

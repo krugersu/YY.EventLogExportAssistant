@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YY.EventLogExportMaster.ElasticSearch\YY.EventLogExportMaster.ElasticSearch.csproj" />
+    <ProjectReference Include="..\YY.EventLogExportMaster.PostgreSQL\YY.EventLogExportMaster.PostgreSQL.csproj" />
+    <ProjectReference Include="..\YY.EventLogExportMaster.SQLServer\YY.EventLogExportMaster.SQLServer.csproj" />
+  </ItemGroup>
+
+</Project>
