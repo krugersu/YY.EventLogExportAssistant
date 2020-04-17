@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogTransferMaster.Core", "YY.EventLogTransferMaster.Core\YY.EventLogTransferMaster.Core.csproj", "{5F55410F-8C36-42EC-A2D2-4975763ADE20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.Core", "YY.EventLogExportMaster.Core\YY.EventLogExportMaster.Core.csproj", "{5F55410F-8C36-42EC-A2D2-4975763ADE20}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{44948605-8B87-444A-B94D-530ADB059377}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogTransferMaster.SQLServer", "YY.EventLogTransferMaster.SQLServer\YY.EventLogTransferMaster.SQLServer.csproj", "{2B04B71E-4785-401C-AED7-751A1C0B7DB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.SQLServer", "YY.EventLogExportMaster.SQLServer\YY.EventLogExportMaster.SQLServer.csproj", "{2B04B71E-4785-401C-AED7-751A1C0B7DB1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogTransferMaster.PostgreSQL", "YY.EventLogTransferMaster.PostgreSQL\YY.EventLogTransferMaster.PostgreSQL.csproj", "{C5CB23FA-C924-452A-963B-2883A7F10994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.PostgreSQL", "YY.EventLogExportMaster.PostgreSQL\YY.EventLogExportMaster.PostgreSQL.csproj", "{C5CB23FA-C924-452A-963B-2883A7F10994}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogTransferMaster.ElasticSearch", "YY.EventLogTransferMaster.ElasticSearch\YY.EventLogTransferMaster.ElasticSearch.csproj", "{959229E8-DAE7-48BA-9D20-C4768460AF04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.ElasticSearch", "YY.EventLogExportMaster.ElasticSearch\YY.EventLogExportMaster.ElasticSearch.csproj", "{959229E8-DAE7-48BA-9D20-C4768460AF04}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogTransferMaster.Core.Tests", "Tests\YY.EventLogTransferMaster.Core.Tests\YY.EventLogTransferMaster.Core.Tests.csproj", "{A3822078-CDCA-45DF-872D-153AD7DF142E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.Core.Tests", "Tests\YY.EventLogExportMaster.Core.Tests\YY.EventLogExportMaster.Core.Tests.csproj", "{A3822078-CDCA-45DF-872D-153AD7DF142E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection

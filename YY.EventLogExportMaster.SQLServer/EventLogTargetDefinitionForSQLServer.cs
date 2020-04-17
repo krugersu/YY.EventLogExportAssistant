@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.EventLogTransferMaster.SQLServer
+namespace YY.EventLogExportMaster.SQLServer
 {
     public class EventLogTargetDefinitionForSQLServer
     {

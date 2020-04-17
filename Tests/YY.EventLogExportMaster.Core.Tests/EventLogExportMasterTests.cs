@@ -1,9 +1,9 @@
 using System;
 using Xunit;
 
-namespace YY.EventLogTransferMaster.Core.Tests
+namespace YY.EventLogExportMaster.Core.Tests
 {
-    public class EventLogTransferMasterTests
+    public class EventLogExportMasterTests
     {
         [Fact]
         public void IsFine()
