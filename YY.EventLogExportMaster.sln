@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.Core", "YY.EventLogExportMaster.Core\YY.EventLogExportMaster.Core.csproj", "{5F55410F-8C36-42EC-A2D2-4975763ADE20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.Core", "Libs\YY.EventLogExportMaster.Core\YY.EventLogExportMaster.Core.csproj", "{5F55410F-8C36-42EC-A2D2-4975763ADE20}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{44948605-8B87-444A-B94D-530ADB059377}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.SQLServer", "YY.EventLogExportMaster.SQLServer\YY.EventLogExportMaster.SQLServer.csproj", "{2B04B71E-4785-401C-AED7-751A1C0B7DB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.SQLServer", "Libs\YY.EventLogExportMaster.SQLServer\YY.EventLogExportMaster.SQLServer.csproj", "{2B04B71E-4785-401C-AED7-751A1C0B7DB1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.PostgreSQL", "YY.EventLogExportMaster.PostgreSQL\YY.EventLogExportMaster.PostgreSQL.csproj", "{C5CB23FA-C924-452A-963B-2883A7F10994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.PostgreSQL", "Libs\YY.EventLogExportMaster.PostgreSQL\YY.EventLogExportMaster.PostgreSQL.csproj", "{C5CB23FA-C924-452A-963B-2883A7F10994}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.ElasticSearch", "YY.EventLogExportMaster.ElasticSearch\YY.EventLogExportMaster.ElasticSearch.csproj", "{959229E8-DAE7-48BA-9D20-C4768460AF04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.ElasticSearch", "Libs\YY.EventLogExportMaster.ElasticSearch\YY.EventLogExportMaster.ElasticSearch.csproj", "{959229E8-DAE7-48BA-9D20-C4768460AF04}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
@@ -33,12 +33,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportMaster.Cor
 		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {5F55410F-8C36-42EC-A2D2-4975763ADE20}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportMasterConsoleApp", "YY.EventLogExportMasterConsoleApp\YY.EventLogExportMasterConsoleApp.csproj", "{EDBA6F39-C0AD-4A69-B420-60914489DA1D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2B04B71E-4785-401C-AED7-751A1C0B7DB1} = {2B04B71E-4785-401C-AED7-751A1C0B7DB1}
-		{959229E8-DAE7-48BA-9D20-C4768460AF04} = {959229E8-DAE7-48BA-9D20-C4768460AF04}
-		{C5CB23FA-C924-452A-963B-2883A7F10994} = {C5CB23FA-C924-452A-963B-2883A7F10994}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportToPostgreSQL", "Apps\YY.EventLogExportToPostgreSQL\YY.EventLogExportToPostgreSQL.csproj", "{9756BB57-6B11-4DE2-ACBD-6277691FF083}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{0F68727D-2383-427E-AF95-1329C70898C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{6EBA96D1-CD22-4055-B272-ABD22E864DF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,16 +65,21 @@ Global
 		{A3822078-CDCA-45DF-872D-153AD7DF142E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3822078-CDCA-45DF-872D-153AD7DF142E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3822078-CDCA-45DF-872D-153AD7DF142E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EDBA6F39-C0AD-4A69-B420-60914489DA1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDBA6F39-C0AD-4A69-B420-60914489DA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDBA6F39-C0AD-4A69-B420-60914489DA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDBA6F39-C0AD-4A69-B420-60914489DA1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9756BB57-6B11-4DE2-ACBD-6277691FF083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9756BB57-6B11-4DE2-ACBD-6277691FF083}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9756BB57-6B11-4DE2-ACBD-6277691FF083}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9756BB57-6B11-4DE2-ACBD-6277691FF083}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{5F55410F-8C36-42EC-A2D2-4975763ADE20} = {0F68727D-2383-427E-AF95-1329C70898C4}
+		{2B04B71E-4785-401C-AED7-751A1C0B7DB1} = {0F68727D-2383-427E-AF95-1329C70898C4}
+		{C5CB23FA-C924-452A-963B-2883A7F10994} = {0F68727D-2383-427E-AF95-1329C70898C4}
+		{959229E8-DAE7-48BA-9D20-C4768460AF04} = {0F68727D-2383-427E-AF95-1329C70898C4}
 		{A3822078-CDCA-45DF-872D-153AD7DF142E} = {44948605-8B87-444A-B94D-530ADB059377}
+		{9756BB57-6B11-4DE2-ACBD-6277691FF083} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}
