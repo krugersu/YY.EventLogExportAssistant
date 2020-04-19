@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.EventLogExportMaster.PostgreSQL
+namespace YY.EventLogExportAssistant.PostgreSQL
 {
     public class EventLogTargetDefinitionForPostgreSQL : EventLogTargetDefinition
     {

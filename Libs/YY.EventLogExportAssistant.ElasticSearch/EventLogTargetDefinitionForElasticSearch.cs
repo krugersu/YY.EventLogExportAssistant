@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.EventLogExportMaster.ElasticSearch
+namespace YY.EventLogExportAssistant.ElasticSearch
 {
     public class EventLogTargetDefinitionForElasticSearch : EventLogTargetDefinition
     {

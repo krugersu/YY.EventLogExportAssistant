@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "YY.EventLogExportToPostgreSQL": {
+      "commandName": "Project",
+      "commandLineArgs": "\"\\\\Srv-1c-01-vm\\жр lgf (генератор событий)\""
+    }
+  }
+}

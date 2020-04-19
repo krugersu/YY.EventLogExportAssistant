@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace YY.EventLogExportMaster
+namespace YY.EventLogExportAssistant
 {
     public interface IEventLogExportMaster
     {
+        void AddItem(object item);
+
+        void Send();
     }
 }

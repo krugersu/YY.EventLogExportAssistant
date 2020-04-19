@@ -6,6 +6,10 @@
     <IsPackable>false</IsPackable>
 
     <Version>1.0.0.0</Version>
+
+    <Authors>Permitin Yuriy</Authors>
+
+    <Product>Event log export assistant tests</Product>
   </PropertyGroup>
 
   <ItemGroup>

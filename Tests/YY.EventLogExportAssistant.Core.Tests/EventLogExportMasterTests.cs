@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace YY.EventLogExportMaster.Core.Tests
+namespace YY.EventLogExportAssistant.Core.Tests
 {
     public class EventLogExportMasterTests
     {

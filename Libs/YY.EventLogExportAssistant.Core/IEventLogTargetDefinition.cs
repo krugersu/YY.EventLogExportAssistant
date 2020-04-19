@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using YY.EventLogReaderAssistant.Models;
 
-namespace YY.EventLogExportMaster
+namespace YY.EventLogExportAssistant
 {
     public interface IEventLogTargetDefinition
     {
