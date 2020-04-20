@@ -22,12 +22,12 @@ namespace YY.EventLogExportAssistant
 
         public void AddItem(object item)
         {
-
+            Console.WriteLine("Item added");
         }
 
         public void Send()
         {
-
+            Console.WriteLine("Sended");
         }
 
         public int QueueLength
