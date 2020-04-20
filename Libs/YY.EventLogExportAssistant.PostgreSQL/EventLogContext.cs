@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,8 +35,15 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectinString = "";
-            optionsBuilder.UseNpgsql(connectinString);
+            if (!optionsBuilder.IsConfigured)
+            {
+                IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .Build();
+
+                string connectinString = Configuration.GetConnectionString("EventLogDatabase");
+                optionsBuilder.UseNpgsql(connectinString);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
