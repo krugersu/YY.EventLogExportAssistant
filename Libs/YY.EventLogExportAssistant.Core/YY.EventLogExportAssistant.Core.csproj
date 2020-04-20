@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.8" />
+    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.10" />
   </ItemGroup>
 
 </Project>
