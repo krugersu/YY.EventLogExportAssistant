@@ -7,11 +7,11 @@ namespace YY.EventLogExportAssistant
 {
     public abstract class EventLogTargetDefinition : IEventLogTargetDefinition
     {
-        public void Save(RowData rowData)
+        public virtual void Save(RowData rowData)
         {
         }
 
-        public void Save(IList<RowData> rowsData)
+        public virtual void Save(IList<RowData> rowsData)
         {
         }
     }
