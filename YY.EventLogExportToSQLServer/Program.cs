@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.SQLServer;
+using YY.EventLogExportAssistant.SQLServer.Models;
 using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportToSQLServer
@@ -26,27 +27,28 @@ namespace YY.EventLogExportToSQLServer
             {
                 string eventLogPath = args[0];
                 int queueLength = 1000;
-                EventLogTargetDefinition exporterDefination = new EventLogTargetDefinitionForSQLServer();
-
-                using (EventLogExportMaster exporter = EventLogExportMaster.CreateExportMaster(exporterDefination))
+                using (EventLogOnTarget<LogObject> target = new EventLogOnSQLServer<LogObject>())
                 {
-                    using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+                    using (EventLogExportMaster<LogObject> exporter = EventLogExportMaster<LogObject>.CreateExportMaster(target))
                     {
-                        if (reader.Read())
-                        {
-                            exporter.AddItem(reader.CurrentRow);
+                        //using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+                        //{
+                        //    if (reader.Read())
+                        //    {
+                        //        exporter.AddItem(reader.CurrentRow);
 
-                            // Отправляем порцию накопившихся элементов
-                            if (exporter.QueueLength >= queueLength)
-                                exporter.Send();
-                        }
+                        //        // Отправляем порцию накопившихся элементов
+                        //        if (exporter.QueueLength >= queueLength)
+                        //            exporter.Send();
+                        //    }
+                        //}
+
+                        // Отправляем оставшиеся элементы
+                        if (exporter.QueueLength > 0)
+                            exporter.Send();
                     }
-
-                    // Отправляем оставшиеся элементы
-                    if (exporter.QueueLength > 0)
-                        exporter.Send();
                 }
-            }
+            }        
 
             Console.WriteLine("Для выхода нажмите любую клавишу...");
             Console.ReadKey();

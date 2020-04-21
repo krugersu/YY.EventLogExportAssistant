@@ -1,26 +1,25 @@
 ﻿using System;
-using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
-    public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
+    public sealed class EventLogExportMaster<T> : IEventLogExportMaster<T>, IDisposable where T : CommonLogObject
     {
-        public static EventLogExportMaster CreateExportMaster(EventLogTargetDefinition target)
+        public static EventLogExportMaster<T> CreateExportMaster(EventLogOnTarget<T> target)
         {
-            return new EventLogExportMaster(target);
+            return new EventLogExportMaster<T>(target);
         }
 
-        private IEventLogTargetDefinition _target;
+        private IEventLogTarget<T> _target;
 
         private EventLogExportMaster()
         {
         }
-        private EventLogExportMaster(EventLogTargetDefinition target)
+        private EventLogExportMaster(EventLogOnTarget<T> target)
         {
-            _target = target;
+            _target = (IEventLogTarget<T>)target;
         }
 
-        public void AddItem(object item)
+        public void AddItem(T item)
         {
             Console.WriteLine("Item added");
         }

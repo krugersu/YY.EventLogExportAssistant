@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace YY.EventLogExportAssistant.SQLServer.Models
+﻿namespace YY.EventLogExportAssistant.SQLServer.Models
 {
-    public abstract class LogObject
+    public abstract class LogObject : CommonLogObject
     {
         public virtual long InformationSystemId { get; set; }
         public virtual InformationSystems InformationSystem { get; set; }

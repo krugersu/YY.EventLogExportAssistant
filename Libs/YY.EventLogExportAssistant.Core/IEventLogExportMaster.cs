@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace YY.EventLogExportAssistant
 {
-    public interface IEventLogExportMaster
+    public interface IEventLogExportMaster<T> where T : CommonLogObject
     {
-        void AddItem(object item);
+        void AddItem(T item);
 
         void Send();
     }
