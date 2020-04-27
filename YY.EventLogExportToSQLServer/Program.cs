@@ -13,12 +13,6 @@ namespace YY.EventLogExportToSQLServer
     {
         static void Main(string[] args)
         {
-            using (EventLogContext context = new EventLogContext())
-            {
-                long isCount = context.InformationSystems.Count();
-                Console.WriteLine("Количество информационных систем: {0}", isCount);
-            }
-
             if (args.Length == 0)
             {
                 Console.WriteLine("Не передан путь к файлам журнала регистрации.");
@@ -26,32 +20,40 @@ namespace YY.EventLogExportToSQLServer
             else
             {
                 string eventLogPath = args[0];
-                int queueLength = 1000;
-                using (EventLogOnTarget<LogObject> target = new EventLogOnSQLServer<LogObject>())
+
+                using (EventLogExportMaster exporter = new EventLogExportMaster())
                 {
-                    using (EventLogExportMaster<LogObject> exporter = EventLogExportMaster<LogObject>.CreateExportMaster(target))
+                    exporter.SetEventLogPath(eventLogPath);
+                    exporter.SetWatchPeriod(60);
+                    exporter.SetTarget(new EventLogOnSQLServer() { });
+
+                    if (exporter.NewDataAvailiable())
                     {
-                        //using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
-                        //{
-                        //    if (reader.Read())
-                        //    {
-                        //        exporter.AddItem(reader.CurrentRow);
-
-                        //        // Отправляем порцию накопившихся элементов
-                        //        if (exporter.QueueLength >= queueLength)
-                        //            exporter.Send();
-                        //    }
-                        //}
-
-                        // Отправляем оставшиеся элементы
-                        if (exporter.QueueLength > 0)
-                            exporter.Send();
+                        exporter.SendData();
                     }
-                }
-            }        
 
-            Console.WriteLine("Для выхода нажмите любую клавишу...");
-            Console.ReadKey();
+                    exporter.BeforeExportData += BeforeExportData;
+                    exporter.AfterExportData += AfterExportData;
+
+                    exporter.BeginWatch();
+
+                    exporter.EndWatch();
+
+                    Console.WriteLine("Нажмите 'q' для выхода...");
+                    while (Console.Read() != 'q') ;
+                }
+            }     
+
+        }
+
+        private static void AfterExportData(AfterExportDataEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void BeforeExportData(BeforeExportDataEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

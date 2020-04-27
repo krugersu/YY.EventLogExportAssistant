@@ -1,39 +1,54 @@
 ﻿using System;
+using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant
 {
-    public sealed class EventLogExportMaster<T> : IEventLogExportMaster<T>, IDisposable where T : CommonLogObject
-    {
-        public static EventLogExportMaster<T> CreateExportMaster(EventLogOnTarget<T> target)
+    public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
+    {        
+        private string _eventLogPath;
+        private EventLogReader _eventLogReader;
+        private IEventLogOnTarget _target;
+        private int _watchPeriod;
+
+        public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
+        public event BeforeExportDataHandler BeforeExportData;
+
+        public delegate void AfterExportDataHandler(AfterExportDataEventArgs e);
+        public event AfterExportDataHandler AfterExportData;
+
+        public EventLogExportMaster()
         {
-            return new EventLogExportMaster<T>(target);
+
         }
 
-        private IEventLogTarget<T> _target;
-
-        private EventLogExportMaster()
+        public void SetEventLogPath(string eventLogPath)
         {
+            _eventLogPath = eventLogPath;
         }
-        private EventLogExportMaster(EventLogOnTarget<T> target)
+        public void SetWatchPeriod(int seconds)
         {
-            _target = (IEventLogTarget<T>)target;
+            _watchPeriod = seconds;
         }
-
-        public void AddItem(T item)
+        public void SetTarget(IEventLogOnTarget target)
         {
-            Console.WriteLine("Item added");
+            _target = target;
         }
-
-        public void Send()
+        public void BeginWatch()
         {
-            Console.WriteLine("Sended");
+            throw new NotImplementedException();
         }
-
-        public int QueueLength
+        public void EndWatch()
         {
-            get { return 0; }
+            throw new NotImplementedException();
         }
-
+        public bool NewDataAvailiable()
+        {
+            throw new NotImplementedException();
+        }
+        public void SendData()
+        {
+            throw new NotImplementedException();
+        }
         public void Dispose()
         {
             

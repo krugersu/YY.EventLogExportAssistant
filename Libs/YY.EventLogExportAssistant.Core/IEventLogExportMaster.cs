@@ -1,10 +1,14 @@
 ﻿
 namespace YY.EventLogExportAssistant
 {
-    public interface IEventLogExportMaster<T> where T : CommonLogObject
+    public interface IEventLogExportMaster
     {
-        void AddItem(T item);
-
-        void Send();
+        void SetEventLogPath(string eventLogPath);
+        void SetWatchPeriod(int seconds);
+        void SetTarget(IEventLogOnTarget target);
+        void BeginWatch();
+        void EndWatch();
+        bool NewDataAvailiable();
+        void SendData();
     }
 }

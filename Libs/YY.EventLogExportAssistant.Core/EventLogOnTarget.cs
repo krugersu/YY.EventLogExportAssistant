@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace YY.EventLogExportAssistant
 {
-    public abstract class EventLogOnTarget<T> : IEventLogTarget<T>, IDisposable where T : CommonLogObject
+    public abstract class EventLogOnTarget : IEventLogOnTarget, IDisposable
     {
-        public virtual void Save(T rowData)
+        public virtual void Save(CommonLogObject rowData)
         {
             throw new NotImplementedException();
         }
 
-        public virtual void Save(IList<T> rowsData)
+        public virtual void Save(IList<CommonLogObject> rowsData)
         {
             throw new NotImplementedException();
         }

@@ -33,9 +33,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("InformationSystemId", "id");
 
-                    b.HasIndex("InformationSystemId", "id")
-                        .IsUnique();
-
                     b.ToTable("Applications");
                 });
 
@@ -52,9 +49,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
-
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
 
                     b.ToTable("Computers");
                 });
@@ -73,9 +67,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
-
                     b.ToTable("Events");
                 });
 
@@ -92,10 +83,26 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.ToTable("InformationSystems");
+                });
+
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.LogFiles", b =>
+                {
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("FileName", "CreateDate", "Id");
+
+                    b.ToTable("LogFiles");
                 });
 
             modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Metadata", b =>
@@ -115,9 +122,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
-
                     b.ToTable("Metadata");
                 });
 
@@ -134,9 +138,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
-
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
 
                     b.ToTable("PrimaryPorts");
                 });
@@ -258,9 +259,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasIndex("WorkServerInformationSystemId", "WorkServerId");
 
-                    b.HasIndex("InformationSystemId", "Period", "Id")
-                        .IsUnique();
-
                     b.ToTable("RowsData");
                 });
 
@@ -277,9 +275,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
-
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
 
                     b.ToTable("SecondaryPorts");
                 });
@@ -298,9 +293,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
-
                     b.ToTable("Severities");
                 });
 
@@ -317,9 +309,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
-
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
 
                     b.ToTable("TransactionStatuses");
                 });
@@ -341,9 +330,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
-
                     b.ToTable("Users");
                 });
 
@@ -360,9 +346,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
-
-                    b.HasIndex("InformationSystemId", "Id")
-                        .IsUnique();
 
                     b.ToTable("WorkServers");
                 });

@@ -1,11 +1,10 @@
 ﻿namespace YY.EventLogExportAssistant.SQLServer
 {
-    public class EventLogOnSQLServer<T> : EventLogOnTarget<T> where T : CommonLogObject
+    public class EventLogOnSQLServer : EventLogOnTarget
     {
         private const int _defaultPortion = 1000;
         private int _portion;
         private EventLogContext _context;
-
 
         public EventLogOnSQLServer() : this(null, _defaultPortion)
         {
@@ -24,7 +23,7 @@
                 _context = context;
         }
 
-        public override void Save(T rowData)
+        public override void Save(CommonLogObject rowData)
         {
             _context.Add(rowData);
         }

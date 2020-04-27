@@ -21,6 +21,20 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LogFiles",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false),
+                    FileName = table.Column<string>(nullable: false),
+                    CreateDate = table.Column<DateTime>(nullable: false),
+                    ModificationDate = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogFiles", x => new { x.FileName, x.CreateDate, x.Id });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Applications",
                 columns: table => new
                 {
@@ -320,42 +334,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Applications_InformationSystemId_id",
-                table: "Applications",
-                columns: new[] { "InformationSystemId", "id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Computers_InformationSystemId_Id",
-                table: "Computers",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Events_InformationSystemId_Id",
-                table: "Events",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InformationSystems_Id",
-                table: "InformationSystems",
-                column: "Id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Metadata_InformationSystemId_Id",
-                table: "Metadata",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PrimaryPorts_InformationSystemId_Id",
-                table: "PrimaryPorts",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RowsData_ApplicationInformationSystemId_Applicationid",
                 table: "RowsData",
                 columns: new[] { "ApplicationInformationSystemId", "Applicationid" });
@@ -404,46 +382,13 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 name: "IX_RowsData_WorkServerInformationSystemId_WorkServerId",
                 table: "RowsData",
                 columns: new[] { "WorkServerInformationSystemId", "WorkServerId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RowsData_InformationSystemId_Period_Id",
-                table: "RowsData",
-                columns: new[] { "InformationSystemId", "Period", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SecondaryPorts_InformationSystemId_Id",
-                table: "SecondaryPorts",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Severities_InformationSystemId_Id",
-                table: "Severities",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TransactionStatuses_InformationSystemId_Id",
-                table: "TransactionStatuses",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_InformationSystemId_Id",
-                table: "Users",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WorkServers_InformationSystemId_Id",
-                table: "WorkServers",
-                columns: new[] { "InformationSystemId", "Id" },
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "LogFiles");
+
             migrationBuilder.DropTable(
                 name: "RowsData");
 
