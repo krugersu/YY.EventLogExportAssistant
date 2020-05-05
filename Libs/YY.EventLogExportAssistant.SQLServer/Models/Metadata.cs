@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YY.EventLogExportAssistant.SQLServer.Models
 {
-    public class Metadata : LogObject
+    public class Metadata : CommonLogObject
     {
         public long Id { get; set; }
         public Guid Uuid { get; set; }

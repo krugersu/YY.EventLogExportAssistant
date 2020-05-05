@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YY.EventLogExportAssistant.SQLServer.Models
 {
-    public class TransactionStatuses : LogObject
+    public class TransactionStatuses : CommonLogObject
     {
         public long Id { get; set; }
         [MaxLength(250)]

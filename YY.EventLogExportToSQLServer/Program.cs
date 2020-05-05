@@ -11,49 +11,80 @@ namespace YY.EventLogExportToSQLServer
 {
     class Program
     {
+        private static long _totalRows = 0;
+
         static void Main(string[] args)
         {
-            if (args.Length == 0)
+            IConfiguration Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
+            string eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
+            int watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
+            bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
+            int portion = eventLogSection.GetValue("Portion", 1000);
+
+            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
+            string inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
+            string inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
+
+            if (string.IsNullOrEmpty(eventLogPath))
             {
-                Console.WriteLine("Не передан путь к файлам журнала регистрации.");
+                Console.WriteLine("Не указан каталог с файлами данных журнала регистрации.");
+                Console.WriteLine("Для выхода нажмите любую клавишу...");
+                Console.Read();
+                return;
             }
-            else
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
-                string eventLogPath = args[0];
+                exporter.SetEventLogPath(eventLogPath);
+                exporter.SetWatchPeriod(watchPeriodSeconds);
 
-                using (EventLogExportMaster exporter = new EventLogExportMaster())
+                EventLogOnSQLServer target = new EventLogOnSQLServer(portion);
+                target.SetInformationSystem(new InformationSystems()
                 {
-                    exporter.SetEventLogPath(eventLogPath);
-                    exporter.SetWatchPeriod(60);
-                    exporter.SetTarget(new EventLogOnSQLServer() { });
+                    Name = inforamtionSystemName,
+                    Description = inforamtionSystemDescription
+                });
+                exporter.SetTarget(target);
 
-                    if (exporter.NewDataAvailiable())
-                    {
-                        exporter.SendData();
-                    }
+                exporter.BeforeExportData += BeforeExportData;
+                exporter.AfterExportData += AfterExportData;
 
-                    exporter.BeforeExportData += BeforeExportData;
-                    exporter.AfterExportData += AfterExportData;
-
+                if(useWatchMode)
+                {
                     exporter.BeginWatch();
 
+                    Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+                    while (Console.Read() != 'q');
+
                     exporter.EndWatch();
-
-                    Console.WriteLine("Нажмите 'q' для выхода...");
-                    while (Console.Read() != 'q') ;
                 }
-            }     
+                else
+                {
+                    while(exporter.NewDataAvailiable())
+                        exporter.SendData();
+                }
+            }
 
-        }
-
-        private static void AfterExportData(AfterExportDataEventArgs e)
-        {
-            throw new NotImplementedException();
+            Console.WriteLine("Для выхода нажмите любую клавишу...");
+            Console.Read();
         }
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
-            throw new NotImplementedException();
+            _totalRows = _totalRows + e.Rows.Count;
+            Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
+        }
+        private static void AfterExportData(AfterExportDataEventArgs e)
+        {            
+            Console.WriteLine("[{0}] Total read: {1}", DateTime.Now, _totalRows);
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
         }
     }
 }

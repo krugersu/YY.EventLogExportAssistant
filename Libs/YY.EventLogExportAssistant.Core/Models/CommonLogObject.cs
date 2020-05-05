@@ -6,5 +6,6 @@ namespace YY.EventLogExportAssistant
 {
     public class CommonLogObject
     {
+        public long InformationSystemId { get; set; }
     }
 }

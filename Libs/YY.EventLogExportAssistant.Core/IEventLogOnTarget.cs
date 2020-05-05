@@ -1,10 +1,17 @@
 ﻿using System.Collections.Generic;
+using YY.EventLogReaderAssistant;
+using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
     public interface IEventLogOnTarget
     {
-        void Save(CommonLogObject rowData);
-        void Save(IList<CommonLogObject> rowsData);        
+        EventLogPosition GetLastPosition();
+        int GetPortionSize();
+
+        void SetInformationSystem(InformationSystems system);
+        void Save(RowData rowData);
+        void Save(IList<RowData> rowsData);
+        void UpdateReferences(ReferencesData data);
     }
 }

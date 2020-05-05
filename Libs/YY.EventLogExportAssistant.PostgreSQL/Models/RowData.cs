@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YY.EventLogExportAssistant.PostgreSQL.Models
 {
-    public class RowData : LogObject
+    public class RowData : CommonLogObject
     {
         public DateTimeOffset Period { get; set; }
         public long Id { get; set; }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace YY.EventLogExportAssistant.PostgreSQL.Models
 {
-    public class Events : LogObject
+    public class Events : CommonLogObject
     {
         public long Id { get; set; }
         [MaxLength(250)]

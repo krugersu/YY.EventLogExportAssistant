@@ -12,7 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.10" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.13" />
   </ItemGroup>
 
 </Project>

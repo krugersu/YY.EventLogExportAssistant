@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YY.EventLogExportAssistant.SQLServer;
 
 namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    partial class EventLogContextModelSnapshot : ModelSnapshot
+    [Migration("20200505210057_Init-v1")]
+    partial class Initv1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
