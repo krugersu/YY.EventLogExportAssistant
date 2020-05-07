@@ -74,6 +74,9 @@ namespace YY.EventLogExportAssistant
 
             while (reader.Read())
             {
+                if (reader.CurrentRow == null)
+                    continue;
+
                 dataToSend.Add(reader.CurrentRow);
 
                 if (dataToSend.Count >= portionSize)

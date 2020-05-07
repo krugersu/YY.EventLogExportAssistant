@@ -213,6 +213,16 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 {
                     table.PrimaryKey("PK_WorkServers", x => new { x.InformationSystemId, x.Id });
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RowsData_InformationSystemId_DataUUID",
+                table: "RowsData",
+                columns: new[] { "InformationSystemId", "DataUUID" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RowsData_InformationSystemId_UserId_Period",
+                table: "RowsData",
+                columns: new[] { "InformationSystemId", "UserId", "Period" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

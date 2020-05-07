@@ -64,6 +64,9 @@ namespace YY.EventLogExportAssistant.SQLServer
             List<Models.RowData> newEntities = new List<Models.RowData>();
             foreach (var itemRow in rowsData)
             {
+                if (itemRow == null)
+                    continue;
+
                 long? rowApplicationId = null;
                 Models.Applications rowApplication = null;
                 if (itemRow.Application != null)

@@ -10,7 +10,7 @@ using YY.EventLogExportAssistant.SQLServer;
 namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    [Migration("20200507044912_Initialization")]
+    [Migration("20200507203744_Initialization")]
     partial class Initialization
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,7 +205,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DataUUID")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<long?>("EventId")
                         .HasColumnType("bigint");
@@ -241,6 +241,10 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("InformationSystemId", "Period", "Id");
+
+                    b.HasIndex("InformationSystemId", "DataUUID");
+
+                    b.HasIndex("InformationSystemId", "UserId", "Period");
 
                     b.ToTable("RowsData");
                 });
