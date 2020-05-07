@@ -10,7 +10,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 {
     public class EventLogContext : DbContext
     {
-        public DbSet<InformationSystems> InformationSystems { get; set; }
+        public DbSet<InformationSystemsBase> InformationSystems { get; set; }
         public DbSet<Applications> Applications { get; set; }
         public DbSet<Computers> Computers { get; set; }
         public DbSet<Events> Events { get; set; }
@@ -48,9 +48,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<InformationSystems>()
+            modelBuilder.Entity<InformationSystemsBase>()
                 .HasKey(b => new { b.Id });
-            modelBuilder.Entity<InformationSystems>()
+            modelBuilder.Entity<InformationSystemsBase>()
                 .HasIndex(b => new { b.Id })
                 .IsUnique();
 

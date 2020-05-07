@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
-    public partial class Initv1 : Migration
+    public partial class Initialization : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -67,11 +67,11 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 name: "LogFiles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InformationSystemId = table.Column<long>(nullable: false),
                     FileName = table.Column<string>(nullable: false),
                     CreateDate = table.Column<DateTime>(nullable: false),
-                    InformationSystemId = table.Column<long>(nullable: false),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     ModificationDate = table.Column<DateTime>(nullable: false),
                     LastEventNumber = table.Column<long>(nullable: false),
                     LastCurrentFileReferences = table.Column<string>(nullable: true),
@@ -80,7 +80,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogFiles", x => new { x.FileName, x.CreateDate, x.Id });
+                    table.PrimaryKey("PK_LogFiles", x => new { x.InformationSystemId, x.FileName, x.CreateDate, x.Id });
                 });
 
             migrationBuilder.CreateTable(
@@ -95,7 +95,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Metadata", x => new { x.InformationSystemId, x.Id, x.Uuid });
+                    table.PrimaryKey("PK_Metadata", x => new { x.InformationSystemId, x.Id });
                 });
 
             migrationBuilder.CreateTable(
@@ -197,7 +197,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => new { x.InformationSystemId, x.Id, x.Uuid });
+                    table.PrimaryKey("PK_Users", x => new { x.InformationSystemId, x.Id });
                 });
 
             migrationBuilder.CreateTable(

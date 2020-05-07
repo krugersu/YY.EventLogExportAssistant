@@ -19,26 +19,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.InformationSystems", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InformationSystems");
-                });
-
             modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Applications", b =>
                 {
                     b.Property<long>("InformationSystemId")
@@ -96,8 +76,31 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.InformationSystems", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(250)")
+                        .HasMaxLength(250);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InformationSystems");
+                });
+
             modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.LogFiles", b =>
                 {
+                    b.Property<long>("InformationSystemId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(450)");
 
@@ -108,9 +111,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("InformationSystemId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("LastCurrentFileData")
                         .HasColumnType("nvarchar(max)");
@@ -127,7 +127,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                     b.Property<DateTime>("ModificationDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("FileName", "CreateDate", "Id");
+                    b.HasKey("InformationSystemId", "FileName", "CreateDate", "Id");
 
                     b.ToTable("LogFiles");
                 });
@@ -142,14 +142,14 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<Guid>("Uuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
-                    b.HasKey("InformationSystemId", "Id", "Uuid");
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("InformationSystemId", "Id");
 
                     b.ToTable("Metadata");
                 });
@@ -310,14 +310,14 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<Guid>("Uuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
-                    b.HasKey("InformationSystemId", "Id", "Uuid");
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("InformationSystemId", "Id");
 
                     b.ToTable("Users");
                 });

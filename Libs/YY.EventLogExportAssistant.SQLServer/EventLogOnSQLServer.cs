@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCore.BulkExtensions;
 using System.Collections.Generic;
 using System.Linq;
 using YY.EventLogExportAssistant.SQLServer.Models;
 using YY.EventLogReaderAssistant;
-using YY.EventLogReaderAssistant.Models;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 
 namespace YY.EventLogExportAssistant.SQLServer
@@ -13,7 +12,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         private const int _defaultPortion = 1000;
         private int _portion;
         private EventLogContext _context;
-        private InformationSystems _system;
+        private InformationSystemsBase _system;
 
         public EventLogOnSQLServer() : this(null, _defaultPortion)
         {
@@ -62,121 +61,136 @@ namespace YY.EventLogExportAssistant.SQLServer
 
         public override void Save(IList<RowData> rowsData)
         {
+            List<Models.RowData> newEntities = new List<Models.RowData>();
             foreach (var itemRow in rowsData)
             {
-                Models.RowData foundRow = _context.RowsData
-                    .Where(r => r.InformationSystemId == _system.Id
-                                && r.Period == itemRow.Period
-                                && r.Id == itemRow.RowID)
+                long? rowApplicationId = null;
+                Models.Applications rowApplication = null;
+                if (itemRow.Application != null)
+                {
+                    rowApplication = cacheApplications
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name)
+                        .FirstOrDefault();
+                    rowApplicationId = rowApplication.Id;
+                }
+
+                long? rowComputerId = null;
+                Models.Computers rowComputer = null;
+                if (itemRow.Computer != null)
+                {
+                    rowComputer = cacheComputers
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name)
+                        .FirstOrDefault();
+                    rowComputerId = rowComputer.Id;
+                }
+
+                long? rowEventId = null;
+                Models.Events rowEvent = null;
+                if (itemRow.Event != null)
+                {
+                    rowEvent = cacheEvents
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name)
+                        .FirstOrDefault();
+                    rowEventId = rowEvent.Id;
+                }
+
+                long? rowMetadataId = null;
+                Models.Metadata rowMetadata = null;
+                if (itemRow.Metadata != null)
+                {
+                    rowMetadata = cacheMetadata
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid)
+                        .FirstOrDefault();
+                    rowMetadataId = rowMetadata.Id;
+                }
+
+                long? rowPrimaryPortId = null;
+                Models.PrimaryPorts rowPrimaryPort = null;
+                if (itemRow.PrimaryPort != null)
+                {
+                    rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name)
+                        .FirstOrDefault();
+                    rowPrimaryPortId = rowPrimaryPort.Id;
+                }
+
+                long? rowSecondaryPortId = null;
+                Models.SecondaryPorts rowSecondaryPort = null;
+                if (itemRow.SecondaryPort != null)
+                {
+                    rowSecondaryPort = cacheSecondaryPorts
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name)
+                        .FirstOrDefault();
+                    rowSecondaryPortId = rowSecondaryPort.Id;
+                }
+
+                Models.Severities rowSeverity = cacheSeverities
+                    .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString())
+                    .FirstOrDefault();
+                Models.TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
+                    .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString())
                     .FirstOrDefault();
 
-                if (foundRow == null)
+                long? rowUserId = null;
+                Models.Users rowUser = null;
+                if (itemRow.User != null)
                 {
-                    long? rowApplicationId = null;
-                    Models.Applications rowApplication = null;
-                    if (itemRow.Application != null)
-                    {
-                        rowApplication = cacheApplications.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name).FirstOrDefault();
-                        rowApplicationId = rowApplication.Id;
-                    }
-
-                    long? rowComputerId = null;
-                    Models.Computers rowComputer = null;
-                    if (itemRow.Computer != null)
-                    {
-                        rowComputer = cacheComputers.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name).FirstOrDefault();
-                        rowComputerId = rowComputer.Id;
-                    }
-
-                    long? rowEventId = null;
-                    Models.Events rowEvent = null;
-                    if (itemRow.Event != null)
-                    {
-                        rowEvent = cacheEvents.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name).FirstOrDefault();
-                        rowEventId = rowEvent.Id;
-                    }
-
-                    long? rowMetadataId = null;
-                    Models.Metadata rowMetadata = null;
-                    if (itemRow.Metadata != null)
-                    {
-                        rowMetadata = cacheMetadata.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid).FirstOrDefault();
-                        rowMetadataId = rowMetadata.Id;
-                    }
-
-                    long? rowPrimaryPortId = null;
-                    Models.PrimaryPorts rowPrimaryPort = null;
-                    if (itemRow.PrimaryPort != null)
-                    {
-                        rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name).FirstOrDefault();
-                        rowPrimaryPortId = rowPrimaryPort.Id;
-                    }
-
-                    long? rowSecondaryPortId = null;
-                    Models.SecondaryPorts rowSecondaryPort = null;
-                    if (itemRow.SecondaryPort != null)
-                    {
-                        rowSecondaryPort = cacheSecondaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name).FirstOrDefault();
-                        rowSecondaryPortId = rowSecondaryPort.Id;
-                    }
-
-                    Models.Severities rowSeverity = cacheSeverities.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString()).FirstOrDefault();
-                    Models.TransactionStatuses rowTransactionStatus = cacheTransactionStatuses.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString()).FirstOrDefault();
-
-                    long? rowUserId = null;
-                    Models.Users rowUser = null;
-                    if (itemRow.User != null)
-                    {
-                        rowUser = cacheUsers.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name).FirstOrDefault();
-                        rowUserId = rowUser.Id;
-                    }
-
-                    long? rowWorkServerId = null;
-                    Models.WorkServers rowWorkServer = null;
-                    if (itemRow.WorkServer != null)
-                    {
-                        rowWorkServer = cacheWorkServers.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name).FirstOrDefault();
-                        rowWorkServerId = rowWorkServer.Id;
-                    }
-
-                    Models.RowData rowData = new Models.RowData()
-                    {
-                        ApplicationId = rowApplicationId,
-                        Comment = itemRow.Comment,
-                        ComputerId = rowComputerId,
-                        ConnectId = itemRow.ConnectId,
-                        Data = itemRow.Data,
-                        DataPresentation = itemRow.DataPresentation,
-                        DataUUID = itemRow.DataUUID,
-                        EventId = rowEventId,
-                        Id = itemRow.RowID,
-                        InformationSystemId = _system.Id,
-                        MetadataId = rowMetadataId,
-                        Period = itemRow.Period,
-                        PrimaryPortId = rowPrimaryPortId,
-                        SecondaryPortId = rowSecondaryPortId,
-                        Session = itemRow.Session,
-                        SeverityId = rowSeverity.Id,
-                        TransactionDate = itemRow.TransactionDate,
-                        TransactionId = itemRow.TransactionId,
-                        TransactionStatusId = rowTransactionStatus.Id,
-                        UserId = rowUserId,
-                        WorkServerId = rowWorkServerId
-                    };
-
-                    _context.Add(rowData);
+                    rowUser = cacheUsers
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name)
+                        .FirstOrDefault();
+                    rowUserId = rowUser.Id;
                 }
-            }
 
-            _context.SaveChanges();
+                long? rowWorkServerId = null;
+                Models.WorkServers rowWorkServer = null;
+                if (itemRow.WorkServer != null)
+                {
+                    rowWorkServer = cacheWorkServers
+                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name)
+                        .FirstOrDefault();
+                    rowWorkServerId = rowWorkServer.Id;
+                }
+
+                Models.RowData rowData = new Models.RowData()
+                {
+                    ApplicationId = rowApplicationId,
+                    Comment = itemRow.Comment,
+                    ComputerId = rowComputerId,
+                    ConnectId = itemRow.ConnectId,
+                    Data = itemRow.Data,
+                    DataPresentation = itemRow.DataPresentation,
+                    DataUUID = itemRow.DataUUID,
+                    EventId = rowEventId,
+                    Id = itemRow.RowID,
+                    InformationSystemId = _system.Id,
+                    MetadataId = rowMetadataId,
+                    Period = itemRow.Period,
+                    PrimaryPortId = rowPrimaryPortId,
+                    SecondaryPortId = rowSecondaryPortId,
+                    Session = itemRow.Session,
+                    SeverityId = rowSeverity.Id,
+                    TransactionDate = itemRow.TransactionDate,
+                    TransactionId = itemRow.TransactionId,
+                    TransactionStatusId = rowTransactionStatus.Id,
+                    UserId = rowUserId,
+                    WorkServerId = rowWorkServerId
+                };
+
+                newEntities.Add(rowData);
+            }
+                        
+            _context.BulkInsertOrUpdate(newEntities);
         }
 
-        public override void SetInformationSystem(InformationSystems system)
+        public override void SetInformationSystem(InformationSystemsBase system)
         {
             InformationSystems existSystem = _context.InformationSystems.Where(e => e.Name == system.Name).FirstOrDefault();
             if(existSystem == null)
             {
-                _context.InformationSystems.Add(system);
+                _context.InformationSystems.Add(new InformationSystems()
+                {
+                    Name = system.Name,
+                    Description = system.Description
+                });
                 _context.SaveChanges();
                 existSystem = _context.InformationSystems.Where(e => e.Name == system.Name).FirstOrDefault();
             } else

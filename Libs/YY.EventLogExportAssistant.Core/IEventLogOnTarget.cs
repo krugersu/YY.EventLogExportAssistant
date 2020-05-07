@@ -8,8 +8,7 @@ namespace YY.EventLogExportAssistant
     {
         EventLogPosition GetLastPosition();
         int GetPortionSize();
-
-        void SetInformationSystem(InformationSystems system);
+        void SetInformationSystem(InformationSystemsBase system);
         void Save(RowData rowData);
         void Save(IList<RowData> rowsData);
         void UpdateReferences(ReferencesData data);

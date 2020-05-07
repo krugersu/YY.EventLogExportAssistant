@@ -12,6 +12,9 @@ namespace YY.EventLogExportToSQLServer
     class Program
     {
         private static long _totalRows = 0;
+        private static long _lastPortionRows = 0;
+        private static DateTime _beginPortionExport;
+        private static DateTime _endPortionExport;
 
         static void Main(string[] args)
         {
@@ -46,7 +49,7 @@ namespace YY.EventLogExportToSQLServer
                 exporter.SetWatchPeriod(watchPeriodSeconds);
 
                 EventLogOnSQLServer target = new EventLogOnSQLServer(portion);
-                target.SetInformationSystem(new InformationSystems()
+                target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = inforamtionSystemName,
                     Description = inforamtionSystemDescription
@@ -78,13 +81,20 @@ namespace YY.EventLogExportToSQLServer
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
+            _beginPortionExport = DateTime.Now;
+            _lastPortionRows = e.Rows.Count;
             _totalRows = _totalRows + e.Rows.Count;
+
             Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
-        {            
-            Console.WriteLine("[{0}] Total read: {1}", DateTime.Now, _totalRows);
-            Console.SetCursorPosition(0, Console.CursorTop - 2);
+        {
+            _endPortionExport = DateTime.Now;
+            var duration = _endPortionExport - _beginPortionExport;
+
+            Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
+            Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
+            Console.SetCursorPosition(0, Console.CursorTop - 3);
         }
     }
 }

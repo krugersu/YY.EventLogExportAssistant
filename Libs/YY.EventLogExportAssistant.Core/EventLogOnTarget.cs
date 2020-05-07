@@ -32,7 +32,7 @@ namespace YY.EventLogExportAssistant
             throw new NotImplementedException();
         }
 
-        public virtual void SetInformationSystem(InformationSystems system)
+        public virtual void SetInformationSystem(InformationSystemsBase system)
         {
             throw new NotImplementedException();
         }

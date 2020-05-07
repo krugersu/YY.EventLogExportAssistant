@@ -1,5 +1,4 @@
-﻿
-namespace YY.EventLogExportAssistant
+﻿namespace YY.EventLogExportAssistant
 {
     public interface IEventLogExportMaster
     {
