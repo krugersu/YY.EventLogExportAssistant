@@ -10,7 +10,7 @@ using YY.EventLogExportAssistant.SQLServer;
 namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    [Migration("20200507203744_Initialization")]
+    [Migration("20200507211315_Initialization")]
     partial class Initialization
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

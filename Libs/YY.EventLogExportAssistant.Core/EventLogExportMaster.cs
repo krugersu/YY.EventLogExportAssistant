@@ -41,20 +41,47 @@ namespace YY.EventLogExportAssistant
         public void BeginWatch()
         {
             string dirPath = Path.GetDirectoryName(_eventLogPath);
-            _watcher = new FileSystemWatcher(dirPath);
-            //_watcher.EnableRaisingEvents = true;
+            
+            _watcher = new FileSystemWatcher(_eventLogPath);
+            _watcher.NotifyFilter = NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName;
 
+            _watcher.Changed += OnChanged;
+            _watcher.Created += OnChanged;
+            _watcher.Deleted += OnChanged;
+            _watcher.Renamed += OnRenamed;
+
+            _watcher.EnableRaisingEvents = true;
         }
+
+        private void OnChanged(object source, FileSystemEventArgs e)
+        {
+            _watcher.EnableRaisingEvents = false;
+
+            while (NewDataAvailiable())
+                SendData();
+
+            _watcher.EnableRaisingEvents = true;
+        }
+        private void OnRenamed(object source, RenamedEventArgs e)
+        {
+            _watcher.EnableRaisingEvents = false;
+
+            while (NewDataAvailiable())
+                SendData();
+
+            _watcher.EnableRaisingEvents = true;
+        }
+
         public void EndWatch()
         {
-            throw new NotImplementedException();
+            _watcher.EnableRaisingEvents = false;
         }
         public bool NewDataAvailiable()
         {
-            // Получаем последнюю позицию считанных данных
             EventLogPosition lastPosition = _target.GetLastPosition();
 
-            // Проверяем есть ли еще информация после установленной позиции
             bool newDataExist = false;
             EventLogReader reader = GetReader();
             reader.SetCurrentPosition(lastPosition);
@@ -132,6 +159,11 @@ namespace YY.EventLogExportAssistant
         public void Dispose()
         {
             _eventLogReader.Dispose();
+            if (_watcher != null)
+            {
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Dispose();
+            }
         }
 
         private EventLogReader GetReader()
