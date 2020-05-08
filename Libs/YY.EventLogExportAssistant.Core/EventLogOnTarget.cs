@@ -6,13 +6,8 @@ using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
-    public abstract class EventLogOnTarget : IEventLogOnTarget, IDisposable
+    public abstract class EventLogOnTarget : IEventLogOnTarget
     {
-        public virtual void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual EventLogPosition GetLastPosition()
         {
             throw new NotImplementedException();

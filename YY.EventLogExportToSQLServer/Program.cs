@@ -45,11 +45,16 @@ namespace YY.EventLogExportToSQLServer
             Console.WriteLine();
             Console.WriteLine();
 
+            string connectionString = Configuration.GetConnectionString("EventLogDatabase");
+            DbContextOptions<EventLogContext> options = new DbContextOptions<EventLogContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+            optionsBuilder.UseSqlServer(connectionString);
+
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);
 
-                EventLogOnSQLServer target = new EventLogOnSQLServer(portion);
+                EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = inforamtionSystemName,
@@ -61,23 +66,21 @@ namespace YY.EventLogExportToSQLServer
                 exporter.AfterExportData += AfterExportData;
 
                 while (exporter.NewDataAvailiable())
+                {
                     exporter.SendData();
+                }
 
                 if (useWatchMode)
                 {
-                    Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
-                    Console.WriteLine();
-                    Console.WriteLine();
                     while (true)
                     {
-                        if(Console.KeyAvailable)                        
+                        if (Console.KeyAvailable)
                             if (Console.ReadKey().KeyChar == 'q')
                                 break;
 
                         while (exporter.NewDataAvailiable())
                         {
-                            Console.Clear();
-                            exporter.SendData();                            
+                            exporter.SendData();
                         }
 
                         Thread.Sleep(watchPeriodSecondsMs);
@@ -97,6 +100,7 @@ namespace YY.EventLogExportToSQLServer
             _lastPortionRows = e.Rows.Count;
             _totalRows = _totalRows + e.Rows.Count;
 
+            Console.Clear();
             Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
@@ -106,7 +110,9 @@ namespace YY.EventLogExportToSQLServer
 
             Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
             Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
-            Console.SetCursorPosition(0, Console.CursorTop - 3);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
         }
     }
 }

@@ -2,26 +2,26 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using YY.EventLogExportAssistant.PostgreSQL;
+using YY.EventLogExportAssistant.SQLServer;
 
-namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
+namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    [Migration("20200508111101_Initialization")]
+    [Migration("20200508204947_Initialization")]
     partial class Initialization
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "3.1.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Applications", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Applications", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -29,10 +29,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -40,7 +40,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("Applications");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Computers", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Computers", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -48,10 +48,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -59,7 +59,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("Computers");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Events", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Events", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -67,10 +67,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -78,19 +78,19 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.InformationSystems", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.InformationSystems", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("Id");
@@ -98,27 +98,27 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("InformationSystems");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.LogFiles", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.LogFiles", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("FileName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("LastCurrentFileData")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastCurrentFileReferences")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("LastEventNumber")
                         .HasColumnType("bigint");
@@ -127,14 +127,14 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("ModificationDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("InformationSystemId", "FileName", "CreateDate", "Id");
 
                     b.ToTable("LogFiles");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Metadata", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Metadata", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -142,21 +142,21 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.Property<Guid>("Uuid")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("InformationSystemId", "Id");
 
                     b.ToTable("Metadata");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.PrimaryPorts", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.PrimaryPorts", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -164,10 +164,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -175,13 +175,13 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("PrimaryPorts");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.RowData", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.RowData", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("Period")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<long>("Id")
                         .HasColumnType("bigint");
@@ -190,7 +190,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("ComputerId")
                         .HasColumnType("bigint");
@@ -199,13 +199,13 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Data")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DataPresentation")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DataUUID")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<long?>("EventId")
                         .HasColumnType("bigint");
@@ -226,7 +226,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("TransactionDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime2");
 
                     b.Property<long?>("TransactionId")
                         .HasColumnType("bigint");
@@ -249,7 +249,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("RowsData");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.SecondaryPorts", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.SecondaryPorts", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -257,10 +257,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -268,7 +268,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("SecondaryPorts");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Severities", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Severities", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -276,10 +276,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -287,7 +287,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("Severities");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.TransactionStatuses", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.TransactionStatuses", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -295,10 +295,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
@@ -306,7 +306,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.ToTable("TransactionStatuses");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.Users", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.Users", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -314,21 +314,21 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.Property<Guid>("Uuid")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("InformationSystemId", "Id");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("YY.EventLogExportAssistant.PostgreSQL.Models.WorkServers", b =>
+            modelBuilder.Entity("YY.EventLogExportAssistant.SQLServer.Models.WorkServers", b =>
                 {
                     b.Property<long>("InformationSystemId")
                         .HasColumnType("bigint");
@@ -336,10 +336,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");

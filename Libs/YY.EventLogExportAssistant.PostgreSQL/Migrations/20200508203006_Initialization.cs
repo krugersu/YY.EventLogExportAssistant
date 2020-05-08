@@ -216,14 +216,92 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Applications_InformationSystemId_Id",
+                table: "Applications",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Computers_InformationSystemId_Id",
+                table: "Computers",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_InformationSystemId_Id",
+                table: "Events",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InformationSystems_Id",
+                table: "InformationSystems",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogFiles_InformationSystemId_FileName_CreateDate_Id",
+                table: "LogFiles",
+                columns: new[] { "InformationSystemId", "FileName", "CreateDate", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Metadata_InformationSystemId_Id",
+                table: "Metadata",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PrimaryPorts_InformationSystemId_Id",
+                table: "PrimaryPorts",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RowsData_InformationSystemId_DataUUID",
                 table: "RowsData",
                 columns: new[] { "InformationSystemId", "DataUUID" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_RowsData_InformationSystemId_Period_Id",
+                table: "RowsData",
+                columns: new[] { "InformationSystemId", "Period", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RowsData_InformationSystemId_UserId_Period",
                 table: "RowsData",
                 columns: new[] { "InformationSystemId", "UserId", "Period" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SecondaryPorts_InformationSystemId_Id",
+                table: "SecondaryPorts",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Severities_InformationSystemId_Id",
+                table: "Severities",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransactionStatuses_InformationSystemId_Id",
+                table: "TransactionStatuses",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_InformationSystemId_Id",
+                table: "Users",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkServers_InformationSystemId_Id",
+                table: "WorkServers",
+                columns: new[] { "InformationSystemId", "Id" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

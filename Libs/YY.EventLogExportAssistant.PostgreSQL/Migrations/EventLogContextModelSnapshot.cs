@@ -35,6 +35,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("Applications");
                 });
 
@@ -53,6 +56,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
+
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
 
                     b.ToTable("Computers");
                 });
@@ -73,6 +79,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("Events");
                 });
 
@@ -92,6 +101,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
 
                     b.ToTable("InformationSystems");
                 });
@@ -129,6 +141,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "FileName", "CreateDate", "Id");
 
+                    b.HasIndex("InformationSystemId", "FileName", "CreateDate", "Id")
+                        .IsUnique();
+
                     b.ToTable("LogFiles");
                 });
 
@@ -151,6 +166,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("Metadata");
                 });
 
@@ -169,6 +187,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
+
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
 
                     b.ToTable("PrimaryPorts");
                 });
@@ -242,6 +263,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasIndex("InformationSystemId", "DataUUID");
 
+                    b.HasIndex("InformationSystemId", "Period", "Id")
+                        .IsUnique();
+
                     b.HasIndex("InformationSystemId", "UserId", "Period");
 
                     b.ToTable("RowsData");
@@ -263,6 +287,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("SecondaryPorts");
                 });
 
@@ -282,6 +309,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("Severities");
                 });
 
@@ -300,6 +330,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
+
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
 
                     b.ToTable("TransactionStatuses");
                 });
@@ -323,6 +356,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 
                     b.HasKey("InformationSystemId", "Id");
 
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -341,6 +377,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
                         .HasMaxLength(250);
 
                     b.HasKey("InformationSystemId", "Id");
+
+                    b.HasIndex("InformationSystemId", "Id")
+                        .IsUnique();
 
                     b.ToTable("WorkServers");
                 });

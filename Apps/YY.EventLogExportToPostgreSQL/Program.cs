@@ -45,11 +45,16 @@ namespace YY.EventLogExportToPostgreSQL
             Console.WriteLine();
             Console.WriteLine();
 
+            string connectionString = Configuration.GetConnectionString("EventLogDatabase");
+            DbContextOptions<EventLogContext> options = new DbContextOptions<EventLogContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+            optionsBuilder.UseNpgsql(connectionString);
+
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);
 
-                EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(portion);
+                EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(optionsBuilder.Options, portion);
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = inforamtionSystemName,
@@ -61,13 +66,12 @@ namespace YY.EventLogExportToPostgreSQL
                 exporter.AfterExportData += AfterExportData;
 
                 while (exporter.NewDataAvailiable())
+                {                    
                     exporter.SendData();
+                }
 
                 if (useWatchMode)
-                {
-                    Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
-                    Console.WriteLine();
-                    Console.WriteLine();
+                {   
                     while (true)
                     {
                         if (Console.KeyAvailable)
@@ -76,7 +80,6 @@ namespace YY.EventLogExportToPostgreSQL
 
                         while (exporter.NewDataAvailiable())
                         {
-                            Console.Clear();
                             exporter.SendData();
                         }
 
@@ -97,6 +100,7 @@ namespace YY.EventLogExportToPostgreSQL
             _lastPortionRows = e.Rows.Count;
             _totalRows = _totalRows + e.Rows.Count;
 
+            Console.Clear();
             Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
@@ -106,7 +110,9 @@ namespace YY.EventLogExportToPostgreSQL
 
             Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
             Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
-            Console.SetCursorPosition(0, Console.CursorTop - 3);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
         }
     }
 }
