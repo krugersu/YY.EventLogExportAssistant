@@ -3,7 +3,7 @@ using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
-    public class ReferencesData
+    public sealed class ReferencesData
     {
         public IReadOnlyList<Applications> Applications;
         public IReadOnlyList<Computers> Computers;

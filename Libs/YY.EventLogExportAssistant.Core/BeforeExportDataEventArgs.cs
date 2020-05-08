@@ -3,7 +3,7 @@ using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
-    public class BeforeExportDataEventArgs
+    public sealed class BeforeExportDataEventArgs
     {
         public BeforeExportDataEventArgs()
         {

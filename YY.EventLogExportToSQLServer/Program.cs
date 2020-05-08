@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Threading;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.SQLServer;
 using YY.EventLogExportAssistant.SQLServer.Models;
@@ -25,6 +26,7 @@ namespace YY.EventLogExportToSQLServer
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             string eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
             int watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
+            int watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
             int portion = eventLogSection.GetValue("Portion", 1000);
 
@@ -46,7 +48,6 @@ namespace YY.EventLogExportToSQLServer
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);
-                exporter.SetWatchPeriod(watchPeriodSeconds);
 
                 EventLogOnSQLServer target = new EventLogOnSQLServer(portion);
                 target.SetInformationSystem(new InformationSystemsBase()
@@ -59,22 +60,32 @@ namespace YY.EventLogExportToSQLServer
                 exporter.BeforeExportData += BeforeExportData;
                 exporter.AfterExportData += AfterExportData;
 
-                if(useWatchMode)
-                {
-                    exporter.BeginWatch();
+                while (exporter.NewDataAvailiable())
+                    exporter.SendData();
 
+                if (useWatchMode)
+                {
                     Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
-                    while (Console.Read() != 'q');
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    while (true)
+                    {
+                        if(Console.KeyAvailable)
+                        {
+                            if (Console.ReadKey().KeyChar == 'q')
+                                break;
+                        }
 
-                    exporter.EndWatch();
-                }
-                else
-                {
-                    while(exporter.NewDataAvailiable())
-                        exporter.SendData();
+                        while (exporter.NewDataAvailiable())
+                            exporter.SendData();
+
+                        Thread.Sleep(watchPeriodSecondsMs);
+                    }
                 }
             }
 
+            Console.WriteLine();
+            Console.WriteLine();
             Console.WriteLine("Для выхода нажмите любую клавишу...");
             Console.Read();
         }

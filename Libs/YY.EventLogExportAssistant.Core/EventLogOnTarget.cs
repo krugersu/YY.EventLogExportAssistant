@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.Models;
 
@@ -28,6 +29,11 @@ namespace YY.EventLogExportAssistant
         }
 
         public virtual void Save(IList<RowData> rowsData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
             throw new NotImplementedException();
         }

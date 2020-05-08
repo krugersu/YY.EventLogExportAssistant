@@ -11,7 +11,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Models
         public long LastEventNumber { set; get; }
         public string LastCurrentFileReferences { set; get; }
         public string LastCurrentFileData { set; get; }
-        public long LastStreamPosition { set; get; }
+        public long? LastStreamPosition { set; get; }
 
     }
 }

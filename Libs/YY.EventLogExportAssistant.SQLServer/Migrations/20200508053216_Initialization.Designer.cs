@@ -10,7 +10,7 @@ using YY.EventLogExportAssistant.SQLServer;
 namespace YY.EventLogExportAssistant.SQLServer.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    [Migration("20200507211315_Initialization")]
+    [Migration("20200508053216_Initialization")]
     partial class Initialization
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,7 +123,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                     b.Property<long>("LastEventNumber")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("LastStreamPosition")
+                    b.Property<long?>("LastStreamPosition")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("ModificationDate")

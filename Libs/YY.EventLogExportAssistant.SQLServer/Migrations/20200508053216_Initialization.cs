@@ -76,7 +76,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                     LastEventNumber = table.Column<long>(nullable: false),
                     LastCurrentFileReferences = table.Column<string>(nullable: true),
                     LastCurrentFileData = table.Column<string>(nullable: true),
-                    LastStreamPosition = table.Column<long>(nullable: false)
+                    LastStreamPosition = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {

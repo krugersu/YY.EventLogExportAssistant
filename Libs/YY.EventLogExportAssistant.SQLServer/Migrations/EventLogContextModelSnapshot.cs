@@ -121,7 +121,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Migrations
                     b.Property<long>("LastEventNumber")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("LastStreamPosition")
+                    b.Property<long?>("LastStreamPosition")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("ModificationDate")

@@ -2,7 +2,7 @@
 
 namespace YY.EventLogExportAssistant
 {
-    public class AfterExportDataEventArgs
+    public sealed class AfterExportDataEventArgs
     {
         public EventLogPosition CurrentPosition;
     }

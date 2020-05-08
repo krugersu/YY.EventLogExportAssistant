@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.Models;
+using System.Timers;
 
 namespace YY.EventLogExportAssistant
 {
@@ -12,8 +13,6 @@ namespace YY.EventLogExportAssistant
         private EventLogReader _eventLogReader;
         private DateTime _lastUpdateReferences;
         private IEventLogOnTarget _target;
-        private int _watchPeriod;
-        FileSystemWatcher _watcher;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
         public event BeforeExportDataHandler BeforeExportData;
@@ -30,63 +29,20 @@ namespace YY.EventLogExportAssistant
         {
             _eventLogPath = eventLogPath;
         }
-        public void SetWatchPeriod(int seconds)
-        {
-            _watchPeriod = seconds;
-        }
         public void SetTarget(IEventLogOnTarget target)
         {
             _target = target;
-        }
-        public void BeginWatch()
-        {
-            string dirPath = Path.GetDirectoryName(_eventLogPath);
-            
-            _watcher = new FileSystemWatcher(_eventLogPath);
-            _watcher.NotifyFilter = NotifyFilters.LastAccess
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.FileName;
-
-            _watcher.Changed += OnChanged;
-            _watcher.Created += OnChanged;
-            _watcher.Deleted += OnChanged;
-            _watcher.Renamed += OnRenamed;
-
-            _watcher.EnableRaisingEvents = true;
-        }
-
-        private void OnChanged(object source, FileSystemEventArgs e)
-        {
-            _watcher.EnableRaisingEvents = false;
-
-            while (NewDataAvailiable())
-                SendData();
-
-            _watcher.EnableRaisingEvents = true;
-        }
-        private void OnRenamed(object source, RenamedEventArgs e)
-        {
-            _watcher.EnableRaisingEvents = false;
-
-            while (NewDataAvailiable())
-                SendData();
-
-            _watcher.EnableRaisingEvents = true;
-        }
-
-        public void EndWatch()
-        {
-            _watcher.EnableRaisingEvents = false;
         }
         public bool NewDataAvailiable()
         {
             EventLogPosition lastPosition = _target.GetLastPosition();
 
             bool newDataExist = false;
-            EventLogReader reader = GetReader();
-            reader.SetCurrentPosition(lastPosition);
-            newDataExist = reader.Read();
-            reader.Reset();
+            using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
+            {
+                reader.SetCurrentPosition(lastPosition);
+                newDataExist = reader.Read();
+            }
 
             return newDataExist;
         }
@@ -119,14 +75,22 @@ namespace YY.EventLogExportAssistant
                         cancel = beforeExportArgs.Cancel;
                     }
 
+                    EventLogPosition currentPosition = _eventLogReader.GetCurrentPosition();
                     if (!cancel)
                     {
                         UpdateReferences();
                         _target.Save(dataToSend);
+                                              
                         AfterExportData.Invoke(new AfterExportDataEventArgs() 
                         { 
-                            CurrentPosition = _eventLogReader.GetCurrentPosition()
+                            CurrentPosition = currentPosition
                         });
+                    }
+
+                    if (_eventLogReader.CurrentFile != null)
+                    {
+                        FileInfo logFileInfo = new FileInfo(_eventLogReader.CurrentFile);
+                        _target.SaveLogPosition(logFileInfo, currentPosition);
                     }
 
                     dataToSend.Clear();
@@ -146,11 +110,22 @@ namespace YY.EventLogExportAssistant
                     cancel = beforeExportArgs.Cancel;
                 }
 
+                EventLogPosition currentPosition = _eventLogReader.GetCurrentPosition();
                 if (!cancel)
                 {
                     UpdateReferences();
                     _target.Save(dataToSend);
-                    AfterExportData.Invoke(new AfterExportDataEventArgs() { });
+                                     
+                    AfterExportData.Invoke(new AfterExportDataEventArgs()
+                    {
+                        CurrentPosition = currentPosition
+                    });                    
+                }
+
+                if (_eventLogReader.CurrentFile != null)
+                {
+                    FileInfo logFileInfo = new FileInfo(_eventLogReader.CurrentFile);
+                    _target.SaveLogPosition(logFileInfo, currentPosition);
                 }
 
                 dataToSend.Clear();
@@ -158,24 +133,32 @@ namespace YY.EventLogExportAssistant
         }
         public void Dispose()
         {
-            _eventLogReader.Dispose();
-            if (_watcher != null)
-            {
-                _watcher.EnableRaisingEvents = false;
-                _watcher.Dispose();
-            }
+            if(_eventLogReader != null)
+                _eventLogReader.Dispose();
         }
 
-        private EventLogReader GetReader()
+        private EventLogReader GetReader(bool recreate = false)
         {
-            if (_eventLogReader == null)
+            if (_eventLogReader == null || recreate)
             {
+                if(_eventLogReader != null)
+                {
+                    _eventLogReader.Dispose();
+                    _eventLogReader = null;
+                }
+
                 _eventLogReader = EventLogReader.CreateReader(_eventLogPath);
+                _eventLogReader.AfterReadFile += EventLogReader_AfterReadFile;
             }
 
             return _eventLogReader;
         }
-
+        private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
+        {
+            FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
+            EventLogPosition position = sender.GetCurrentPosition();
+            _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
+        }
         private void UpdateReferences()
         {
             if (_lastUpdateReferences != _eventLogReader.ReferencesReadDate)

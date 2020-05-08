@@ -1,9 +1,11 @@
 ﻿using EFCore.BulkExtensions;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using YY.EventLogExportAssistant.SQLServer.Models;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
+using Microsoft.EntityFrameworkCore;
 
 namespace YY.EventLogExportAssistant.SQLServer
 {
@@ -45,6 +47,38 @@ namespace YY.EventLogExportAssistant.SQLServer
                     lastLogFile.LastCurrentFileReferences, 
                     lastLogFile.LastCurrentFileData, 
                     lastLogFile.LastStreamPosition);
+        }
+
+        public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
+        {
+            LogFiles foundLogFile = _context.LogFiles
+                .Where(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc)
+                .FirstOrDefault();
+            
+            if(foundLogFile == null)
+            {
+                _context.LogFiles.Add(new LogFiles()
+                {
+                    InformationSystemId = _system.Id,
+                    FileName = logFileInfo.Name,
+                    CreateDate = logFileInfo.CreationTimeUtc,
+                    ModificationDate = logFileInfo.LastWriteTimeUtc,
+                    LastCurrentFileData = position.CurrentFileData,
+                    LastCurrentFileReferences = position.CurrentFileReferences,
+                    LastEventNumber = position.EventNumber,
+                    LastStreamPosition = position.StreamPosition
+                });
+            } else
+            {
+                foundLogFile.ModificationDate = logFileInfo.LastWriteTimeUtc;
+                foundLogFile.LastCurrentFileData = position.CurrentFileData;
+                foundLogFile.LastCurrentFileReferences = position.CurrentFileReferences;
+                foundLogFile.LastEventNumber = position.EventNumber;
+                foundLogFile.LastStreamPosition = position.StreamPosition;
+                _context.Entry<LogFiles>(foundLogFile).State = EntityState.Modified;
+            }
+
+            _context.SaveChanges();
         }
 
         public override int GetPortionSize()
