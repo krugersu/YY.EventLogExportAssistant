@@ -5,51 +5,108 @@ using YY.EventLogExportAssistant.PostgreSQL;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Threading;
+using Microsoft.Extensions.Configuration;
 
 namespace YY.EventLogExportToPostgreSQL
 {
     class Program
     {
+        private static long _totalRows = 0;
+        private static long _lastPortionRows = 0;
+        private static DateTime _beginPortionExport;
+        private static DateTime _endPortionExport;
+
         static void Main(string[] args)
         {
-            //using (EventLogContext context = new EventLogContext())
-            //{
-            //    long isCount = context.InformationSystems.Count();
-            //    Console.WriteLine("Количество информационных систем: {0}", isCount);
-            //}
+            IConfiguration Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
 
-            //if (args.Length == 0)
-            //{
-            //    Console.WriteLine("Не передан путь к файлам журнала регистрации.");
-            //}
-            //else
-            //{
-            //    string eventLogPath = args[0];
-            //    int queueLength = 1000;
-            //    EventLogOnTarget exporterDefination = new EventLogOnPostgreSQL();
+            IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
+            string eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
+            int watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
+            int watchPeriodSecondsMs = watchPeriodSeconds * 1000;
+            bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
+            int portion = eventLogSection.GetValue("Portion", 1000);
 
-            //    using (EventLogExportMaster exporter = EventLogExportMaster.CreateExportMaster(exporterDefination))
-            //    {
-            //        using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
-            //        {
-            //            if (reader.Read())
-            //            {
-            //                exporter.AddItem(reader.CurrentRow);
+            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
+            string inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
+            string inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
 
-            //                // Отправляем порцию накопившихся элементов
-            //                if (exporter.QueueLength >= queueLength)
-            //                    exporter.Send();
-            //            }
-            //        }
+            if (string.IsNullOrEmpty(eventLogPath))
+            {
+                Console.WriteLine("Не указан каталог с файлами данных журнала регистрации.");
+                Console.WriteLine("Для выхода нажмите любую клавишу...");
+                Console.Read();
+                return;
+            }
 
-            //        // Отправляем оставшиеся элементы
-            //        if (exporter.QueueLength > 0)
-            //            exporter.Send();
-            //    }
-            //}
+            Console.WriteLine();
+            Console.WriteLine();
 
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
+            {
+                exporter.SetEventLogPath(eventLogPath);
+
+                EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(portion);
+                target.SetInformationSystem(new InformationSystemsBase()
+                {
+                    Name = inforamtionSystemName,
+                    Description = inforamtionSystemDescription
+                });
+                exporter.SetTarget(target);
+
+                exporter.BeforeExportData += BeforeExportData;
+                exporter.AfterExportData += AfterExportData;
+
+                while (exporter.NewDataAvailiable())
+                    exporter.SendData();
+
+                if (useWatchMode)
+                {
+                    Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    while (true)
+                    {
+                        if (Console.KeyAvailable)
+                            if (Console.ReadKey().KeyChar == 'q')
+                                break;
+
+                        while (exporter.NewDataAvailiable())
+                        {
+                            Console.Clear();
+                            exporter.SendData();
+                        }
+
+                        Thread.Sleep(watchPeriodSecondsMs);
+                    }
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
             Console.WriteLine("Для выхода нажмите любую клавишу...");
-            Console.ReadKey();
+            Console.Read();
+        }
+
+        private static void BeforeExportData(BeforeExportDataEventArgs e)
+        {
+            _beginPortionExport = DateTime.Now;
+            _lastPortionRows = e.Rows.Count;
+            _totalRows = _totalRows + e.Rows.Count;
+
+            Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
+        }
+        private static void AfterExportData(AfterExportDataEventArgs e)
+        {
+            _endPortionExport = DateTime.Now;
+            var duration = _endPortionExport - _beginPortionExport;
+
+            Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
+            Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
+            Console.SetCursorPosition(0, Console.CursorTop - 3);
         }
     }
 }

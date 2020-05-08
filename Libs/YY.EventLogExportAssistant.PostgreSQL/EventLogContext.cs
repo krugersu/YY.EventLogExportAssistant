@@ -10,7 +10,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 {
     public class EventLogContext : DbContext
     {
-        public DbSet<InformationSystemsBase> InformationSystems { get; set; }
+        public DbSet<InformationSystems> InformationSystems { get; set; }
         public DbSet<Applications> Applications { get; set; }
         public DbSet<Computers> Computers { get; set; }
         public DbSet<Events> Events { get; set; }
@@ -22,15 +22,24 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         public DbSet<TransactionStatuses> TransactionStatuses { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<WorkServers> WorkServers { get; set; }
+        public DbSet<LogFiles> LogFiles { get; set; }
 
         public EventLogContext() : base()
         {
             Database.EnsureCreated();
+            AdditionalInitializationActions();
         }
 
         public EventLogContext(DbContextOptions<EventLogContext> options) : base(options)
         {
             Database.EnsureCreated();
+            AdditionalInitializationActions();
+        }
+
+        private void AdditionalInitializationActions()
+        {
+            // TODO
+            // Создавать в базе VIEW для просмотра данных в удобном виде
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -48,78 +57,84 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<InformationSystemsBase>()
+            modelBuilder.Entity<InformationSystems>()
                 .HasKey(b => new { b.Id });
-            modelBuilder.Entity<InformationSystemsBase>()
-                .HasIndex(b => new { b.Id })
-                .IsUnique();
+            modelBuilder.Entity<InformationSystems>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Applications>()
-                .HasKey(b => new { b.InformationSystemId, b.id });
+                .HasKey(b => new { b.InformationSystemId, b.Id });
             modelBuilder.Entity<Applications>()
-                .HasIndex(b => new { b.InformationSystemId, b.id })
-                .IsUnique();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Computers>()
                 .HasKey(b => new { b.InformationSystemId, b.Id });
             modelBuilder.Entity<Computers>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Events>()
                 .HasKey(b => new { b.InformationSystemId, b.Id });
             modelBuilder.Entity<Events>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Metadata>()
                 .HasKey(b => new { b.InformationSystemId, b.Id });
             modelBuilder.Entity<Metadata>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<PrimaryPorts>()
                 .HasKey(b => new { b.InformationSystemId, b.Id });
             modelBuilder.Entity<PrimaryPorts>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<SecondaryPorts>()
+                .HasKey(b => new { b.InformationSystemId, b.Id });
+            modelBuilder.Entity<SecondaryPorts>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Severities>()
+                .HasKey(b => new { b.InformationSystemId, b.Id });
+            modelBuilder.Entity<Severities>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<TransactionStatuses>()
+                .HasKey(b => new { b.InformationSystemId, b.Id });
+            modelBuilder.Entity<TransactionStatuses>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Users>()
+                .HasKey(b => new { b.InformationSystemId, b.Id });
+            modelBuilder.Entity<Users>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<WorkServers>()
+                .HasKey(b => new { b.InformationSystemId, b.Id });
+            modelBuilder.Entity<WorkServers>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<LogFiles>()
+                .HasKey(b => new { b.InformationSystemId, b.FileName, b.CreateDate, b.Id });
+            modelBuilder.Entity<LogFiles>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<RowData>()
                 .HasKey(b => new { b.InformationSystemId, b.Period, b.Id });
             modelBuilder.Entity<RowData>()
-                .HasIndex(b => new { b.InformationSystemId, b.Period, b.Id })
-                .IsUnique();
-
-
-            modelBuilder.Entity<SecondaryPorts>()
-                .HasKey(b => new { b.InformationSystemId, b.Id });
-            modelBuilder.Entity<SecondaryPorts>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
-
-            modelBuilder.Entity<Severities>()
-                .HasKey(b => new { b.InformationSystemId, b.Id });
-            modelBuilder.Entity<Severities>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
-
-            modelBuilder.Entity<TransactionStatuses>()
-                .HasKey(b => new { b.InformationSystemId, b.Id });
-            modelBuilder.Entity<TransactionStatuses>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
-
-            modelBuilder.Entity<Users>()
-                .HasKey(b => new { b.InformationSystemId, b.Id });
-            modelBuilder.Entity<Users>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
-
-            modelBuilder.Entity<WorkServers>()
-                .HasKey(b => new { b.InformationSystemId, b.Id });
-            modelBuilder.Entity<WorkServers>()
-                .HasIndex(b => new { b.InformationSystemId, b.Id })
-                .IsUnique();
+                .HasIndex(i => new { i.InformationSystemId, i.UserId, i.Period });
+            modelBuilder.Entity<RowData>()
+                .HasIndex(i => new { i.InformationSystemId, i.DataUUID });
         }
     }
 }

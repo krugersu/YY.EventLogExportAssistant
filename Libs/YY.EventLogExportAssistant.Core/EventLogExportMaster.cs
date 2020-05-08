@@ -10,7 +10,6 @@ namespace YY.EventLogExportAssistant
     public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
     {        
         private string _eventLogPath;
-        private EventLogReader _eventLogReader;
         private DateTime _lastUpdateReferences;
         private IEventLogOnTarget _target;
 
@@ -49,20 +48,57 @@ namespace YY.EventLogExportAssistant
         public void SendData()
         {
             EventLogPosition lastPosition = _target.GetLastPosition();
-            EventLogReader reader = GetReader();
-            reader.SetCurrentPosition(lastPosition);
-
-            int portionSize = _target.GetPortionSize();
-            List<RowData> dataToSend = new List<RowData>();
-
-            while (reader.Read())
+            using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
             {
-                if (reader.CurrentRow == null)
-                    continue;
+                reader.AfterReadFile += EventLogReader_AfterReadFile;
+                reader.SetCurrentPosition(lastPosition);
 
-                dataToSend.Add(reader.CurrentRow);
+                int portionSize = _target.GetPortionSize();
+                List<RowData> dataToSend = new List<RowData>();
 
-                if (dataToSend.Count >= portionSize)
+                while (reader.Read())
+                {
+                    if (reader.CurrentRow == null)
+                        continue;
+
+                    dataToSend.Add(reader.CurrentRow);
+
+                    if (dataToSend.Count >= portionSize)
+                    {
+                        bool cancel = false;
+                        if (BeforeExportData != null)
+                        {
+                            BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
+                            {
+                                Rows = dataToSend
+                            };
+                            BeforeExportData.Invoke(beforeExportArgs);
+                            cancel = beforeExportArgs.Cancel;
+                        }
+
+                        EventLogPosition currentPosition = reader.GetCurrentPosition();
+                        if (!cancel)
+                        {
+                            UpdateReferences(reader);
+                            _target.Save(dataToSend);
+
+                            AfterExportData.Invoke(new AfterExportDataEventArgs()
+                            {
+                                CurrentPosition = currentPosition
+                            });
+                        }
+
+                        if (reader.CurrentFile != null)
+                        {
+                            FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
+                            _target.SaveLogPosition(logFileInfo, currentPosition);
+                        }
+
+                        dataToSend.Clear();
+                    }
+                }
+
+                if (dataToSend.Count > 0)
                 {
                     bool cancel = false;
                     if (BeforeExportData != null)
@@ -75,83 +111,32 @@ namespace YY.EventLogExportAssistant
                         cancel = beforeExportArgs.Cancel;
                     }
 
-                    EventLogPosition currentPosition = _eventLogReader.GetCurrentPosition();
+                    EventLogPosition currentPosition = reader.GetCurrentPosition();
                     if (!cancel)
                     {
-                        UpdateReferences();
+                        UpdateReferences(reader);
                         _target.Save(dataToSend);
-                                              
-                        AfterExportData.Invoke(new AfterExportDataEventArgs() 
-                        { 
+
+                        AfterExportData.Invoke(new AfterExportDataEventArgs()
+                        {
                             CurrentPosition = currentPosition
                         });
                     }
 
-                    if (_eventLogReader.CurrentFile != null)
+                    if (reader.CurrentFile != null)
                     {
-                        FileInfo logFileInfo = new FileInfo(_eventLogReader.CurrentFile);
+                        FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
                         _target.SaveLogPosition(logFileInfo, currentPosition);
                     }
 
                     dataToSend.Clear();
                 }
             }
-
-            if (dataToSend.Count > 0)
-            {
-                bool cancel = false;
-                if (BeforeExportData != null)
-                {
-                    BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
-                    {
-                        Rows = dataToSend
-                    };
-                    BeforeExportData.Invoke(beforeExportArgs);
-                    cancel = beforeExportArgs.Cancel;
-                }
-
-                EventLogPosition currentPosition = _eventLogReader.GetCurrentPosition();
-                if (!cancel)
-                {
-                    UpdateReferences();
-                    _target.Save(dataToSend);
-                                     
-                    AfterExportData.Invoke(new AfterExportDataEventArgs()
-                    {
-                        CurrentPosition = currentPosition
-                    });                    
-                }
-
-                if (_eventLogReader.CurrentFile != null)
-                {
-                    FileInfo logFileInfo = new FileInfo(_eventLogReader.CurrentFile);
-                    _target.SaveLogPosition(logFileInfo, currentPosition);
-                }
-
-                dataToSend.Clear();
-            }
         }
         public void Dispose()
         {
-            if(_eventLogReader != null)
-                _eventLogReader.Dispose();
-        }
-
-        private EventLogReader GetReader(bool recreate = false)
-        {
-            if (_eventLogReader == null || recreate)
-            {
-                if(_eventLogReader != null)
-                {
-                    _eventLogReader.Dispose();
-                    _eventLogReader = null;
-                }
-
-                _eventLogReader = EventLogReader.CreateReader(_eventLogPath);
-                _eventLogReader.AfterReadFile += EventLogReader_AfterReadFile;
-            }
-
-            return _eventLogReader;
+            // TODO
+            // Нет необходимости?
         }
         private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
@@ -159,9 +144,9 @@ namespace YY.EventLogExportAssistant
             EventLogPosition position = sender.GetCurrentPosition();
             _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
         }
-        private void UpdateReferences()
+        private void UpdateReferences(EventLogReader reader)
         {
-            if (_lastUpdateReferences != _eventLogReader.ReferencesReadDate)
+            if (_lastUpdateReferences != reader.ReferencesReadDate)
             {
                 List<Severity> severities = new List<Severity>();
                 severities.Add(Severity.Error);
@@ -179,19 +164,19 @@ namespace YY.EventLogExportAssistant
 
                 ReferencesData data = new ReferencesData()
                 {
-                    Applications = _eventLogReader.Applications,
-                    Computers = _eventLogReader.Computers,
-                    Events = _eventLogReader.Events,
-                    Metadata = _eventLogReader.Metadata,
-                    PrimaryPorts = _eventLogReader.PrimaryPorts,
-                    SecondaryPorts = _eventLogReader.SecondaryPorts,
+                    Applications = reader.Applications,
+                    Computers = reader.Computers,
+                    Events = reader.Events,
+                    Metadata = reader.Metadata,
+                    PrimaryPorts = reader.PrimaryPorts,
+                    SecondaryPorts = reader.SecondaryPorts,
                     Severities = severities.AsReadOnly(),
                     TransactionStatuses = transactionStatuses.AsReadOnly(),
-                    Users = _eventLogReader.Users,
-                    WorkServers = _eventLogReader.WorkServers
+                    Users = reader.Users,
+                    WorkServers = reader.WorkServers
                 };
                 _target.UpdateReferences(data);
-                _lastUpdateReferences = _eventLogReader.ReferencesReadDate;
+                _lastUpdateReferences = reader.ReferencesReadDate;
             }
         }
     }
