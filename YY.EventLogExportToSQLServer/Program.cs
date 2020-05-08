@@ -70,11 +70,9 @@ namespace YY.EventLogExportToSQLServer
                     Console.WriteLine();
                     while (true)
                     {
-                        if(Console.KeyAvailable)
-                        {
+                        if(Console.KeyAvailable)                        
                             if (Console.ReadKey().KeyChar == 'q')
-                                break;
-                        }
+                                break;                        
 
                         while (exporter.NewDataAvailiable())
                             exporter.SendData();
