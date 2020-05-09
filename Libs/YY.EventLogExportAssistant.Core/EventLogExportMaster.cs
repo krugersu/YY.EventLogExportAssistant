@@ -7,7 +7,7 @@ using System.Timers;
 
 namespace YY.EventLogExportAssistant
 {
-    public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
+    public sealed class EventLogExportMaster : IEventLogExportMaster
     {        
         private string _eventLogPath;
         private string _referenceDataHash;
@@ -133,11 +133,7 @@ namespace YY.EventLogExportAssistant
                 }
             }
         }
-        public void Dispose()
-        {
-            // TODO
-            // Нет необходимости?
-        }
+
         private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
             FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
