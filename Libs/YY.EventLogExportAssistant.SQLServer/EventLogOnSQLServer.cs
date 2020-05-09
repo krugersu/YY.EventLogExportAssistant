@@ -15,7 +15,6 @@ namespace YY.EventLogExportAssistant.SQLServer
         private const int _defaultPortion = 1000;
         private int _portion;
         private DbContextOptions<EventLogContext> _databaseOptions;
-        private EventLogContext _context;
         private InformationSystemsBase _system;
 
         private IReadOnlyList<Models.Applications> cacheApplications;
