@@ -10,7 +10,7 @@ namespace YY.EventLogExportAssistant
     public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
     {        
         private string _eventLogPath;
-        private DateTime _lastUpdateReferences;
+        private string _referenceDataHash;
         private IEventLogOnTarget _target;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
@@ -21,7 +21,7 @@ namespace YY.EventLogExportAssistant
 
         public EventLogExportMaster()
         {
-            _lastUpdateReferences = DateTime.MinValue;
+            _referenceDataHash = string.Empty;
         }
 
         public void SetEventLogPath(string eventLogPath)
@@ -146,7 +146,7 @@ namespace YY.EventLogExportAssistant
         }
         private void UpdateReferences(EventLogReader reader)
         {
-            if (_lastUpdateReferences != reader.ReferencesReadDate)
+            if (_referenceDataHash != reader.ReferencesHash)
             {
                 List<Severity> severities = new List<Severity>();
                 severities.Add(Severity.Error);
@@ -176,7 +176,7 @@ namespace YY.EventLogExportAssistant
                     WorkServers = reader.WorkServers
                 };
                 _target.UpdateReferences(data);
-                _lastUpdateReferences = reader.ReferencesReadDate;
+                _referenceDataHash = reader.ReferencesHash;
             }
         }
     }
