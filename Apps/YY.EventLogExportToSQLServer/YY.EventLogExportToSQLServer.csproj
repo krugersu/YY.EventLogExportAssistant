@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Libs\YY.EventLogExportAssistant.SQLServer\YY.EventLogExportAssistant.SQLServer.csproj" />
+    <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.SQLServer\YY.EventLogExportAssistant.SQLServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
