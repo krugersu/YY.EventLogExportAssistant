@@ -98,7 +98,7 @@ namespace YY.EventLogExportToSQLServer
             _lastPortionRows = e.Rows.Count;
             _totalRows = _totalRows + e.Rows.Count;
 
-            Console.Clear();
+            Console.SetCursorPosition(0, 0);
             Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)

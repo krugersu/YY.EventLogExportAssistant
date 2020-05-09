@@ -7,6 +7,7 @@ using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace YY.EventLogExportAssistant.SQLServer
 {
@@ -16,6 +17,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         private int _portion;
         private DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
+        private DateTime _maxPeriodRowData;
 
         private IReadOnlyList<Models.Applications> cacheApplications;
         private IReadOnlyList<Models.Computers> cacheComputers;
@@ -38,6 +40,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public EventLogOnSQLServer(DbContextOptions<EventLogContext> databaseOptions, int portion)
         {
+            _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
             if (databaseOptions == null)
             {
@@ -122,11 +125,32 @@ namespace YY.EventLogExportAssistant.SQLServer
         {
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
+                if (_maxPeriodRowData == DateTime.MinValue)
+                {
+                    Models.RowData firstRow = _context.RowsData.FirstOrDefault();
+                    if (firstRow != null)
+                    {
+                        DateTimeOffset _maxPeriodRowDataTimeOffset = _context.RowsData
+                            .Where(p => p.InformationSystemId == _system.Id)
+                            .Max(m => m.Period);
+                        if (_maxPeriodRowDataTimeOffset != null)
+                            _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
+                    }
+                }
+
                 List<Models.RowData> newEntities = new List<Models.RowData>();
                 foreach (var itemRow in rowsData)
                 {
                     if (itemRow == null)
                         continue;
+                    if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
+                    {
+                        var checkExist = _context.RowsData
+                            .Where(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowID)
+                            .FirstOrDefault();
+                        if (checkExist != null)
+                            continue;
+                    }
 
                     long? rowApplicationId = null;
                     Models.Applications rowApplication = null;
@@ -242,7 +266,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     newEntities.Add(rowData);
                 }
 
-                _context.BulkInsertOrUpdate(newEntities);
+                _context.BulkInsert(newEntities);
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
