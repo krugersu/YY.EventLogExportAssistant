@@ -14,8 +14,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
     public class EventLogOnPostgreSQL : EventLogOnTarget
     {
         private const int _defaultPortion = 1000;
-        private int _portion;
-        private DbContextOptions<EventLogContext> _databaseOptions;
+        private readonly int _portion;
+        private readonly DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
 
@@ -119,8 +119,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void Save(RowData rowData)
         {
-            IList<RowData> rowsData = new List<RowData>();
-            rowsData.Add(rowData);
+            IList<RowData> rowsData = new List<RowData>
+            {
+                rowData
+            };
             Save(rowsData);
         }
         public override void Save(IList<RowData> rowsData)

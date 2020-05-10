@@ -17,7 +17,7 @@ namespace YY.EventLogExportToSQLServer
         private static DateTime _beginPortionExport;
         private static DateTime _endPortionExport;
 
-        static void Main(string[] args)
+        static void Main()
         {
             IConfiguration Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -62,12 +62,7 @@ namespace YY.EventLogExportToSQLServer
             exporter.SetTarget(target);
 
             exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-
-            while (exporter.NewDataAvailiable())
-            {
-                exporter.SendData();
-            }
+            exporter.AfterExportData += AfterExportData;         
 
             if (useWatchMode)
             {
@@ -80,11 +75,12 @@ namespace YY.EventLogExportToSQLServer
                     while (exporter.NewDataAvailiable())
                     {
                         exporter.SendData();
-                    }
-
-                    Thread.Sleep(watchPeriodSecondsMs);
+                        Thread.Sleep(watchPeriodSecondsMs);
+                    }                    
                 }
-            }
+            } else
+                while (exporter.NewDataAvailiable())
+                    exporter.SendData();
 
             Console.WriteLine();
             Console.WriteLine();
@@ -96,10 +92,10 @@ namespace YY.EventLogExportToSQLServer
         {
             _beginPortionExport = DateTime.Now;
             _lastPortionRows = e.Rows.Count;
-            _totalRows = _totalRows + e.Rows.Count;
+            _totalRows += e.Rows.Count;
 
             Console.SetCursorPosition(0, 0);
-            Console.WriteLine("[{0}] Last read: {1}", DateTime.Now, e.Rows.Count);
+            Console.WriteLine("[{0}] Last read: {1}             ", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
         {
