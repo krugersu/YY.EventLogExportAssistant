@@ -12,10 +12,16 @@ namespace YY.EventLogExportToSQLServer
 {
     class Program
     {
+        #region Private Static Member Variables
+
         private static long _totalRows = 0;
         private static long _lastPortionRows = 0;
         private static DateTime _beginPortionExport;
         private static DateTime _endPortionExport;
+
+        #endregion
+
+        #region Static Methods
 
         static void Main()
         {
@@ -88,6 +94,10 @@ namespace YY.EventLogExportToSQLServer
             Console.Read();
         }
 
+        #endregion
+
+        #region Events
+
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
             _beginPortionExport = DateTime.Now;
@@ -108,5 +118,7 @@ namespace YY.EventLogExportToSQLServer
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
         }
+
+        #endregion
     }
 }

@@ -13,6 +13,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 {
     public class EventLogOnPostgreSQL : EventLogOnTarget
     {
+        #region Private Member Variables
+
         private const int _defaultPortion = 1000;
         private readonly int _portion;
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
@@ -29,6 +31,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private IReadOnlyList<Models.TransactionStatuses> cacheTransactionStatuses;
         private IReadOnlyList<Models.Users> cacheUsers;
         private IReadOnlyList<Models.WorkServers> cacheWorkServers;
+
+        #endregion
+
+        #region Constructor
 
         public EventLogOnPostgreSQL() : this(null, _defaultPortion)
         {
@@ -57,6 +63,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL
             else
                 _databaseOptions = databaseOptions;
         }
+
+        #endregion
+
+        #region Public Methods
 
         public override EventLogPosition GetLastPosition()
         {
@@ -498,5 +508,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                 cacheWorkServers = _context.WorkServers.ToList().AsReadOnly();
             }
         }
+
+        #endregion
     }
 }

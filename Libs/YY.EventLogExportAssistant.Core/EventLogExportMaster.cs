@@ -8,7 +8,9 @@ using System.Timers;
 namespace YY.EventLogExportAssistant
 {
     public sealed class EventLogExportMaster : IEventLogExportMaster
-    {        
+    {
+        #region Private Member Variables
+
         private string _eventLogPath;
         private string _referenceDataHash;
         private IEventLogOnTarget _target;
@@ -19,10 +21,18 @@ namespace YY.EventLogExportAssistant
         public delegate void AfterExportDataHandler(AfterExportDataEventArgs e);
         public event AfterExportDataHandler AfterExportData;
 
+        #endregion
+
+        #region Constructor
+
         public EventLogExportMaster()
         {
             _referenceDataHash = string.Empty;
         }
+
+        #endregion
+
+        #region Public Methods
 
         public void SetEventLogPath(string eventLogPath)
         {
@@ -134,6 +144,10 @@ namespace YY.EventLogExportAssistant
             }
         }
 
+        #endregion
+
+        #region Private Methods
+
         private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
             FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
@@ -175,5 +189,7 @@ namespace YY.EventLogExportAssistant
                 _referenceDataHash = reader.ReferencesHash;
             }
         }
+
+        #endregion
     }
 }

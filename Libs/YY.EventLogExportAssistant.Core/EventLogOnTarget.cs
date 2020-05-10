@@ -8,6 +8,8 @@ namespace YY.EventLogExportAssistant
 {
     public abstract class EventLogOnTarget : IEventLogOnTarget
     {
+        #region Public Methods
+
         public virtual EventLogPosition GetLastPosition()
         {
             throw new NotImplementedException();
@@ -42,6 +44,7 @@ namespace YY.EventLogExportAssistant
         {
             throw new NotImplementedException();
         }
-             
+
+        #endregion
     }
 }
