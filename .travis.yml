@@ -7,3 +7,9 @@ install:
 script:
   - dotnet build --configuration Release
   - dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: chmod +x ./Scripts/deploy.sh && ./Scripts/deploy.sh $NUGET_API_KEY
+  on:
+    branch: master

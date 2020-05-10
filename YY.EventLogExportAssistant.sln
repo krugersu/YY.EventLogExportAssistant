@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4CA9D292-5342-4388-BC1C-A59E837CE283}"
 	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
+		appveyor.yml = appveyor.yml
 		LICENSE = LICENSE
 		Readme.md = Readme.md
 	EndProjectSection
@@ -42,8 +44,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToSQLServe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C4D18-9F7B-4E44-9531-A191AA6F725E}"
 	ProjectSection(SolutionItems) = preProject
+		Scripts\appveyor-build.ps1 = Scripts\appveyor-build.ps1
+		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
+		Scripts\deploy.sh = Scripts\deploy.sh
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{9C060815-539F-46E8-83AD-89F573568BC5}"
+	ProjectSection(SolutionItems) = preProject
+		Nuget\icon.png = Nuget\icon.png
 	EndProjectSection
 EndProject
 Global
@@ -87,6 +97,8 @@ Global
 		{A3822078-CDCA-45DF-872D-153AD7DF142E} = {44948605-8B87-444A-B94D-530ADB059377}
 		{9756BB57-6B11-4DE2-ACBD-6277691FF083} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 		{34E386CA-1ADE-41FC-ADCB-229EC8B20CE6} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
+		{AF6C4D18-9F7B-4E44-9531-A191AA6F725E} = {4CA9D292-5342-4388-BC1C-A59E837CE283}
+		{9C060815-539F-46E8-83AD-89F573568BC5} = {4CA9D292-5342-4388-BC1C-A59E837CE283}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}
