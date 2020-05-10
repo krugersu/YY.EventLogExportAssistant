@@ -3,6 +3,11 @@
 Решение для экспорта данных журнала регистрации платформы 1С:Предприятие 8.x в нестандартные хранилища данных.
 С помощью библиотеки **[YY.EventLogReaderAssistant](https://github.com/YPermitin/YY.EventLogReaderAssistant)** реализовано чтение данных журнала регистрации как текстового формата (*.lgf, *.lgp), так и нового формата в виде SQLite-базы (*.lgd).
 
+### Состояние сборки
+| Windows |  Linux |
+|:-------:|:------:|
+| [![Build status](https://ci.appveyor.com/api/projects/status/lm4hex3gooyvaes2?svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogexportassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant) |
+
 ## Состав репозитория
 
 * Библиотеки
