@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using YY.EventLogExportAssistant.PostgreSQL.Models;
 
 namespace YY.EventLogExportAssistant.PostgreSQL

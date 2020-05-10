@@ -1,10 +1,7 @@
 ﻿using System;
-using YY.EventLogReaderAssistant;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.PostgreSQL;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
 

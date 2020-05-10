@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.Models;
-using System.Timers;
 
 namespace YY.EventLogExportAssistant
 {
@@ -158,19 +156,23 @@ namespace YY.EventLogExportAssistant
         {
             if (_referenceDataHash != reader.ReferencesHash)
             {
-                List<Severity> severities = new List<Severity>();
-                severities.Add(Severity.Error);
-                severities.Add(Severity.Information);
-                severities.Add(Severity.Note);
-                severities.Add(Severity.Unknown);
-                severities.Add(Severity.Warning);
+                List<Severity> severities = new List<Severity>
+                {
+                    Severity.Error,
+                    Severity.Information,
+                    Severity.Note,
+                    Severity.Unknown,
+                    Severity.Warning
+                };
 
-                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>();
-                transactionStatuses.Add(TransactionStatus.Committed);
-                transactionStatuses.Add(TransactionStatus.NotApplicable);
-                transactionStatuses.Add(TransactionStatus.RolledBack);
-                transactionStatuses.Add(TransactionStatus.Unfinished);
-                transactionStatuses.Add(TransactionStatus.Unknown);
+                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>
+                {
+                    TransactionStatus.Committed,
+                    TransactionStatus.NotApplicable,
+                    TransactionStatus.RolledBack,
+                    TransactionStatus.Unfinished,
+                    TransactionStatus.Unknown
+                };
 
                 ReferencesData data = new ReferencesData()
                 {

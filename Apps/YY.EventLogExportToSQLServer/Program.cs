@@ -1,12 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Linq;
 using System.Threading;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.SQLServer;
-using YY.EventLogExportAssistant.SQLServer.Models;
-using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportToSQLServer
 {
