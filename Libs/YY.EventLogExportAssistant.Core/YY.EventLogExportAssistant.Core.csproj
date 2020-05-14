@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>YY.EventLogExportAssistant</RootNamespace>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <PackageId>YY.EventLogExportAssistant.Core</PackageId>
     <Authors>Permitin Yuriy</Authors>
     <Company />
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
-    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.15" />
+    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.16" />
   </ItemGroup>
 
   <ItemGroup>
