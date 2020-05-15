@@ -103,6 +103,7 @@ namespace YY.EventLogExportAssistant
                         }
 
                         dataToSend.Clear();
+                        break;
                     }
                 }
 
