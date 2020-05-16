@@ -58,6 +58,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{9C060815
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.SQLServer.Tests", "Tests\YY.EventLogExportAssistant.SQLServer.Tests\YY.EventLogExportAssistant.SQLServer.Tests.csproj", "{74DB2292-783C-4692-9771-EB0C27B6E373}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.PostgreSQL.Tests", "Tests\YY.EventLogExportAssistant.PostgreSQL.Tests\YY.EventLogExportAssistant.PostgreSQL.Tests.csproj", "{540111EF-F6E0-427E-BD26-419119665269}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{74DB2292-783C-4692-9771-EB0C27B6E373}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74DB2292-783C-4692-9771-EB0C27B6E373}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74DB2292-783C-4692-9771-EB0C27B6E373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{540111EF-F6E0-427E-BD26-419119665269}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{540111EF-F6E0-427E-BD26-419119665269}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{540111EF-F6E0-427E-BD26-419119665269}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{540111EF-F6E0-427E-BD26-419119665269}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,7 @@ Global
 		{AF6C4D18-9F7B-4E44-9531-A191AA6F725E} = {4CA9D292-5342-4388-BC1C-A59E837CE283}
 		{9C060815-539F-46E8-83AD-89F573568BC5} = {4CA9D292-5342-4388-BC1C-A59E837CE283}
 		{74DB2292-783C-4692-9771-EB0C27B6E373} = {44948605-8B87-444A-B94D-530ADB059377}
+		{540111EF-F6E0-427E-BD26-419119665269} = {44948605-8B87-444A-B94D-530ADB059377}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}
