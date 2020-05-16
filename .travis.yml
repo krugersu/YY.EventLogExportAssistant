@@ -6,9 +6,12 @@ services:
   - postgresql
 install:
   - dotnet restore
+before_script:
+  - psql -c 'ALTER USER postgres WITH PASSWORD 'Password12!';' -U postgres
 script:
   - dotnet build --configuration Release
   - dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
+  - dotnet test Tests/YY.EventLogExportAssistant.PostgreSQL.Tests/YY.EventLogExportAssistant.PostgreSQL.Tests.csproj
 deploy:
   skip_cleanup: true
   provider: script
