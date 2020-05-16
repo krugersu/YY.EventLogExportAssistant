@@ -65,7 +65,8 @@ namespace YY.EventLogExportToSQLServer
             exporter.SetTarget(target);
 
             exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;         
+            exporter.AfterExportData += AfterExportData;
+            exporter.OnErrorExportData += OnErrorExportData;
 
             if (useWatchMode)
             {
@@ -114,6 +115,20 @@ namespace YY.EventLogExportToSQLServer
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+        }
+        private static void OnErrorExportData(OnErrorExportDataEventArgs e)
+        {
+            Console.WriteLine(
+                "Ошибка при экспорте данных." +
+                "Критическая: {0}\n" +
+                "\n" +
+                "Содержимое события:\n" +
+                "{1}" +
+                "\n" +
+                "Информация об ошибке:\n" +
+                "\n" +
+                "{2}",
+                e.Critical, e.SourceData, e.Exception.ToString());
         }
 
         #endregion
