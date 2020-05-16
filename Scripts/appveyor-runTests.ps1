@@ -1,7 +1,7 @@
 $appsettings = @'
 {
   "ConnectionStrings": {
-    "EventLogDatabase": "Data Source=YY-COMP;Initial Catalog=EventLogExportTest;Persist Security Info=True;User ID=sa;Password=128935;Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;"
+    "EventLogDatabase": "Server=(local)\SQL2017;Database=master;User ID=sa;Password=Password12!"
   },
   "InformationSystem": {
     "Name": "EventLogExportTest",
