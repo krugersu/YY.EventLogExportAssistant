@@ -49,7 +49,6 @@ namespace YY.EventLogExportToSQLServer
             Console.WriteLine();
 
             string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-            DbContextOptions<EventLogContext> options = new DbContextOptions<EventLogContext>();
             var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseSqlServer(connectionString);
 
