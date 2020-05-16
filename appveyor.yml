@@ -2,6 +2,7 @@ version: 1.0.0.{build}
 configuration: Release
 image:
 - Visual Studio 2019
+services: mssql2017
 
 build_script:
 - ps: >-
