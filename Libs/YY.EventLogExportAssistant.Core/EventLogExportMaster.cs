@@ -30,6 +30,7 @@ namespace YY.EventLogExportAssistant
         {
             _referenceDataHash = string.Empty;
             _dataToSend = new List<RowData>();
+            _portionSize = 0;
         }
 
         #endregion
@@ -43,10 +44,16 @@ namespace YY.EventLogExportAssistant
         public void SetTarget(IEventLogOnTarget target)
         {
             _target = target;
-            _portionSize = _target.GetPortionSize();
+            if (_target != null)
+            {
+                _portionSize = _target.GetPortionSize();
+            }
         }
         public bool NewDataAvailiable()
         {
+            if (_target == null)
+                return false;
+
             EventLogPosition lastPosition = _target.GetLastPosition();
 
             bool newDataExist = false;
@@ -60,6 +67,9 @@ namespace YY.EventLogExportAssistant
         }
         public void SendData()
         {
+            if (_target == null)
+                return;
+
             EventLogPosition lastPosition = _target.GetLastPosition();
             using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
             {
@@ -118,7 +128,6 @@ namespace YY.EventLogExportAssistant
                 _referenceDataHash = reader.ReferencesHash;
             }
         }
-
         private void SendDataCurrentPortion(EventLogReader reader)
         {
             bool cancel = false;
@@ -172,14 +181,12 @@ namespace YY.EventLogExportAssistant
                 SendDataCurrentPortion(sender);
             }
         }
-
         private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
             FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
             EventLogPosition position = sender.GetCurrentPosition();
             _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
         }
-
         private void EventLogReader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
         {
             if (OnErrorExportData != null)
