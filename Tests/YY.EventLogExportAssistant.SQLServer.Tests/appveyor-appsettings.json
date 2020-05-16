@@ -1,6 +1,6 @@
 ﻿{
   "ConnectionStrings": {
-    "EventLogDatabase": "Server=(local)\\SQL2017;Database=master;User ID=sa;Password=Password12!"
+    "EventLogDatabase": "Server=(local)\\SQL2017;Database=EventLogExportTest;User ID=sa;Password=Password12!"
   },
   "InformationSystem": {
     "Name": "EventLogExportTest",
