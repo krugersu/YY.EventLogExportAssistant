@@ -34,6 +34,9 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
         {
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
+                configFilePath = "appveyor-appsettings.json";
+
+            if (!File.Exists(configFilePath))
                 throw new Exception("Файл конфигурации не обнаружен.");
 
             IConfiguration Configuration = new ConfigurationBuilder()
