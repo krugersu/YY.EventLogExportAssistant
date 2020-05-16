@@ -14,8 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>event, log, 1C, enterprise, export, postgre, postgresql</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.7</AssemblyVersion>
+    <AssemblyVersion>1.0.0.8</AssemblyVersion>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
+    <FileVersion>1.0.0.8</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,12 +12,15 @@ namespace YY.EventLogExportAssistant
         private string _eventLogPath;
         private string _referenceDataHash;
         private IEventLogOnTarget _target;
+        private List<RowData> _dataToSend;
+        private int _portionSize;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
         public event BeforeExportDataHandler BeforeExportData;
-
         public delegate void AfterExportDataHandler(AfterExportDataEventArgs e);
         public event AfterExportDataHandler AfterExportData;
+        public delegate void OnErrorExportDataHandler(OnErrorExportDataEventArgs e);
+        public event OnErrorExportDataHandler OnErrorExportData;
 
         #endregion
 
@@ -26,6 +29,7 @@ namespace YY.EventLogExportAssistant
         public EventLogExportMaster()
         {
             _referenceDataHash = string.Empty;
+            _dataToSend = new List<RowData>();
         }
 
         #endregion
@@ -39,6 +43,7 @@ namespace YY.EventLogExportAssistant
         public void SetTarget(IEventLogOnTarget target)
         {
             _target = target;
+            _portionSize = _target.GetPortionSize();
         }
         public bool NewDataAvailiable()
         {
@@ -59,87 +64,14 @@ namespace YY.EventLogExportAssistant
             using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
             {
                 reader.AfterReadFile += EventLogReader_AfterReadFile;
+                reader.AfterReadEvent += EventLogReader_AfterReadEvent;
+                reader.OnErrorEvent += EventLogReader_OnErrorEvent;
                 reader.SetCurrentPosition(lastPosition);
 
-                int portionSize = _target.GetPortionSize();
-                List<RowData> dataToSend = new List<RowData>();
+                while (reader.Read());
 
-                while (reader.Read())
-                {
-                    if (reader.CurrentRow == null)
-                        continue;
-
-                    dataToSend.Add(reader.CurrentRow);
-
-                    if (dataToSend.Count >= portionSize)
-                    {
-                        bool cancel = false;
-                        if (BeforeExportData != null)
-                        {
-                            BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
-                            {
-                                Rows = dataToSend
-                            };
-                            BeforeExportData.Invoke(beforeExportArgs);
-                            cancel = beforeExportArgs.Cancel;
-                        }
-
-                        EventLogPosition currentPosition = reader.GetCurrentPosition();
-                        if (!cancel)
-                        {
-                            UpdateReferences(reader);
-                            _target.Save(dataToSend);
-
-                            AfterExportData.Invoke(new AfterExportDataEventArgs()
-                            {
-                                CurrentPosition = currentPosition
-                            });
-                        }
-
-                        if (reader.CurrentFile != null)
-                        {
-                            FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
-                            _target.SaveLogPosition(logFileInfo, currentPosition);
-                        }
-
-                        dataToSend.Clear();
-                        break;
-                    }
-                }
-
-                if (dataToSend.Count > 0)
-                {
-                    bool cancel = false;
-                    if (BeforeExportData != null)
-                    {
-                        BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
-                        {
-                            Rows = dataToSend
-                        };
-                        BeforeExportData.Invoke(beforeExportArgs);
-                        cancel = beforeExportArgs.Cancel;
-                    }
-
-                    EventLogPosition currentPosition = reader.GetCurrentPosition();
-                    if (!cancel)
-                    {
-                        UpdateReferences(reader);
-                        _target.Save(dataToSend);
-
-                        AfterExportData.Invoke(new AfterExportDataEventArgs()
-                        {
-                            CurrentPosition = currentPosition
-                        });
-                    }
-
-                    if (reader.CurrentFile != null)
-                    {
-                        FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
-                        _target.SaveLogPosition(logFileInfo, currentPosition);
-                    }
-
-                    dataToSend.Clear();
-                }
+                if (_dataToSend.Count > 0)                
+                    SendDataCurrentPortion(reader);                
             }
         }
 
@@ -147,12 +79,6 @@ namespace YY.EventLogExportAssistant
 
         #region Private Methods
 
-        private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
-        {
-            FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
-            EventLogPosition position = sender.GetCurrentPosition();
-            _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
-        }
         private void UpdateReferences(EventLogReader reader)
         {
             if (_referenceDataHash != reader.ReferencesHash)
@@ -190,6 +116,80 @@ namespace YY.EventLogExportAssistant
                 };
                 _target.UpdateReferences(data);
                 _referenceDataHash = reader.ReferencesHash;
+            }
+        }
+
+        private void SendDataCurrentPortion(EventLogReader reader)
+        {
+            bool cancel = false;
+            if (BeforeExportData != null)
+            {
+                BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
+                {
+                    Rows = _dataToSend
+                };
+                BeforeExportData.Invoke(beforeExportArgs);
+                cancel = beforeExportArgs.Cancel;
+            }
+
+            EventLogPosition currentPosition = reader.GetCurrentPosition();
+            if (!cancel)
+            {
+                UpdateReferences(reader);
+                _target.Save(_dataToSend);
+
+                if (AfterExportData != null)
+                {
+                    AfterExportData.Invoke(new AfterExportDataEventArgs()
+                    {
+                        CurrentPosition = currentPosition
+                    });
+                }
+            }
+
+            if (reader.CurrentFile != null)
+            {
+                FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
+                _target.SaveLogPosition(logFileInfo, currentPosition);
+            }
+
+            _dataToSend.Clear();
+        }
+
+        #endregion
+
+        #region Events
+
+        private void EventLogReader_AfterReadEvent(EventLogReader sender, AfterReadEventArgs args)
+        {
+            if (sender.CurrentRow == null)
+                return;
+
+            _dataToSend.Add(sender.CurrentRow);
+
+            if (_dataToSend.Count >= _portionSize)
+            {
+                SendDataCurrentPortion(sender);
+            }
+        }
+
+        private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
+        {
+            FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
+            EventLogPosition position = sender.GetCurrentPosition();
+            _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
+        }
+
+        private void EventLogReader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
+        {
+            if (OnErrorExportData != null)
+            {
+                OnErrorExportData.Invoke(new OnErrorExportDataEventArgs()
+                {
+                    Exception = args.Exception,
+                    SourceData = args.SourceData,
+                    Critical = args.Critical
+                });
             }
         }
 
