@@ -7,7 +7,7 @@ services:
 install:
   - dotnet restore
 before_script:
-  - psql -c 'ALTER USER postgres WITH PASSWORD 'Password12!';' -U postgres
+  - psql -c 'ALTER USER postgres WITH PASSWORD ''Password12!'';' -U postgres
 script:
   - dotnet build --configuration Release
   - dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
