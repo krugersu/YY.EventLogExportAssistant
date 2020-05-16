@@ -136,6 +136,8 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         private void AdditionalInitializationActions()
         {
+            return;
+
             Database.ExecuteSqlRaw(
                 @"IF NOT EXISTS (
 	                SELECT * FROM sys. objects 
