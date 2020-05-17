@@ -7,7 +7,7 @@
     "Description": "Тесты проверки экспорта данных журнала регистрации."
   },
   "EventLog": {
-    "SourcePath": "TestData//LGFFormat",
+    "SourcePath": "TestData/LGFFormat",
     "UseWatchMode": false,
     "WatchPeriod": 5,
     "Portion": 10000
