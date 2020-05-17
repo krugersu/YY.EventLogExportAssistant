@@ -49,7 +49,6 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 pathParts.Insert(0, Directory.GetCurrentDirectory());
                 eventLogPath = Path.Combine(pathParts.ToArray());
             }
-
             watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
             watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
