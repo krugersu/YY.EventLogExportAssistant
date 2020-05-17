@@ -103,6 +103,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
         private string GetConfigFile()
         {
+            // TODO
+            // Перенести формирование конфигурационного файла в скрипты CI
+
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))            
                 configFilePath = "travisci-appsettings";
