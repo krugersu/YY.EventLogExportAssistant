@@ -41,6 +41,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
+            eventLogPath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "LGFFormat");
             watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
             watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
@@ -62,7 +63,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
         public void ExportToSQLServerTest()
         {
             if (!Directory.Exists(eventLogPath))
-                throw new Exception(" аталог данных журнала регистрации не обнаружен.");
+                throw new Exception("Directory with event log's data not found: " + eventLogPath);
 
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPath);
