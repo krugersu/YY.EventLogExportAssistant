@@ -41,7 +41,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
-            //eventLogPath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "LGFFormat");
+            eventLogPath = Path.Combine(Directory.GetCurrentDirectory(), eventLogPath);
             watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
             watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
