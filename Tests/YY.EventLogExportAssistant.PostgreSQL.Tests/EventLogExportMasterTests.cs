@@ -31,10 +31,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
         public EventLogExportMasterTests()
         {
-            string configFilePath = "appsettings.json";
-            if (!File.Exists(configFilePath))
-                configFilePath = "appveyor-appsettings.json";
-
+            string configFilePath = GetConfigFile();
             if (!File.Exists(configFilePath))
                 throw new Exception("Файл конфигурации не обнаружен.");
 
@@ -102,6 +99,30 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             Assert.NotEqual(0, rowsInSourceFiles);
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
+        }
+
+        private string GetConfigFile()
+        {
+            string configFilePath = "appsettings.json";
+            if (!File.Exists(configFilePath))            
+                configFilePath = "travisci-appsettings";
+            
+            IConfiguration Configuration = new ConfigurationBuilder()
+                .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
+                .Build();
+            connectionString = Configuration.GetConnectionString("EventLogDatabase");
+            try
+            {
+                optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+                optionsBuilder.UseNpgsql(connectionString);
+                using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                    context.Database.EnsureDeleted();
+            }
+            catch {
+                configFilePath = "appveyor-appsettings.json";
+            }
+
+            return configFilePath;
         }
 
         #region Events

@@ -23,6 +23,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="travisci-appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="appveyor-appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
