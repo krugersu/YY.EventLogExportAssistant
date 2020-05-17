@@ -178,7 +178,7 @@ namespace YY.EventLogExportAssistant.SQLServer
 			                [PPRT].[Name] AS [PrimaryPortName],
 			                [RD].[SecondaryPortId] AS [SecondaryPortId],
 			                [SPRT].[Name] AS [SecondaryPortName]
-		                FROM [EventLogYellowPlatform].[dbo].[RowsData] AS [RD]
+		                FROM [dbo].[RowsData] AS [RD]
 			                LEFT JOIN [dbo].[InformationSystems] AS [IS]
 			                ON [RD].[InformationSystemId] = [IS].[Id]
 			                LEFT JOIN [dbo].[Severities] AS [SV]

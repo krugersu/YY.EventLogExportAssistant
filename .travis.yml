@@ -4,11 +4,14 @@ dist: xenial
 dotnet: 3.1
 services:
   - postgresql
+addons:
+  postgresql: "12.1"
 install:
   - dotnet restore
 script:
   - dotnet build --configuration Release
   - dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
+#  - dotnet test Tests/YY.EventLogExportAssistant.PostgreSQL.Tests/YY.EventLogExportAssistant.PostgreSQL.Tests.csproj
 deploy:
   skip_cleanup: true
   provider: script

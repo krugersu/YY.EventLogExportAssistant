@@ -25,4 +25,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
+  </ItemGroup>
+
 </Project>

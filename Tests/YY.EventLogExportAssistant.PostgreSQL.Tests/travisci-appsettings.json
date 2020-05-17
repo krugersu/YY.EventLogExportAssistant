@@ -1,0 +1,15 @@
+﻿{
+  "ConnectionStrings": {
+    "EventLogDatabase": "Host=localhost;Port=5432;Database=EventLogExportTest;Username=postgres;;Password="
+  },
+  "InformationSystem": {
+    "Name": "EventLogExportTest",
+    "Description": "Тесты проверки экспорта данных журнала регистрации."
+  },
+  "EventLog": {
+    "SourcePath": "TestData\\LGFFormat",
+    "UseWatchMode": false,
+    "WatchPeriod": 5,
+    "Portion": 10000
+  }
+}
