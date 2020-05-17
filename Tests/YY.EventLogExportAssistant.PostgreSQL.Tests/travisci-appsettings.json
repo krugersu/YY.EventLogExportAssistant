@@ -1,6 +1,6 @@
 ﻿{
   "ConnectionStrings": {
-    "EventLogDatabase": "Host=localhost;Port=5432;Database=EventLogExportTest;Username=postgres;;Password="
+    "EventLogDatabase": "Host=localhost;Port=5432;Database=EventLogExportTest;Username=postgres;Password="
   },
   "InformationSystem": {
     "Name": "EventLogExportTest",

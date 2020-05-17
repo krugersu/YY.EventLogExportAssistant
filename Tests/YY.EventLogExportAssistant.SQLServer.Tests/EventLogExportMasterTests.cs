@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 using YY.EventLogExportAssistant;
 using YY.EventLogReaderAssistant;
@@ -32,9 +34,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         public EventLogExportMasterTests()
         {
-            string configFilePath = "appsettings.json";
-            if (!File.Exists(configFilePath))
-                configFilePath = "appveyor-appsettings.json";
+            string configFilePath = GetConfigFile();
 
             if (!File.Exists(configFilePath))
                 throw new Exception("Файл конфигурации не обнаружен.");
@@ -45,6 +45,12 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
+            if (!Directory.Exists(eventLogPath))
+            {
+                List<string> pathParts = eventLogPath.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
+                pathParts.Insert(0, Directory.GetCurrentDirectory());
+                eventLogPath = Path.Combine(pathParts.ToArray());
+            }
             watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
             watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
@@ -103,6 +109,35 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             Assert.NotEqual(0, rowsInSourceFiles);
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
+        }
+
+        private string GetConfigFile()
+        {
+            // TODO
+            // Перенести формирование конфигурационного файла в скрипты CI
+
+            string configFilePath = "appsettings.json";
+            if (!File.Exists(configFilePath))
+            {
+                configFilePath = "travisci-appsettings";
+                IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
+                    .Build();
+                connectionString = Configuration.GetConnectionString("EventLogDatabase");
+                try
+                {
+                    optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+                    optionsBuilder.UseSqlServer(connectionString);
+                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                        context.Database.EnsureDeleted();
+                }
+                catch
+                {
+                    configFilePath = "appveyor-appsettings.json";
+                }
+            }
+
+            return configFilePath;
         }
 
         #region Events

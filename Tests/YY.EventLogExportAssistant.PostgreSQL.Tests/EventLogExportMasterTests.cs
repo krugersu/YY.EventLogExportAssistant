@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 using YY.EventLogReaderAssistant;
 
@@ -41,6 +43,12 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
+            if (!Directory.Exists(eventLogPath))
+            {
+                List<string> pathParts = eventLogPath.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
+                pathParts.Insert(0, Directory.GetCurrentDirectory());
+                eventLogPath = Path.Combine(pathParts.ToArray());
+            }
             watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
             watchPeriodSecondsMs = watchPeriodSeconds * 1000;
             useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
@@ -59,10 +67,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
         }
 
         [Fact]
-        public void ExportToSQLServerTest()
+        public void ExportToPostgreSQLTest()
         {
             if (!Directory.Exists(eventLogPath))
-                throw new Exception("Каталог данных журнала регистрации не обнаружен.");
+                throw new Exception("Directory with event log's data not found: " + eventLogPath);
 
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPath);
@@ -107,22 +115,24 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             // Перенести формирование конфигурационного файла в скрипты CI
 
             string configFilePath = "appsettings.json";
-            if (!File.Exists(configFilePath))            
-                configFilePath = "travisci-appsettings";
-            
-            IConfiguration Configuration = new ConfigurationBuilder()
-                .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
-                .Build();
-            connectionString = Configuration.GetConnectionString("EventLogDatabase");
-            try
+            if (!File.Exists(configFilePath))
             {
-                optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                optionsBuilder.UseNpgsql(connectionString);
-                using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
-                    context.Database.EnsureDeleted();
-            }
-            catch {
-                configFilePath = "appveyor-appsettings.json";
+                configFilePath = "travisci-appsettings";
+                IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
+                    .Build();
+                connectionString = Configuration.GetConnectionString("EventLogDatabase");
+                try
+                {
+                    optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+                    optionsBuilder.UseNpgsql(connectionString);
+                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                        context.Database.EnsureDeleted();
+                }
+                catch
+                {
+                    configFilePath = "appveyor-appsettings.json";
+                }
             }
 
             return configFilePath;
