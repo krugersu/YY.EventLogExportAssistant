@@ -59,6 +59,19 @@ namespace YY.EventLogExportAssistant
             bool newDataExist = false;
             using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
             {
+                // В случае, если каталог последней позиции не совпадает 
+                // с текущим каталогом данных, то предыдущую позицию не учитываем
+                if (lastPosition != null)
+                {
+                    FileInfo lastDataFileInfo = new FileInfo(lastPosition.CurrentFileReferences);
+                    FileInfo currentDataFileInfo = new FileInfo(reader.CurrentFile);
+
+                    if (lastDataFileInfo.Directory != null && currentDataFileInfo.Directory != null)
+                    {
+                        if (lastDataFileInfo.Directory.FullName != currentDataFileInfo.Directory.FullName)
+                            lastPosition = null;
+                    }
+                }
                 reader.SetCurrentPosition(lastPosition);
                 newDataExist = reader.Read();
             }

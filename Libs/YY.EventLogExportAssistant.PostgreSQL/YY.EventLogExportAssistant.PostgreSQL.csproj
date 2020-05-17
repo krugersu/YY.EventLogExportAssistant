@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.10</Version>
+    <Version>1.0.0.11</Version>
     <PackageId>YY.EventLogExportAssistant.PostgreSQL</PackageId>
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log export assistant for PostgreSQL</Product>
@@ -14,9 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>event, log, 1C, enterprise, export, postgre, postgresql</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.10</AssemblyVersion>
+    <AssemblyVersion>1.0.0.11</AssemblyVersion>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
-    <FileVersion>1.0.0.10</FileVersion>
+    <FileVersion>1.0.0.11</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
