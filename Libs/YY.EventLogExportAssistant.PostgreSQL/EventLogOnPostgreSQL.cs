@@ -70,22 +70,22 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            LogFiles lastLogFile;
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
-                lastLogFile = _context.LogFiles
-                    .Where(e => e.InformationSystemId == _system.Id && e.Id == _context.LogFiles.Max(m => m.Id))
+                var lastLogFile = _context.LogFiles
+                    .Where(e => e.InformationSystemId == _system.Id
+                        && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id))
                     .SingleOrDefault();
-            }
 
-            if (lastLogFile == null)
-                return null;
-            else
-                return new EventLogPosition(
-                    lastLogFile.LastEventNumber,
-                    lastLogFile.LastCurrentFileReferences,
-                    lastLogFile.LastCurrentFileData,
-                    lastLogFile.LastStreamPosition);
+                if (lastLogFile == null)
+                    return null;
+                else
+                    return new EventLogPosition(
+                        lastLogFile.LastEventNumber,
+                        lastLogFile.LastCurrentFileReferences,
+                        lastLogFile.LastCurrentFileData,
+                        lastLogFile.LastStreamPosition);
+            }
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
@@ -172,7 +172,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowApplication = cacheApplications
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowApplicationId = rowApplication.Id;
                     }
 
@@ -182,7 +182,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowComputer = cacheComputers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowComputerId = rowComputer.Id;
                     }
 
@@ -192,7 +192,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowEvent = cacheEvents
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowEventId = rowEvent.Id;
                     }
 
@@ -202,7 +202,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowMetadata = cacheMetadata
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid)
-                            .FirstOrDefault();
+                            .First();
                         rowMetadataId = rowMetadata.Id;
                     }
 
@@ -211,7 +211,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     if (itemRow.PrimaryPort != null)
                     {
                         rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowPrimaryPortId = rowPrimaryPort.Id;
                     }
 
@@ -221,16 +221,16 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowSecondaryPort = cacheSecondaryPorts
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowSecondaryPortId = rowSecondaryPort.Id;
                     }
 
                     Models.Severities rowSeverity = cacheSeverities
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString())
-                        .FirstOrDefault();
+                        .First();
                     Models.TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString())
-                        .FirstOrDefault();
+                        .First();
 
                     long? rowUserId = null;
                     Models.Users rowUser = null;
@@ -238,7 +238,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowUser = cacheUsers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowUserId = rowUser.Id;
                     }
 
@@ -248,7 +248,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     {
                         rowWorkServer = cacheWorkServers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowWorkServerId = rowWorkServer.Id;
                     }
 

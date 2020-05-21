@@ -156,13 +156,14 @@ namespace YY.EventLogExportAssistant
         private void SendDataCurrentPortion(EventLogReader reader)
         {
             bool cancel = false;
-            if (BeforeExportData != null)
+            BeforeExportDataHandler handlerBeforeExportData = BeforeExportData;
+            if (handlerBeforeExportData != null)
             {
                 BeforeExportDataEventArgs beforeExportArgs = new BeforeExportDataEventArgs()
                 {
                     Rows = _dataToSend
                 };
-                BeforeExportData.Invoke(beforeExportArgs);
+                handlerBeforeExportData.Invoke(beforeExportArgs);
                 cancel = beforeExportArgs.Cancel;
             }
 
@@ -172,9 +173,10 @@ namespace YY.EventLogExportAssistant
                 UpdateReferences(reader);
                 _target.Save(_dataToSend);
 
-                if (AfterExportData != null)
+                AfterExportDataHandler handlerAfterExportData = AfterExportData;
+                if (handlerAfterExportData != null)
                 {
-                    AfterExportData.Invoke(new AfterExportDataEventArgs()
+                    handlerAfterExportData.Invoke(new AfterExportDataEventArgs()
                     {
                         CurrentPosition = currentPosition
                     });
@@ -214,9 +216,10 @@ namespace YY.EventLogExportAssistant
         }
         private void EventLogReader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
         {
-            if (OnErrorExportData != null)
+            OnErrorExportDataHandler handlerOnErrorExportData = OnErrorExportData;
+            if (handlerOnErrorExportData != null)
             {
-                OnErrorExportData.Invoke(new OnErrorExportDataEventArgs()
+                handlerOnErrorExportData.Invoke(new OnErrorExportDataEventArgs()
                 {
                     Exception = args.Exception,
                     SourceData = args.SourceData,
