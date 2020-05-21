@@ -171,7 +171,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowApplication = cacheApplications
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowApplicationId = rowApplication.Id;
                     }
 
@@ -181,7 +181,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowComputer = cacheComputers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowComputerId = rowComputer.Id;
                     }
 
@@ -191,7 +191,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowEvent = cacheEvents
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowEventId = rowEvent.Id;
                     }
 
@@ -201,7 +201,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowMetadata = cacheMetadata
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid)
-                            .FirstOrDefault();
+                            .First();
                         rowMetadataId = rowMetadata.Id;
                     }
 
@@ -210,7 +210,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     if (itemRow.PrimaryPort != null)
                     {
                         rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowPrimaryPortId = rowPrimaryPort.Id;
                     }
 
@@ -220,16 +220,16 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowSecondaryPort = cacheSecondaryPorts
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowSecondaryPortId = rowSecondaryPort.Id;
                     }
 
                     Models.Severities rowSeverity = cacheSeverities
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString())
-                        .FirstOrDefault();
+                        .First();
                     Models.TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString())
-                        .FirstOrDefault();
+                        .First();
 
                     long? rowUserId = null;
                     Models.Users rowUser = null;
@@ -237,7 +237,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowUser = cacheUsers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowUserId = rowUser.Id;
                     }
 
@@ -247,7 +247,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     {
                         rowWorkServer = cacheWorkServers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name)
-                            .FirstOrDefault();
+                            .First();
                         rowWorkServerId = rowWorkServer.Id;
                     }
 
