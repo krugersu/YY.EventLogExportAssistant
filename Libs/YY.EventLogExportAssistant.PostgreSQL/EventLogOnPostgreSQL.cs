@@ -70,22 +70,22 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            LogFiles lastLogFile;
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
-                lastLogFile = _context.LogFiles
-                    .Where(e => e.InformationSystemId == _system.Id && e.Id == _context.LogFiles.Max(m => m.Id))
+                var lastLogFile = _context.LogFiles
+                    .Where(e => e.InformationSystemId == _system.Id
+                        && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id))
                     .SingleOrDefault();
-            }
 
-            if (lastLogFile == null)
-                return null;
-            else
-                return new EventLogPosition(
-                    lastLogFile.LastEventNumber,
-                    lastLogFile.LastCurrentFileReferences,
-                    lastLogFile.LastCurrentFileData,
-                    lastLogFile.LastStreamPosition);
+                if (lastLogFile == null)
+                    return null;
+                else
+                    return new EventLogPosition(
+                        lastLogFile.LastEventNumber,
+                        lastLogFile.LastCurrentFileReferences,
+                        lastLogFile.LastCurrentFileData,
+                        lastLogFile.LastStreamPosition);
+            }
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
