@@ -53,6 +53,8 @@ namespace YY.EventLogExportAssistant
         {
             if (_target == null)
                 return false;
+            if (_eventLogPath == null)
+                return false;
 
             EventLogPosition lastPosition = _target.GetLastPosition();
 
@@ -82,6 +84,8 @@ namespace YY.EventLogExportAssistant
         {
             if (_target == null)
                 return;
+            if (_eventLogPath == null)
+                return;
 
             EventLogPosition lastPosition = _target.GetLastPosition();
             using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
@@ -91,7 +95,15 @@ namespace YY.EventLogExportAssistant
                 reader.OnErrorEvent += EventLogReader_OnErrorEvent;
                 reader.SetCurrentPosition(lastPosition);
 
-                while (reader.Read());
+                long totalReadEvents = 0;
+                while (reader.Read())
+                {
+                    if(reader.CurrentRow != null)
+                        totalReadEvents += 1;
+
+                    if (totalReadEvents >= _portionSize)
+                        break;
+                }
 
                 if (_dataToSend.Count > 0)                
                     SendDataCurrentPortion(reader);                
