@@ -25,10 +25,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appveyor-LGF-appsettings.json">
+    <None Update="appveyor-appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\LGDFormat\1Cv8.lgd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestData\LGFFormat\1Cv8.lgf">

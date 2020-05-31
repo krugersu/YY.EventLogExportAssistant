@@ -1,0 +1,32 @@
+﻿{
+  "LGF": {
+    "ConnectionStrings": {
+      "EventLogDatabase": "Server=(local)\\SQL2017;Database=EventLogExport_LGF_Test;User ID=sa;Password=Password12!"
+    },
+    "InformationSystem": {
+      "Name": "EventLogExportTest",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGFFormat",
+      "UseWatchMode": false,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
+  },
+  "LGD": {
+    "ConnectionStrings": {
+      "EventLogDatabase": "Server=(local)\\SQL2017;Database=EventLogExport_LGD_Test;User ID=sa;Password=Password12!"
+    },
+    "InformationSystem": {
+      "Name": "EventLogExportTest",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGDFormat",
+      "UseWatchMode": false,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
+  } 
+}

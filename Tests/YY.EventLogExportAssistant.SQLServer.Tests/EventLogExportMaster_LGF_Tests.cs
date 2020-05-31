@@ -9,7 +9,7 @@ using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.SQLServer.Tests
 {
-    public class EventLogExportMasterTests
+    public class EventLogExportMaster_LGF_Tests
     {
         #region Private Member Variables
 
@@ -23,7 +23,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         #endregion
 
-        public EventLogExportMasterTests()
+        public EventLogExportMaster_LGF_Tests()
         {
             string configFilePath = GetConfigFile();
 
@@ -34,7 +34,9 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                 .Build();
 
-            IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
+            IConfigurationSection LGFSection = Configuration.GetSection("LGF");
+
+            IConfigurationSection eventLogSection = LGFSection.GetSection("EventLog");
             eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
             if (!Directory.Exists(eventLogPath))
             {
@@ -46,20 +48,21 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             eventLogSection.GetValue("UseWatchMode", false);
             portion = eventLogSection.GetValue("Portion", 1000);
 
-            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
+            IConfigurationSection inforamtionSystemSection = LGFSection.GetSection("InformationSystem");
             inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
             inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
 
-            connectionString = Configuration.GetConnectionString("EventLogDatabase");
+            IConfigurationSection connectionStringsSection = LGFSection.GetSection("ConnectionStrings");
+            connectionString = connectionStringsSection.GetValue("EventLogDatabase", string.Empty);
 
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseSqlServer(connectionString);
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))            
-                context.Database.EnsureDeleted();            
+                context.Database.EnsureDeleted();
         }
 
         [Fact]
-        public void ExportToSQLServerTest()
+        public void ExportToSQLServer_LGF_Test()
         {
             if (!Directory.Exists(eventLogPath))
                 throw new Exception(" аталог данных журнала регистрации не обнаружен.");
@@ -108,7 +111,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
             {
-                configFilePath = "travisci-appsettings";
+                configFilePath = "travisci-appsettings.json";
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
@@ -122,7 +125,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 }
                 catch
                 {
-                    configFilePath = "appveyor-LGF-appsettings.json";
+                    configFilePath = "appveyor-appsettings.json";
                 }
             }
 
