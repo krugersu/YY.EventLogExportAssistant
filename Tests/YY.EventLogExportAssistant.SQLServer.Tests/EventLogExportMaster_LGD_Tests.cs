@@ -9,6 +9,7 @@ using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.SQLServer.Tests
 {
+    [CollectionDefinition("YY.EventLogExportAssistant.SQLServer.LGD", DisableParallelization = true)]
     public class EventLogExportMaster_LGD_Tests
     {
         #region Private Member Variables
