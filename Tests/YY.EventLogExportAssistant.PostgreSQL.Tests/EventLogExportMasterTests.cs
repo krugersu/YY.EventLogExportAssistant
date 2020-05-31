@@ -11,7 +11,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 {
     public class EventLogExportMasterTests
     {
-        #region Private Static Member Variables
+        #region Private Member Variables
 
         string eventLogPath;
         int portion;
@@ -108,7 +108,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
             {
-                configFilePath = "travisci-appsettings";
+                configFilePath = "travisci-LGF-appsettings";
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
@@ -122,7 +122,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 }
                 catch
                 {
-                    configFilePath = "appveyor-appsettings.json";
+                    configFilePath = "appveyor-LGF-appsettings.json";
                 }
             }
 

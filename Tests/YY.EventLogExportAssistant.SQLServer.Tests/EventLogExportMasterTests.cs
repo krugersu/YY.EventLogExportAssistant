@@ -11,7 +11,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 {
     public class EventLogExportMasterTests
     {
-        #region Private Static Member Variables
+        #region Private Member Variables
 
         string eventLogPath;
         int portion;
@@ -100,7 +100,6 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
         }
-
         private string GetConfigFile()
         {
             // TODO
@@ -123,7 +122,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 }
                 catch
                 {
-                    configFilePath = "appveyor-appsettings.json";
+                    configFilePath = "appveyor-LGF-appsettings.json";
                 }
             }
 
