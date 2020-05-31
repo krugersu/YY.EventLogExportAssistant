@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
-using YY.EventLogExportAssistant;
 using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.SQLServer.Tests
@@ -14,15 +13,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
     {
         #region Private Static Member Variables
 
-        private static long _totalRows = 0;
-        private static long _lastPortionRows = 0;
-        private static DateTime _beginPortionExport;
-        private static DateTime _endPortionExport;
-
         string eventLogPath;
-        int watchPeriodSeconds;
-        int watchPeriodSecondsMs;
-        bool useWatchMode;
         int portion;
         string inforamtionSystemName;
         string inforamtionSystemDescription;
@@ -51,9 +42,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 pathParts.Insert(0, Directory.GetCurrentDirectory());
                 eventLogPath = Path.Combine(pathParts.ToArray());
             }
-            watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
-            watchPeriodSecondsMs = watchPeriodSeconds * 1000;
-            useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
+            eventLogSection.GetValue("WatchPeriod", 60);
+            eventLogSection.GetValue("UseWatchMode", false);
             portion = eventLogSection.GetValue("Portion", 1000);
 
             IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
@@ -92,7 +82,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             while (exporter.NewDataAvailiable())
                 exporter.SendData();
 
-            long rowsInDB = 0;
+            long rowsInDB;
             using(EventLogContext context = new EventLogContext(optionsBuilder.Options))
             {
                 var getCount = context.RowsData.LongCountAsync();
@@ -100,7 +90,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 rowsInDB = getCount.Result;
             }
 
-            long rowsInSourceFiles = 0;
+            long rowsInSourceFiles;
             using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
             {
                 rowsInSourceFiles = reader.Count();
@@ -144,14 +134,9 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
-            _beginPortionExport = DateTime.Now;
-            _lastPortionRows = e.Rows.Count;
-            _totalRows += e.Rows.Count;
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
         {
-            _endPortionExport = DateTime.Now;
-            var duration = _endPortionExport - _beginPortionExport;
         }
         private static void OnErrorExportData(OnErrorExportDataEventArgs e)
         {

@@ -58,7 +58,7 @@ namespace YY.EventLogExportAssistant
 
             EventLogPosition lastPosition = _target.GetLastPosition();
 
-            bool newDataExist = false;
+            bool newDataExist;
             using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
             {
                 // В случае, если каталог последней позиции не совпадает 

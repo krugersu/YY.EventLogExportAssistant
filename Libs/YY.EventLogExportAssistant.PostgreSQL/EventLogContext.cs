@@ -26,7 +26,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         #region Constructor
 
-        public EventLogContext() : base()
+        public EventLogContext()
         {
             Database.EnsureCreated();
             AdditionalInitializationActions();

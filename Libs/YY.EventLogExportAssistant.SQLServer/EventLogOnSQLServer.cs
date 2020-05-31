@@ -21,16 +21,16 @@ namespace YY.EventLogExportAssistant.SQLServer
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
 
-        private IReadOnlyList<Models.Applications> cacheApplications;
-        private IReadOnlyList<Models.Computers> cacheComputers;
-        private IReadOnlyList<Models.Events> cacheEvents;
-        private IReadOnlyList<Models.Metadata> cacheMetadata;
-        private IReadOnlyList<Models.PrimaryPorts> cachePrimaryPorts;
-        private IReadOnlyList<Models.SecondaryPorts> cacheSecondaryPorts;
-        private IReadOnlyList<Models.Severities> cacheSeverities;
-        private IReadOnlyList<Models.TransactionStatuses> cacheTransactionStatuses;
-        private IReadOnlyList<Models.Users> cacheUsers;
-        private IReadOnlyList<Models.WorkServers> cacheWorkServers;
+        private IReadOnlyList<Applications> cacheApplications;
+        private IReadOnlyList<Computers> cacheComputers;
+        private IReadOnlyList<Events> cacheEvents;
+        private IReadOnlyList<Metadata> cacheMetadata;
+        private IReadOnlyList<PrimaryPorts> cachePrimaryPorts;
+        private IReadOnlyList<SecondaryPorts> cacheSecondaryPorts;
+        private IReadOnlyList<Severities> cacheSeverities;
+        private IReadOnlyList<TransactionStatuses> cacheTransactionStatuses;
+        private IReadOnlyList<Users> cacheUsers;
+        private IReadOnlyList<WorkServers> cacheWorkServers;
 
         #endregion
 
@@ -55,7 +55,6 @@ namespace YY.EventLogExportAssistant.SQLServer
                     .Build();
                 string connectionString = Configuration.GetConnectionString("EventLogDatabase");
 
-                DbContextOptions<EventLogContext> dbOptions = new DbContextOptions<EventLogContext>();
                 var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
                 optionsBuilder.UseSqlServer(connectionString);
                 _databaseOptions = optionsBuilder.Options;
@@ -116,7 +115,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     foundLogFile.LastCurrentFileReferences = position.CurrentFileReferences;
                     foundLogFile.LastEventNumber = position.EventNumber;
                     foundLogFile.LastStreamPosition = position.StreamPosition;
-                    _context.Entry<LogFiles>(foundLogFile).State = EntityState.Modified;
+                    _context.Entry(foundLogFile).State = EntityState.Modified;
                 }
 
                 _context.SaveChanges();
@@ -146,8 +145,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                         DateTimeOffset _maxPeriodRowDataTimeOffset = _context.RowsData
                             .Where(p => p.InformationSystemId == _system.Id)
                             .Max(m => m.Period);
-                        if (_maxPeriodRowDataTimeOffset != null)
-                            _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
+                        _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
                     }
                 }
 
@@ -166,7 +164,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowApplicationId = null;
-                    Models.Applications rowApplication = null;
+                    Applications rowApplication;
                     if (itemRow.Application != null)
                     {
                         rowApplication = cacheApplications
@@ -176,7 +174,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowComputerId = null;
-                    Models.Computers rowComputer = null;
+                    Computers rowComputer;
                     if (itemRow.Computer != null)
                     {
                         rowComputer = cacheComputers
@@ -186,7 +184,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowEventId = null;
-                    Models.Events rowEvent = null;
+                    Events rowEvent;
                     if (itemRow.Event != null)
                     {
                         rowEvent = cacheEvents
@@ -196,7 +194,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowMetadataId = null;
-                    Models.Metadata rowMetadata = null;
+                    Metadata rowMetadata;
                     if (itemRow.Metadata != null)
                     {
                         rowMetadata = cacheMetadata
@@ -206,7 +204,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowPrimaryPortId = null;
-                    Models.PrimaryPorts rowPrimaryPort = null;
+                    PrimaryPorts rowPrimaryPort;
                     if (itemRow.PrimaryPort != null)
                     {
                         rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name)
@@ -215,7 +213,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowSecondaryPortId = null;
-                    Models.SecondaryPorts rowSecondaryPort = null;
+                    SecondaryPorts rowSecondaryPort;
                     if (itemRow.SecondaryPort != null)
                     {
                         rowSecondaryPort = cacheSecondaryPorts
@@ -224,15 +222,15 @@ namespace YY.EventLogExportAssistant.SQLServer
                         rowSecondaryPortId = rowSecondaryPort.Id;
                     }
 
-                    Models.Severities rowSeverity = cacheSeverities
+                    Severities rowSeverity = cacheSeverities
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString())
                         .First();
-                    Models.TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
+                    TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
                         .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString())
                         .First();
 
                     long? rowUserId = null;
-                    Models.Users rowUser = null;
+                    Users rowUser;
                     if (itemRow.User != null)
                     {
                         rowUser = cacheUsers
@@ -242,7 +240,7 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowWorkServerId = null;
-                    Models.WorkServers rowWorkServer = null;
+                    WorkServers rowWorkServer;
                     if (itemRow.WorkServer != null)
                     {
                         rowWorkServer = cacheWorkServers
@@ -318,12 +316,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemApplication in data.Applications)
                     {
-                        Models.Applications foundApplication = _context.Applications
+                        Applications foundApplication = _context.Applications
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemApplication.Name)
                             .FirstOrDefault();
                         if (foundApplication == null)
                         {
-                            _context.Applications.Add(new Models.Applications()
+                            _context.Applications.Add(new Applications()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemApplication.Name
@@ -335,12 +333,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemComputer in data.Computers)
                     {
-                        Models.Computers foundComputer = _context.Computers
+                        Computers foundComputer = _context.Computers
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemComputer.Name)
                             .FirstOrDefault();
                         if (foundComputer == null)
                         {
-                            _context.Computers.Add(new Models.Computers()
+                            _context.Computers.Add(new Computers()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemComputer.Name
@@ -352,12 +350,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemEvent in data.Events)
                     {
-                        Models.Events foundEvents = _context.Events
+                        Events foundEvents = _context.Events
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemEvent.Name)
                             .FirstOrDefault();
                         if (foundEvents == null)
                         {
-                            _context.Events.Add(new Models.Events()
+                            _context.Events.Add(new Events()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemEvent.Name
@@ -369,14 +367,14 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemMetadata in data.Metadata)
                     {
-                        Models.Metadata foundMetadata = _context.Metadata
+                        Metadata foundMetadata = _context.Metadata
                             .Where(e => e.InformationSystemId == _system.Id
                                 && e.Name == itemMetadata.Name
                                 && e.Uuid == itemMetadata.Uuid)
                             .FirstOrDefault();
                         if (foundMetadata == null)
                         {
-                            _context.Metadata.Add(new Models.Metadata()
+                            _context.Metadata.Add(new Metadata()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemMetadata.Name,
@@ -389,12 +387,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemPrimaryPort in data.PrimaryPorts)
                     {
-                        Models.PrimaryPorts foundPrimaryPort = _context.PrimaryPorts
+                        PrimaryPorts foundPrimaryPort = _context.PrimaryPorts
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemPrimaryPort.Name)
                             .FirstOrDefault();
                         if (foundPrimaryPort == null)
                         {
-                            _context.PrimaryPorts.Add(new Models.PrimaryPorts()
+                            _context.PrimaryPorts.Add(new PrimaryPorts()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemPrimaryPort.Name
@@ -406,12 +404,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemSecondaryPort in data.SecondaryPorts)
                     {
-                        Models.SecondaryPorts foundSecondaryPort = _context.SecondaryPorts
+                        SecondaryPorts foundSecondaryPort = _context.SecondaryPorts
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemSecondaryPort.Name)
                             .FirstOrDefault();
                         if (foundSecondaryPort == null)
                         {
-                            _context.SecondaryPorts.Add(new Models.SecondaryPorts()
+                            _context.SecondaryPorts.Add(new SecondaryPorts()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemSecondaryPort.Name
@@ -423,12 +421,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemSeverity in data.Severities)
                     {
-                        Models.Severities foundSeverity = _context.Severities
+                        Severities foundSeverity = _context.Severities
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemSeverity.ToString())
                             .FirstOrDefault();
                         if (foundSeverity == null)
                         {
-                            _context.Severities.Add(new Models.Severities()
+                            _context.Severities.Add(new Severities()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemSeverity.ToString()
@@ -440,12 +438,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemTransactionStatus in data.TransactionStatuses)
                     {
-                        Models.TransactionStatuses foundTransactionStatus = _context.TransactionStatuses
+                        TransactionStatuses foundTransactionStatus = _context.TransactionStatuses
                             .Where(e => e.InformationSystemId == _system.Id && e.Name == itemTransactionStatus.ToString())
                             .FirstOrDefault();
                         if (foundTransactionStatus == null)
                         {
-                            _context.TransactionStatuses.Add(new Models.TransactionStatuses()
+                            _context.TransactionStatuses.Add(new TransactionStatuses()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemTransactionStatus.ToString()
@@ -457,14 +455,14 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemUser in data.Users)
                     {
-                        Models.Users foundUsers = _context.Users
+                        Users foundUsers = _context.Users
                             .Where(e => e.InformationSystemId == _system.Id
                                     && e.Name == itemUser.Name
                                     && e.Uuid == itemUser.Uuid)
                             .FirstOrDefault();
                         if (foundUsers == null)
                         {
-                            _context.Users.Add(new Models.Users()
+                            _context.Users.Add(new Users()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemUser.Name,
@@ -477,13 +475,13 @@ namespace YY.EventLogExportAssistant.SQLServer
                 {
                     foreach (var itemWorkServer in data.WorkServers)
                     {
-                        Models.WorkServers foundWorkServer = _context.WorkServers
+                        WorkServers foundWorkServer = _context.WorkServers
                             .Where(e => e.InformationSystemId == _system.Id
                                     && e.Name == itemWorkServer.Name)
                             .FirstOrDefault();
                         if (foundWorkServer == null)
                         {
-                            _context.WorkServers.Add(new Models.WorkServers()
+                            _context.WorkServers.Add(new WorkServers()
                             {
                                 InformationSystemId = _system.Id,
                                 Name = itemWorkServer.Name
