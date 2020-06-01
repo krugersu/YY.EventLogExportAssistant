@@ -113,6 +113,12 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             ExportToSQLServer_LGF_Test();
 
             ExportToSQLServer_LGD_Test();
+
+            long informationSystemsCount;
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                informationSystemsCount = context.InformationSystems.Count();
+
+            Assert.Equal(2, informationSystemsCount);
         }
 
         #endregion
