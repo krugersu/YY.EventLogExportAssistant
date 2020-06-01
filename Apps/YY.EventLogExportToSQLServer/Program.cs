@@ -11,8 +11,8 @@ namespace YY.EventLogExportToSQLServer
     {
         #region Private Static Member Variables
 
-        private static long _totalRows = 0;
-        private static long _lastPortionRows = 0;
+        private static long _totalRows;
+        private static long _lastPortionRows;
         private static DateTime _beginPortionExport;
         private static DateTime _endPortionExport;
 
@@ -127,7 +127,7 @@ namespace YY.EventLogExportToSQLServer
                 "Информация об ошибке:\n" +
                 "\n" +
                 "{2}",
-                e.Critical, e.SourceData, e.Exception.ToString());
+                e.Critical, e.SourceData, e.Exception);
         }
 
         #endregion

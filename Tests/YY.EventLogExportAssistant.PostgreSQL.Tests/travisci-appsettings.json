@@ -2,14 +2,28 @@
   "ConnectionStrings": {
     "EventLogDatabase": "Host=localhost;Port=5432;Database=EventLogExportTest;Username=postgres;Password="
   },
-  "InformationSystem": {
-    "Name": "EventLogExportTest",
-    "Description": "Тесты проверки экспорта данных журнала регистрации."
+  "LGF": {
+    "InformationSystem": {
+      "Name": "EventLogExport_LGF_Test",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGFFormat",
+      "UseWatchMode": false,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
   },
-  "EventLog": {
-    "SourcePath": "TestData\\LGFFormat",
-    "UseWatchMode": false,
-    "WatchPeriod": 5,
-    "Portion": 10000
+  "LGD": {
+    "InformationSystem": {
+      "Name": "EventLogExport_LGD_Test",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGDFormat",
+      "UseWatchMode": false,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
   }
 }

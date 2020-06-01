@@ -11,29 +11,37 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 {
     public class EventLogExportMasterTests
     {
-        #region Private Static Member Variables
+        #region Private Member Variables
 
-        private static long _totalRows = 0;
-        private static long _lastPortionRows = 0;
-        private static DateTime _beginPortionExport;
-        private static DateTime _endPortionExport;
-
-        string eventLogPath;
-        int watchPeriodSeconds;
-        int watchPeriodSecondsMs;
-        bool useWatchMode;
-        int portion;
-        string inforamtionSystemName;
-        string inforamtionSystemDescription;
         string connectionString;
-
         DbContextOptionsBuilder<EventLogContext> optionsBuilder;
 
+        #region LGF Settings
+
+        string eventLogPathLGF;
+        int portionLGF;
+        string inforamtionSystemNameLGF;
+        string inforamtionSystemDescriptionLGF;
+
         #endregion
+
+        #region LGD Settings
+
+        string eventLogPathLGD;
+        int portionLGD;
+        string inforamtionSystemNameLGD;
+        string inforamtionSystemDescriptionLGD;
+
+        #endregion
+
+        #endregion
+
+        #region Constructors
 
         public EventLogExportMasterTests()
         {
             string configFilePath = GetConfigFile();
+
             if (!File.Exists(configFilePath))
                 throw new Exception("Файл конфигурации не обнаружен.");
 
@@ -41,45 +49,98 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                 .Build();
 
-            IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
-            eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
-            if (!Directory.Exists(eventLogPath))
-            {
-                List<string> pathParts = eventLogPath.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
-                pathParts.Insert(0, Directory.GetCurrentDirectory());
-                eventLogPath = Path.Combine(pathParts.ToArray());
-            }
-            watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
-            watchPeriodSecondsMs = watchPeriodSeconds * 1000;
-            useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
-            portion = eventLogSection.GetValue("Portion", 1000);
-
-            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
-            inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
-            inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
+            #region Database Settings
 
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
-
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseNpgsql(connectionString);
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                 context.Database.EnsureDeleted();
+
+            #endregion
+
+            IConfigurationSection LGFSection = Configuration.GetSection("LGF");
+
+            #region LGF Format
+
+            IConfigurationSection eventLogSectionLGF = LGFSection.GetSection("EventLog");
+            eventLogPathLGF = eventLogSectionLGF.GetValue("SourcePath", string.Empty);
+            if (!Directory.Exists(eventLogPathLGF))
+            {
+                List<string> pathParts = eventLogPathLGF.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
+                pathParts.Insert(0, Directory.GetCurrentDirectory());
+                eventLogPathLGF = Path.Combine(pathParts.ToArray());
+            }
+
+            eventLogSectionLGF.GetValue("WatchPeriod", 60);
+            eventLogSectionLGF.GetValue("UseWatchMode", false);
+            portionLGF = eventLogSectionLGF.GetValue("Portion", 1000);
+
+            IConfigurationSection inforamtionSystemSectionLGF = LGFSection.GetSection("InformationSystem");
+            inforamtionSystemNameLGF = inforamtionSystemSectionLGF.GetValue("Name", string.Empty);
+            inforamtionSystemDescriptionLGF = inforamtionSystemSectionLGF.GetValue("Description", string.Empty);
+
+            #endregion
+
+            IConfigurationSection LGDSection = Configuration.GetSection("LGD");
+
+            #region LGF Format
+
+            IConfigurationSection eventLogSectionLGD = LGDSection.GetSection("EventLog");
+            eventLogPathLGD = eventLogSectionLGD.GetValue("SourcePath", string.Empty);
+            if (!Directory.Exists(eventLogPathLGD))
+            {
+                List<string> pathParts = eventLogPathLGD.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
+                pathParts.Insert(0, Directory.GetCurrentDirectory());
+                eventLogPathLGD = Path.Combine(pathParts.ToArray());
+            }
+
+            eventLogSectionLGD.GetValue("WatchPeriod", 60);
+            eventLogSectionLGD.GetValue("UseWatchMode", false);
+            portionLGD = eventLogSectionLGD.GetValue("Portion", 1000);
+
+            IConfigurationSection inforamtionSystemSectionLGD = LGDSection.GetSection("InformationSystem");
+            inforamtionSystemNameLGD = inforamtionSystemSectionLGD.GetValue("Name", string.Empty);
+            inforamtionSystemDescriptionLGD = inforamtionSystemSectionLGD.GetValue("Description", string.Empty);
+
+            #endregion
         }
 
+        #endregion
+
+        #region Public Methods
+        
         [Fact]
         public void ExportToPostgreSQLTest()
         {
-            if (!Directory.Exists(eventLogPath))
-                throw new Exception("Directory with event log's data not found: " + eventLogPath);
+            ExportToPostgreSQL_LGF_Test();
+
+            ExportToPostgreSQL_LGD_Test();
+
+            long informationSystemsCount;
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                informationSystemsCount = context.InformationSystems.Count();
+
+            Assert.Equal(2, informationSystemsCount);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ExportToPostgreSQL_LGF_Test()
+        {
+            if (!Directory.Exists(eventLogPathLGF))
+                throw new Exception("Каталог данных журнала регистрации не обнаружен.");
 
             EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogPath);
+            exporter.SetEventLogPath(eventLogPathLGF);
 
-            EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(optionsBuilder.Options, portion);
+            EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(optionsBuilder.Options, portionLGF);
             target.SetInformationSystem(new InformationSystemsBase()
             {
-                Name = inforamtionSystemName,
-                Description = inforamtionSystemDescription
+                Name = inforamtionSystemNameLGF,
+                Description = inforamtionSystemDescriptionLGF
             });
             exporter.SetTarget(target);
 
@@ -90,16 +151,20 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             while (exporter.NewDataAvailiable())
                 exporter.SendData();
 
-            long rowsInDB = 0;
+            long rowsInDB;
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
             {
-                var getCount = context.RowsData.LongCountAsync();
+                var informationSystem = context.InformationSystems
+                    .First(i => i.Name == inforamtionSystemNameLGF);
+                var getCount = context.RowsData
+                    .Where(r => r.InformationSystemId == informationSystem.Id)
+                    .LongCountAsync();
                 getCount.Wait();
                 rowsInDB = getCount.Result;
             }
 
-            long rowsInSourceFiles = 0;
-            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            long rowsInSourceFiles;
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPathLGF))
             {
                 rowsInSourceFiles = reader.Count();
             }
@@ -108,7 +173,51 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
         }
+        private void ExportToPostgreSQL_LGD_Test()
+        {
+            if (!Directory.Exists(eventLogPathLGD))
+                throw new Exception("Каталог данных журнала регистрации не обнаружен.");
 
+            EventLogExportMaster exporter = new EventLogExportMaster();
+            exporter.SetEventLogPath(eventLogPathLGD);
+
+            EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(optionsBuilder.Options, portionLGD);
+            target.SetInformationSystem(new InformationSystemsBase()
+            {
+                Name = inforamtionSystemNameLGD,
+                Description = inforamtionSystemDescriptionLGD
+            });
+            exporter.SetTarget(target);
+
+            exporter.BeforeExportData += BeforeExportData;
+            exporter.AfterExportData += AfterExportData;
+            exporter.OnErrorExportData += OnErrorExportData;
+
+            while (exporter.NewDataAvailiable())
+                exporter.SendData();
+
+            long rowsInDB;
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            {
+                var informationSystem = context.InformationSystems
+                    .First(i => i.Name == inforamtionSystemNameLGD);
+                var getCount = context.RowsData
+                    .Where(r => r.InformationSystemId == informationSystem.Id)
+                    .LongCountAsync();
+                getCount.Wait();
+                rowsInDB = getCount.Result;
+            }
+
+            long rowsInSourceFiles;
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPathLGD))
+            {
+                rowsInSourceFiles = reader.Count();
+            }
+
+            Assert.NotEqual(0, rowsInSourceFiles);
+            Assert.NotEqual(0, rowsInDB);
+            Assert.Equal(rowsInSourceFiles, rowsInDB);
+        }
         private string GetConfigFile()
         {
             // TODO
@@ -138,18 +247,15 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             return configFilePath;
         }
 
+        #endregion
+
         #region Events
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
-            _beginPortionExport = DateTime.Now;
-            _lastPortionRows = e.Rows.Count;
-            _totalRows += e.Rows.Count;
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
         {
-            _endPortionExport = DateTime.Now;
-            var duration = _endPortionExport - _beginPortionExport;
         }
         private static void OnErrorExportData(OnErrorExportDataEventArgs e)
         {

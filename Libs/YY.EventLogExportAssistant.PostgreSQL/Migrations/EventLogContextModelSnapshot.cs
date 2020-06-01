@@ -2,14 +2,12 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using YY.EventLogExportAssistant.PostgreSQL;
 
 namespace YY.EventLogExportAssistant.PostgreSQL.Migrations
 {
     [DbContext(typeof(EventLogContext))]
-    partial class EventLogContextModelSnapshot : ModelSnapshot
+    class EventLogContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
