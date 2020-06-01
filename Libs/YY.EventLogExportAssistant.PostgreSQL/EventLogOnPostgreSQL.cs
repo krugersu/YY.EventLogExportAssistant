@@ -158,7 +158,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     if(_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
                     {
                         var checkExist = _context.RowsData
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowID);
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowId);
                         if (checkExist != null)
                             continue;
                     }
@@ -240,9 +240,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                         ConnectId = itemRow.ConnectId,
                         Data = itemRow.Data,
                         DataPresentation = itemRow.DataPresentation,
-                        DataUUID = itemRow.DataUUID,
+                        DataUUID = itemRow.DataUuid,
                         EventId = rowEventId,
-                        Id = itemRow.RowID,
+                        Id = itemRow.RowId,
                         InformationSystemId = _system.Id,
                         MetadataId = rowMetadataId,
                         Period = itemRow.Period,

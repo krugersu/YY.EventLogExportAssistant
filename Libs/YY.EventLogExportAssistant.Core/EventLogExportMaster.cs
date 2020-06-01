@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using YY.EventLogReaderAssistant;
+using YY.EventLogReaderAssistant.EventArguments;
 using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
