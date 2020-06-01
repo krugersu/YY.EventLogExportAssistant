@@ -72,9 +72,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
                 var lastLogFile = _context.LogFiles
-                    .Where(e => e.InformationSystemId == _system.Id
-                        && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id))
-                    .SingleOrDefault();
+                    .SingleOrDefault(e => e.InformationSystemId == _system.Id
+                                          && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id));
 
                 if (lastLogFile == null)
                     return null;
@@ -91,10 +90,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
                 LogFiles foundLogFile = _context.LogFiles
-                    .Where(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc)
-                    .FirstOrDefault();
-
-
+                    .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
+                
                 if (foundLogFile == null)
                 {
                     _context.LogFiles.Add(new LogFiles()
@@ -158,95 +155,77 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     if(_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
                     {
                         var checkExist = _context.RowsData
-                            .Where(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowID)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowID);
                         if (checkExist != null)
                             continue;
                     }
 
                     long? rowApplicationId = null;
-                    Applications rowApplication;
                     if (itemRow.Application != null)
                     {
-                        rowApplication = cacheApplications
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name)
-                            .First();
+                        var rowApplication = cacheApplications
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name);
                         rowApplicationId = rowApplication.Id;
                     }
 
                     long? rowComputerId = null;
-                    Computers rowComputer;
                     if (itemRow.Computer != null)
                     {
-                        rowComputer = cacheComputers
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name)
-                            .First();
+                        var rowComputer = cacheComputers
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name);
                         rowComputerId = rowComputer.Id;
                     }
 
                     long? rowEventId = null;
-                    Events rowEvent;
                     if (itemRow.Event != null)
                     {
-                        rowEvent = cacheEvents
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name)
-                            .First();
+                        var rowEvent = cacheEvents
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name);
                         rowEventId = rowEvent.Id;
                     }
 
                     long? rowMetadataId = null;
-                    Metadata rowMetadata;
                     if (itemRow.Metadata != null)
                     {
-                        rowMetadata = cacheMetadata
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid)
-                            .First();
+                        var rowMetadata = cacheMetadata
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid);
                         rowMetadataId = rowMetadata.Id;
                     }
 
                     long? rowPrimaryPortId = null;
-                    PrimaryPorts rowPrimaryPort;
                     if (itemRow.PrimaryPort != null)
                     {
-                        rowPrimaryPort = cachePrimaryPorts.Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name)
-                            .First();
+                        var rowPrimaryPort = cachePrimaryPorts
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name);
                         rowPrimaryPortId = rowPrimaryPort.Id;
                     }
 
                     long? rowSecondaryPortId = null;
-                    SecondaryPorts rowSecondaryPort;
                     if (itemRow.SecondaryPort != null)
                     {
-                        rowSecondaryPort = cacheSecondaryPorts
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name)
-                            .First();
+                        var rowSecondaryPort = cacheSecondaryPorts
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name);
                         rowSecondaryPortId = rowSecondaryPort.Id;
                     }
 
-                    Severities rowSeverity = cacheSeverities
-                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString())
-                        .First();
-                    TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
-                        .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString())
-                        .First();
+                    var rowSeverity = cacheSeverities
+                        .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString());
+                    var rowTransactionStatus = cacheTransactionStatuses
+                        .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString());
 
                     long? rowUserId = null;
-                    Users rowUser;
                     if (itemRow.User != null)
                     {
-                        rowUser = cacheUsers
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name)
-                            .First();
+                        var rowUser = cacheUsers
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name);
                         rowUserId = rowUser.Id;
                     }
 
                     long? rowWorkServerId = null;
-                    WorkServers rowWorkServer;
                     if (itemRow.WorkServer != null)
                     {
-                        rowWorkServer = cacheWorkServers
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name)
-                            .First();
+                        var rowWorkServer = cacheWorkServers
+                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name);
                         rowWorkServerId = rowWorkServer.Id;
                     }
 
@@ -286,7 +265,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         {
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
-                InformationSystems existSystem = _context.InformationSystems.Where(e => e.Name == system.Name).FirstOrDefault();
+                InformationSystems existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
                 if (existSystem == null)
                 {
                     _context.InformationSystems.Add(new InformationSystems()
@@ -319,8 +298,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemApplication in data.Applications)
                     {
                         Applications foundApplication = _context.Applications
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemApplication.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemApplication.Name);
                         if (foundApplication == null)
                         {
                             _context.Applications.Add(new Applications()
@@ -336,8 +314,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemComputer in data.Computers)
                     {
                         Computers foundComputer = _context.Computers
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemComputer.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemComputer.Name);
                         if (foundComputer == null)
                         {
                             _context.Computers.Add(new Computers()
@@ -353,8 +330,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemEvent in data.Events)
                     {
                         Events foundEvents = _context.Events
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemEvent.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemEvent.Name);
                         if (foundEvents == null)
                         {
                             _context.Events.Add(new Events()
@@ -370,10 +346,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemMetadata in data.Metadata)
                     {
                         Metadata foundMetadata = _context.Metadata
-                            .Where(e => e.InformationSystemId == _system.Id
-                                && e.Name == itemMetadata.Name
-                                && e.Uuid == itemMetadata.Uuid)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
+                                                 && e.Name == itemMetadata.Name
+                                                 && e.Uuid == itemMetadata.Uuid);
                         if (foundMetadata == null)
                         {
                             _context.Metadata.Add(new Metadata()
@@ -390,8 +365,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemPrimaryPort in data.PrimaryPorts)
                     {
                         PrimaryPorts foundPrimaryPort = _context.PrimaryPorts
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemPrimaryPort.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemPrimaryPort.Name);
                         if (foundPrimaryPort == null)
                         {
                             _context.PrimaryPorts.Add(new PrimaryPorts()
@@ -407,8 +381,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemSecondaryPort in data.SecondaryPorts)
                     {
                         SecondaryPorts foundSecondaryPort = _context.SecondaryPorts
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemSecondaryPort.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemSecondaryPort.Name);
                         if (foundSecondaryPort == null)
                         {
                             _context.SecondaryPorts.Add(new SecondaryPorts()
@@ -424,8 +397,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemSeverity in data.Severities)
                     {
                         Severities foundSeverity = _context.Severities
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemSeverity.ToString())
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemSeverity.ToString());
                         if (foundSeverity == null)
                         {
                             _context.Severities.Add(new Severities()
@@ -441,8 +413,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemTransactionStatus in data.TransactionStatuses)
                     {
                         TransactionStatuses foundTransactionStatus = _context.TransactionStatuses
-                            .Where(e => e.InformationSystemId == _system.Id && e.Name == itemTransactionStatus.ToString())
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemTransactionStatus.ToString());
                         if (foundTransactionStatus == null)
                         {
                             _context.TransactionStatuses.Add(new TransactionStatuses()
@@ -458,10 +429,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemUser in data.Users)
                     {
                         Users foundUsers = _context.Users
-                            .Where(e => e.InformationSystemId == _system.Id
-                                    && e.Name == itemUser.Name
-                                    && e.Uuid == itemUser.Uuid)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
+                                                 && e.Name == itemUser.Name
+                                                 && e.Uuid == itemUser.Uuid);
                         if (foundUsers == null)
                         {
                             _context.Users.Add(new Users()
@@ -478,9 +448,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                     foreach (var itemWorkServer in data.WorkServers)
                     {
                         WorkServers foundWorkServer = _context.WorkServers
-                            .Where(e => e.InformationSystemId == _system.Id
-                                    && e.Name == itemWorkServer.Name)
-                            .FirstOrDefault();
+                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
+                                                 && e.Name == itemWorkServer.Name);
                         if (foundWorkServer == null)
                         {
                             _context.WorkServers.Add(new WorkServers()

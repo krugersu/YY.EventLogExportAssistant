@@ -72,9 +72,8 @@ namespace YY.EventLogExportAssistant.SQLServer
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
                 var lastLogFile = _context.LogFiles
-                    .Where(e => e.InformationSystemId == _system.Id 
-                        && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id))
-                    .SingleOrDefault();
+                    .SingleOrDefault(e => e.InformationSystemId == _system.Id 
+                                          && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id));
 
                 if (lastLogFile == null)
                     return null;
@@ -91,8 +90,7 @@ namespace YY.EventLogExportAssistant.SQLServer
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
                 LogFiles foundLogFile = _context.LogFiles
-                .Where(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc)
-                .FirstOrDefault();
+                    .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
 
                 if (foundLogFile == null)
                 {
@@ -166,78 +164,70 @@ namespace YY.EventLogExportAssistant.SQLServer
                     }
 
                     long? rowApplicationId = null;
-                    Applications rowApplication;
                     if (itemRow.Application != null)
                     {
-                        rowApplication = cacheApplications
+                        var rowApplication = cacheApplications
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name);
                         rowApplicationId = rowApplication.Id;
                     }
 
                     long? rowComputerId = null;
-                    Computers rowComputer;
                     if (itemRow.Computer != null)
                     {
-                        rowComputer = cacheComputers
+                        var rowComputer = cacheComputers
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name);
                         rowComputerId = rowComputer.Id;
                     }
 
                     long? rowEventId = null;
-                    Events rowEvent;
                     if (itemRow.Event != null)
                     {
-                        rowEvent = cacheEvents
+                        var rowEvent = cacheEvents
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name);
                         rowEventId = rowEvent.Id;
                     }
 
                     long? rowMetadataId = null;
-                    Metadata rowMetadata;
                     if (itemRow.Metadata != null)
                     {
-                        rowMetadata = cacheMetadata
+                        var rowMetadata = cacheMetadata
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid);
                         rowMetadataId = rowMetadata.Id;
                     }
 
                     long? rowPrimaryPortId = null;
-                    PrimaryPorts rowPrimaryPort;
                     if (itemRow.PrimaryPort != null)
                     {
-                        rowPrimaryPort = cachePrimaryPorts
+                        var rowPrimaryPort = cachePrimaryPorts
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name);
                         rowPrimaryPortId = rowPrimaryPort.Id;
                     }
 
                     long? rowSecondaryPortId = null;
-                    SecondaryPorts rowSecondaryPort;
                     if (itemRow.SecondaryPort != null)
                     {
-                        rowSecondaryPort = cacheSecondaryPorts
+                        var rowSecondaryPort = cacheSecondaryPorts
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name);
                         rowSecondaryPortId = rowSecondaryPort.Id;
                     }
 
-                    Severities rowSeverity = cacheSeverities
+                    var rowSeverity = cacheSeverities
                         .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString());
-                    TransactionStatuses rowTransactionStatus = cacheTransactionStatuses
+                    var rowTransactionStatus = cacheTransactionStatuses
                         .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString());
 
                     long? rowUserId = null;
-                    Users rowUser;
                     if (itemRow.User != null)
                     {
-                        rowUser = cacheUsers
+                        var rowUser = cacheUsers
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name);
                         rowUserId = rowUser.Id;
                     }
 
                     long? rowWorkServerId = null;
-                    WorkServers rowWorkServer;
                     if (itemRow.WorkServer != null)
                     {
-                        rowWorkServer = cacheWorkServers
+                        var rowWorkServer = cacheWorkServers
                             .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name);
                         rowWorkServerId = rowWorkServer.Id;
                     }
