@@ -135,15 +135,18 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         {
             using (EventLogContext _context = new EventLogContext(_databaseOptions))
             {
-                if(_maxPeriodRowData == DateTime.MinValue)
+                if (_maxPeriodRowData == DateTime.MinValue)
                 {
                     Models.RowData firstRow = _context.RowsData.FirstOrDefault();
                     if (firstRow != null)
                     {
-                        DateTimeOffset _maxPeriodRowDataTimeOffset = _context.RowsData
-                            .Where(p => p.InformationSystemId == _system.Id)
-                            .Max(m => m.Period);
-                        _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
+                        var _maxPeriodData = _context.RowsData
+                            .Where(p => p.InformationSystemId == _system.Id);
+                        if (_maxPeriodData.Any())
+                        {
+                            DateTimeOffset _maxPeriodRowDataTimeOffset = _maxPeriodData.Max(m => m.Period);
+                            _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
+                        }
                     }
                 }
 
