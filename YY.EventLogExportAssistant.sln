@@ -60,9 +60,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.PostgreSQL.Tests", "Tests\YY.EventLogExportAssistant.PostgreSQL.Tests\YY.EventLogExportAssistant.PostgreSQL.Tests.csproj", "{540111EF-F6E0-427E-BD26-419119665269}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.ElasticSearch", "Libs\YY.EventLogExportAssistant.ElasticSearch\YY.EventLogExportAssistant.ElasticSearch.csproj", "{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ElasticSearch", "Libs\YY.EventLogExportAssistant.ElasticSearch\YY.EventLogExportAssistant.ElasticSearch.csproj", "{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.ElasticSearch.Tests", "YY.EventLogExportAssistant.ElasticSearch.Tests\YY.EventLogExportAssistant.ElasticSearch.Tests.csproj", "{09105BB0-0E85-4464-A228-4FA7121BEFB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ElasticSearch.Tests", "Tests\YY.EventLogExportAssistant.ElasticSearch.Tests\YY.EventLogExportAssistant.ElasticSearch.Tests.csproj", "{09105BB0-0E85-4464-A228-4FA7121BEFB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportToElasticSearch", "Apps\YY.EventLogExportToElasticSearch\YY.EventLogExportToElasticSearch.csproj", "{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +112,10 @@ Global
 		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +133,7 @@ Global
 		{540111EF-F6E0-427E-BD26-419119665269} = {44948605-8B87-444A-B94D-530ADB059377}
 		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A} = {0F68727D-2383-427E-AF95-1329C70898C4}
 		{09105BB0-0E85-4464-A228-4FA7121BEFB9} = {44948605-8B87-444A-B94D-530ADB059377}
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}

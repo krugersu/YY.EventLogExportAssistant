@@ -54,12 +54,12 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .Build();
                 IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
-                Uri nodeAddree = elasticSearchSection.GetValue<Uri>("Node");
+                Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
                 string indexName = elasticSearchSection.GetValue<string>("IndexName");
                 int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
                 int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
 
-                _elasticSettings = new ConnectionSettings(nodeAddree)
+                _elasticSettings = new ConnectionSettings(nodeAddress)
                     .DefaultIndex(indexName)
                     .MaximumRetries(maximumRetries)
                     .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
@@ -98,7 +98,15 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            throw new NotImplementedException();
+            _system = new InformationSystems()
+            {
+                Id = system.Id,
+                Name = system.Name,
+                Description = system.Description
+            };
+
+            ElasticClient client = new ElasticClient(_elasticSettings);
+            client.IndexDocument(_system);
         }
         public override void UpdateReferences(ReferencesData data)
         {
