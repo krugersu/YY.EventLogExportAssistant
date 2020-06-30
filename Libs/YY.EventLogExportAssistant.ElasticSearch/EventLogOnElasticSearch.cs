@@ -106,7 +106,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             };
 
             ElasticClient client = new ElasticClient(_elasticSettings);
-            client.IndexDocument(_system);
+            client.Index(_system, idx => idx.Index("event-log"));
         }
         public override void UpdateReferences(ReferencesData data)
         {
