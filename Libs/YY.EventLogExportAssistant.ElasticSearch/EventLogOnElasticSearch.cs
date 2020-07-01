@@ -18,19 +18,9 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         private const int _defaultPortion = 1000;
         private readonly int _portion;
         private readonly ConnectionSettings _elasticSettings;
+        private readonly ElasticClient _client;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
-
-        private IReadOnlyList<Applications> cacheApplications;
-        private IReadOnlyList<Computers> cacheComputers;
-        private IReadOnlyList<Events> cacheEvents;
-        private IReadOnlyList<Metadata> cacheMetadata;
-        private IReadOnlyList<PrimaryPorts> cachePrimaryPorts;
-        private IReadOnlyList<SecondaryPorts> cacheSecondaryPorts;
-        private IReadOnlyList<Severities> cacheSeverities;
-        private IReadOnlyList<TransactionStatuses> cacheTransactionStatuses;
-        private IReadOnlyList<Users> cacheUsers;
-        private IReadOnlyList<WorkServers> cacheWorkServers;
 
         #endregion
 
@@ -65,7 +55,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
             }
             else
+            {
                 _elasticSettings = elasticSettings;
+            }
+
+            _client = new ElasticClient(_elasticSettings);
         }
 
         #endregion
@@ -74,11 +68,29 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
         public override EventLogPosition GetLastPosition()
         {
+            // TODO: Read last position info from Elastic Index
+
             throw new NotImplementedException();
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            throw new NotImplementedException();
+            // TODO: Save last position info to Elastic Index
+            // with model LogFileElement
+
+            var logFileElement = new LogFileElement()
+            {
+                CreateDate = logFileInfo.CreationTimeUtc,
+                FileName = logFileInfo.Name,
+                InformationSystem = _system.Name,
+                LastCurrentFileData = position.CurrentFileData,
+                LastCurrentFileReferences = position.CurrentFileReferences,
+                LastEventNumber = position.EventNumber,
+                LastStreamPosition = position.StreamPosition,
+                ModificationDate = logFileInfo.LastWriteTimeUtc
+            };
+
+            // TODO: Index for log file elements
+            //_client.Index(logFileElement, idx => idx.Index("IS-LogFiles"));
         }
         public override int GetPortionSize()
         {
@@ -94,7 +106,41 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void Save(IList<RowData> rowsData)
         {
-            throw new NotImplementedException();
+            // TODO: Convert RowData to LogDataElement and add to index
+
+            List<LogDataElement> items = new List<LogDataElement>();
+            foreach (RowData item in rowsData)
+            {
+                items.Add(new LogDataElement()
+                {
+                    Id = item.RowId,
+                    Application = item.Application.Name,
+                    Comment = item.Comment,
+                    Computer = item.Computer.Name,
+                    ConnectionId = item.ConnectId,
+                    Data = item.Data,
+                    DataPresentation = item.DataPresentation,
+                    DataUUID = item.DataUuid,
+                    Event = item.Event.Name,
+                    InformationSystem = _system.Name,
+                    Metadata = item.Metadata.Name,
+                    MetadataUUID = item.Metadata.Uuid.ToString(),
+                    Period = item.Period,
+                    PrimaryPort = item.PrimaryPort.Name,
+                    SecondaryPort = item.SecondaryPort.Name,
+                    Session = item.Session,
+                    Severity = item.Severity.ToString(),
+                    TransactionDate = item.TransactionDate,
+                    TransactionId = item.TransactionId,
+                    TransactionStatus = item.TransactionStatus.ToString(),
+                    User = item.User.Name,
+                    UserUUID = item.User.Uuid.ToString(),
+                    WorkServer = item.WorkServer.Name
+                });
+            }
+
+            // TODO: Bulk index for log data elements
+            //_client.IndexMany(items, idx => idx.Index("IS-LogData"));
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
@@ -105,12 +151,14 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 Description = system.Description
             };
 
-            ElasticClient client = new ElasticClient(_elasticSettings);
-            client.Index(_system, idx => idx.Index("event-log"));
+            // TODO: Create empty index for data if not exists
+            // TODO: Create empty index for status last log's files
+            //_client.Index(_system, idx => idx.Index("event-log"));
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            throw new NotImplementedException();
+            // TODO:
+            // There is no necessary to do something here, because data of reference put inside the index
         }
 
         #endregion
