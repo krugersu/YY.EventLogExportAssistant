@@ -9,6 +9,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Models
         public string Id { get; set; }
         public string InformationSystem { get; set; }
         public DateTimeOffset Period { get; set; }
+        public long RowId { get; set; }
         public string Severity { get; set; }
         public long? ConnectionId { get; set; }
         public long? Session { get; set; }

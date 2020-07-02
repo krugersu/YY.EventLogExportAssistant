@@ -74,7 +74,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         public override EventLogPosition GetLastPosition()
         {
             // TODO: Read last position from Elastic Index
-            //string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
+            string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
             //var searchResponse = _client.Search<LogFileElement>(s =>
             //    s.Index(logFilesActualIndexName)
             //        .From(0)
@@ -145,6 +145,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     DataPresentation = item.DataPresentation,
                     DataUUID = item.DataUuid,
                     Event = item.Event?.Name,
+                    RowId = item.RowId,
                     InformationSystem = _system.Name,
                     Metadata = item.Metadata?.Name,
                     MetadataUUID = item.Metadata?.Uuid.ToString(),
