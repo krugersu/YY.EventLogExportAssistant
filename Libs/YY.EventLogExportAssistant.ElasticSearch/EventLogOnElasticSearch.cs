@@ -6,6 +6,7 @@ using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using System;
 using Microsoft.Extensions.Configuration;
 using Nest;
+using YY.EventLogExportAssistant.ElasticSearch.Helpers;
 using YY.EventLogExportAssistant.ElasticSearch.Models;
 using YY.EventLogReaderAssistant;
 
@@ -20,6 +21,8 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         private readonly ConnectionSettings _elasticSettings;
         private readonly ElasticClient _client;
         private InformationSystemsBase _system;
+        private string _indexName;
+        private IndexSeparationPeriod _indexSeparationPeriod;
         private DateTime _maxPeriodRowData;
 
         #endregion
@@ -36,8 +39,10 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public EventLogOnElasticSearch(ConnectionSettings elasticSettings, int portion)
         {
+            _indexSeparationPeriod = IndexSeparationPeriod.None;
             _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
+
             if (elasticSettings == null)
             {
                 IConfiguration Configuration = new ConfigurationBuilder()
@@ -68,17 +73,21 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
         public override EventLogPosition GetLastPosition()
         {
-            // TODO: Read last position info from Elastic Index
+            // TODO: Read last position from Elastic Index
+            //string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
+            //var searchResponse = _client.Search<LogFileElement>(s =>
+            //    s.Index(logFilesActualIndexName)
+            //        .From(0)
+            //        .Size(1)
+            //);
 
-            throw new NotImplementedException();
+            return null;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            // TODO: Save last position info to Elastic Index
-            // with model LogFileElement
-
-            var logFileElement = new LogFileElement()
+            LogFileElement logFileHistoryElement = new LogFileElement()
             {
+                Id = $"[{_system.Name}][{logFileInfo.Name}][{logFileInfo.CreationTimeUtc:yyyyMMddhhmmss}]",
                 CreateDate = logFileInfo.CreationTimeUtc,
                 FileName = logFileInfo.Name,
                 InformationSystem = _system.Name,
@@ -88,9 +97,25 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 LastStreamPosition = position.StreamPosition,
                 ModificationDate = logFileInfo.LastWriteTimeUtc
             };
+            string logFilesHistoryIndexName = $"{ _indexName }-LogFiles-History";
+            logFilesHistoryIndexName = logFilesHistoryIndexName.ToLower();
+            _client.Index(logFileHistoryElement, idx => idx.Index(logFilesHistoryIndexName));
 
-            // TODO: Index for log file elements
-            //_client.Index(logFileElement, idx => idx.Index("IS-LogFiles"));
+            LogFileElement logFilActualElement = new LogFileElement()
+            {
+                Id = _system.Name,
+                CreateDate = logFileInfo.CreationTimeUtc,
+                FileName = logFileInfo.Name,
+                InformationSystem = _system.Name,
+                LastCurrentFileData = position.CurrentFileData,
+                LastCurrentFileReferences = position.CurrentFileReferences,
+                LastEventNumber = position.EventNumber,
+                LastStreamPosition = position.StreamPosition,
+                ModificationDate = logFileInfo.LastWriteTimeUtc
+            };
+            string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
+            logFilesActualIndexName = logFilesActualIndexName.ToLower();
+            _client.Index(logFilActualElement, idx => idx.Index(logFilesActualIndexName));
         }
         public override int GetPortionSize()
         {
@@ -106,41 +131,45 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void Save(IList<RowData> rowsData)
         {
-            // TODO: Convert RowData to LogDataElement and add to index
-
             List<LogDataElement> items = new List<LogDataElement>();
             foreach (RowData item in rowsData)
             {
                 items.Add(new LogDataElement()
                 {
-                    Id = item.RowId,
+                    Id = $"[{_system.Name}][{item.Period:yyyyMMddhhmmss}][{item.RowId}]",
                     Application = item.Application.Name,
                     Comment = item.Comment,
-                    Computer = item.Computer.Name,
+                    Computer = item.Computer?.Name,
                     ConnectionId = item.ConnectId,
                     Data = item.Data,
                     DataPresentation = item.DataPresentation,
                     DataUUID = item.DataUuid,
-                    Event = item.Event.Name,
+                    Event = item.Event?.Name,
                     InformationSystem = _system.Name,
-                    Metadata = item.Metadata.Name,
-                    MetadataUUID = item.Metadata.Uuid.ToString(),
+                    Metadata = item.Metadata?.Name,
+                    MetadataUUID = item.Metadata?.Uuid.ToString(),
                     Period = item.Period,
-                    PrimaryPort = item.PrimaryPort.Name,
-                    SecondaryPort = item.SecondaryPort.Name,
+                    PrimaryPort = item.PrimaryPort?.Name,
+                    SecondaryPort = item.SecondaryPort?.Name,
                     Session = item.Session,
                     Severity = item.Severity.ToString(),
                     TransactionDate = item.TransactionDate,
                     TransactionId = item.TransactionId,
                     TransactionStatus = item.TransactionStatus.ToString(),
-                    User = item.User.Name,
-                    UserUUID = item.User.Uuid.ToString(),
-                    WorkServer = item.WorkServer.Name
+                    User = item.User?.Name,
+                    UserUUID = item.User?.Uuid.ToString(),
+                    WorkServer = item.WorkServer?.Name
                 });
             }
 
-            // TODO: Bulk index for log data elements
-            //_client.IndexMany(items, idx => idx.Index("IS-LogData"));
+            string logDataIndexName = $"{ _indexName }-LogData-{ ElasticSearchHelper.GetIndexSeparationPeriod(DateTime.Now, _indexSeparationPeriod) }";
+            logDataIndexName = logDataIndexName.ToLower();
+            var indexManyResponse = _client.IndexMany(items, logDataIndexName);
+            
+            // TODO: Do actions on errors
+            //if (indexManyResponse.Errors)
+            //{
+            //}
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
@@ -151,9 +180,33 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 Description = system.Description
             };
 
+            if (_indexName == null)
+            {
+                _indexName = _system.Name;
+            }
+
             // TODO: Create empty index for data if not exists
             // TODO: Create empty index for status last log's files
-            //_client.Index(_system, idx => idx.Index("event-log"));
+            // OR NOT???
+        }
+        public void SetIndexName(string indexName)
+        {
+            _indexName = indexName;
+        }
+        public void SetIndexSeparationPeriod(string separation)
+        {
+            if (separation != null && Enum.TryParse(separation, true, out IndexSeparationPeriod separationValue))
+            {
+                SetIndexSaparationPeriod(separationValue);
+            }
+            else
+            {
+                SetIndexSaparationPeriod(IndexSeparationPeriod.None);
+            }
+        }
+        public void SetIndexSaparationPeriod(IndexSeparationPeriod separation)
+        {
+            _indexSeparationPeriod = separation;
         }
         public override void UpdateReferences(ReferencesData data)
         {

@@ -40,6 +40,7 @@ namespace YY.EventLogExportToElasticSearch
             IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
             Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
             string indexName = elasticSearchSection.GetValue<string>("IndexName");
+            string indexSeparation = elasticSearchSection.GetValue<string>("IndexSeparationPeriod");
             int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
             int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
 
@@ -59,7 +60,7 @@ namespace YY.EventLogExportToElasticSearch
                 .DefaultIndex(indexName)
                 .MaximumRetries(maximumRetries)
                 .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
-
+            
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPath);
 
@@ -69,6 +70,8 @@ namespace YY.EventLogExportToElasticSearch
                 Name = inforamtionSystemName,
                 Description = inforamtionSystemDescription
             });
+            target.SetIndexName(indexName);
+            target.SetIndexSeparationPeriod(indexSeparation);
             exporter.SetTarget(target);
 
             exporter.BeforeExportData += BeforeExportData;
