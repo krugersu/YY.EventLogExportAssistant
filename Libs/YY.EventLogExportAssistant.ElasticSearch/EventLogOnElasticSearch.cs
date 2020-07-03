@@ -73,7 +73,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
         public override EventLogPosition GetLastPosition()
         {
-            // TODO: Read last position from Elastic Index
             string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
             logFilesActualIndexName = logFilesActualIndexName.ToLower();
 
@@ -188,10 +187,10 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             logDataIndexName = logDataIndexName.ToLower();
             var indexManyResponse = _client.IndexMany(items, logDataIndexName);
             
-            // TODO: Do actions on errors
-            //if (indexManyResponse.Errors)
-            //{
-            //}
+            if (indexManyResponse.Errors)
+            {
+                throw new Exception("Произошли ошибки выгрузки данных в ElasticSearch");
+            }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
