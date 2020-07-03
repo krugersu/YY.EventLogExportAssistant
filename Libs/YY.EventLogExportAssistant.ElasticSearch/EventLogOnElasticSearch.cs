@@ -75,13 +75,34 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         {
             // TODO: Read last position from Elastic Index
             string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
-            //var searchResponse = _client.Search<LogFileElement>(s =>
-            //    s.Index(logFilesActualIndexName)
-            //        .From(0)
-            //        .Size(1)
-            //);
+            logFilesActualIndexName = logFilesActualIndexName.ToLower();
 
-            return null;
+            var searchResponse = _client.Search<LogFileElement>(s => s
+                .Index(logFilesActualIndexName)
+                .From(0)
+                .Size(1)
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.InformationSystem)
+                        .Query(_system.Name)
+                    )
+                )
+            );
+
+            EventLogPosition position = null;
+            if (searchResponse.Documents.Count == 1)
+            {
+                LogFileElement actualLogFileInfo = searchResponse.Documents.First();
+
+                position = new EventLogPosition(
+                    actualLogFileInfo.LastEventNumber,
+                    actualLogFileInfo.LastCurrentFileReferences,
+                    actualLogFileInfo.LastCurrentFileData,
+                    actualLogFileInfo.LastStreamPosition
+                );
+            }
+
+            return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
