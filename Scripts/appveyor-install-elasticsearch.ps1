@@ -19,8 +19,8 @@ $tempPath = "$env:TEMP\jdk11_temp"
 Remove-Item $tempPath -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $zipPath -ErrorAction SilentlyContinue
 
-cmd /c "dir C:\Program Files\Java\jdk11"
 cmd /c "`"$jdkPath\bin\java`" --version"
+Write-Host $jdkPath
 
 Write-Host "JDK 11 installed" -ForegroundColor Green
 
