@@ -6,7 +6,7 @@
     <Company>Permitin Yuriy</Company>
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log export assistant to ElasticSearch</Product>
-    <Description>Library for exprorting 1C:Enterprise 8.x platform's event log files to ElasticSearch index</Description>
+    <Description>Library for exprorting 1C:Enterprise 8.x platform's event log files to ElasticSearch</Description>
     <Copyright>Copyright (c) 2020 Permitin Yury</Copyright>
     <PackageProjectUrl>https://github.com/YPermitin/YY.EventLogExportAssistant</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
@@ -14,6 +14,7 @@
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>event, log, 1C, enterprise, export, elasticsearch, elk</PackageTags>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
