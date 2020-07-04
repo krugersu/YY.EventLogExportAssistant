@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace YY.EventLogExportAssistant.ElasticSearch
+﻿namespace YY.EventLogExportAssistant.ElasticSearch
 {
     public enum IndexSeparationPeriod
     {

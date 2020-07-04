@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Nest;
 using YY.EventLogExportAssistant.ElasticSearch.Helpers;
 using YY.EventLogExportAssistant.ElasticSearch.Models;
-using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.ElasticSearch
 {
@@ -18,12 +17,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
         private const int _defaultPortion = 1000;
         private readonly int _portion;
-        private readonly ConnectionSettings _elasticSettings;
         private readonly ElasticClient _client;
         private InformationSystemsBase _system;
         private string _indexName;
         private IndexSeparationPeriod _indexSeparationPeriod;
-        private DateTime _maxPeriodRowData;
+        private EventLogPosition _lastEventLogFilePosition;
 
         #endregion
 
@@ -39,8 +37,8 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public EventLogOnElasticSearch(ConnectionSettings elasticSettings, int portion)
         {
+            ConnectionSettings elasticSettings1;
             _indexSeparationPeriod = IndexSeparationPeriod.None;
-            _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
 
             if (elasticSettings == null)
@@ -51,20 +49,22 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
                 Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
                 string indexName = elasticSearchSection.GetValue<string>("IndexName");
+                string indexSeparation = elasticSearchSection.GetValue<string>("IndexSeparationPeriod");
                 int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
                 int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
 
-                _elasticSettings = new ConnectionSettings(nodeAddress)
+                elasticSettings1 = new ConnectionSettings(nodeAddress)
                     .DefaultIndex(indexName)
                     .MaximumRetries(maximumRetries)
                     .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
+                SetIndexSeparationPeriod(indexSeparation);
             }
             else
             {
-                _elasticSettings = elasticSettings;
+                elasticSettings1 = elasticSettings;
             }
 
-            _client = new ElasticClient(_elasticSettings);
+            _client = new ElasticClient(elasticSettings1);
         }
 
         #endregion
@@ -73,6 +73,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
         public override EventLogPosition GetLastPosition()
         {
+            if (_lastEventLogFilePosition != null)
+            {
+                return _lastEventLogFilePosition;
+            }
+
             string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
             logFilesActualIndexName = logFilesActualIndexName.ToLower();
 
@@ -100,6 +105,8 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     actualLogFileInfo.LastStreamPosition
                 );
             }
+
+            _lastEventLogFilePosition = position;
 
             return position;
         }
@@ -136,6 +143,8 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
             logFilesActualIndexName = logFilesActualIndexName.ToLower();
             _client.Index(logFilActualElement, idx => idx.Index(logFilesActualIndexName));
+
+            _lastEventLogFilePosition = position;
         }
         public override int GetPortionSize()
         {
@@ -186,10 +195,12 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             string logDataIndexName = $"{ _indexName }-LogData-{ ElasticSearchHelper.GetIndexSeparationPeriod(DateTime.Now, _indexSeparationPeriod) }";
             logDataIndexName = logDataIndexName.ToLower();
             var indexManyResponse = _client.IndexMany(items, logDataIndexName);
-            
-            if (indexManyResponse.Errors)
+
+            if (indexManyResponse.IsValid == false || indexManyResponse.Errors)
             {
-                throw new Exception("Произошли ошибки выгрузки данных в ElasticSearch");
+                string errorMessage =
+                    $"При экспорте данных в индекс {logDataIndexName} произошли ошибки в {indexManyResponse.ItemsWithErrors.Count()} из {items.Count} элементов.";
+                throw new Exception(errorMessage);
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
@@ -205,10 +216,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             {
                 _indexName = _system.Name;
             }
-
-            // TODO: Create empty index for data if not exists
-            // TODO: Create empty index for status last log's files
-            // OR NOT???
         }
         public void SetIndexName(string indexName)
         {
@@ -231,8 +238,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            // TODO:
-            // There is no necessary to do something here, because data of reference put inside the index
         }
 
         #endregion
