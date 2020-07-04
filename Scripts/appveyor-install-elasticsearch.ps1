@@ -4,7 +4,7 @@ New-Item "${env:ProgramFiles}\Java" -ItemType Directory -Force | Out-Null
 
 $jdkPath = "${env:ProgramFiles}\Java\jdk11"
 
-cmd dir C:\Program Files\Java\jdk11
+cmd /c "dir C:\Program Files\Java\jdk11""
 cmd /c "`"$jdkPath\bin\java`" --version"
 
 Write-Host "JDK 11 installed" -ForegroundColor Green
