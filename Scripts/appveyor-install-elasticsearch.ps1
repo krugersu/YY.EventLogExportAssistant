@@ -1,6 +1,6 @@
 Write-Host "Preparing to download and install Elasticsearch..." -ForegroundColor Cyan
 $esVersion = "7.8.0"
-$downloadUrl = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$($esVersion).zip"
+$downloadUrl = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$($esVersion)-windows-x86_64.zip"
 $zipPath = "$($env:USERPROFILE)\elasticsearch-$esVersion.zip"
 $extractRoot = "$env:SYSTEMDRIVE\Elasticsearch"
 $esRoot = "$extractRoot\elasticsearch-$esVersion"
