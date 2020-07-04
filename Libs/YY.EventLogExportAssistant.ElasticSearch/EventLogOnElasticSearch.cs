@@ -88,6 +88,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 )
             );
 
+            if (!searchResponse.ApiCall.Success)
+            {
+                throw searchResponse.ApiCall.OriginalException;
+            }
+
             EventLogPosition position = null;
             if (searchResponse.Documents.Count == 1)
             {
@@ -137,7 +142,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             };
             string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
             logFilesActualIndexName = logFilesActualIndexName.ToLower();
-            _client.Index(logFilActualElement, idx => idx.Index(logFilesActualIndexName));
+            var indexResponse = _client.Index(logFilActualElement, idx => idx.Index(logFilesActualIndexName));
+            if (!indexResponse.ApiCall.Success)
+            {
+                throw indexResponse.ApiCall.OriginalException;
+            }
 
             _lastEventLogFilePosition = position;
         }
@@ -199,6 +208,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             {
                 string logDataIndexName = indexItems.Key;
                 var indexManyResponse = _client.IndexMany(indexItems.Value, logDataIndexName);
+
+                if (!indexManyResponse.ApiCall.Success)
+                {
+                    throw indexManyResponse.ApiCall.OriginalException;
+                }
 
                 if (indexManyResponse.IsValid == false || indexManyResponse.Errors)
                 {
