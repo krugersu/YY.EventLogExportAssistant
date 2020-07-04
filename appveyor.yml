@@ -7,8 +7,8 @@ services:
  - postgresql101
 
 install:
-- ps: >-
-    .\Scripts\appveyor-install-elasticsearch.ps1
+  - cinst elasticsearch
+  - appveyor-retry elasticsearch-service-x64 start
 
 build_script:
 - ps: >-
