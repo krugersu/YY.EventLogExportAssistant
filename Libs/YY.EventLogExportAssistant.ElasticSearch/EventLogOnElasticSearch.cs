@@ -160,10 +160,18 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void Save(IList<RowData> rowsData)
         {
-            List<LogDataElement> items = new List<LogDataElement>();
+            Dictionary<string, List<LogDataElement>> logDataByIndices = new Dictionary<string, List<LogDataElement>>();
+
             foreach (RowData item in rowsData)
             {
-                items.Add(new LogDataElement()
+                string logDataCurrentIndexName = $"{ _indexName }-LogData-{ ElasticSearchHelper.GetIndexSeparationPeriod(item.Period.DateTime, _indexSeparationPeriod) }";
+                logDataCurrentIndexName = logDataCurrentIndexName.ToLower();
+                if (logDataByIndices.ContainsKey(logDataCurrentIndexName) == false)
+                {
+                    logDataByIndices.Add(logDataCurrentIndexName, new List<LogDataElement>());
+                }
+
+                logDataByIndices[logDataCurrentIndexName].Add(new LogDataElement()
                 {
                     Id = $"[{_system.Name}][{item.Period:yyyyMMddhhmmss}][{item.RowId}]",
                     Application = item.Application.Name,
@@ -192,15 +200,17 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 });
             }
 
-            string logDataIndexName = $"{ _indexName }-LogData-{ ElasticSearchHelper.GetIndexSeparationPeriod(DateTime.Now, _indexSeparationPeriod) }";
-            logDataIndexName = logDataIndexName.ToLower();
-            var indexManyResponse = _client.IndexMany(items, logDataIndexName);
-
-            if (indexManyResponse.IsValid == false || indexManyResponse.Errors)
+            foreach (var indexItems in logDataByIndices)
             {
-                string errorMessage =
-                    $"При экспорте данных в индекс {logDataIndexName} произошли ошибки в {indexManyResponse.ItemsWithErrors.Count()} из {items.Count} элементов.";
-                throw new Exception(errorMessage);
+                string logDataIndexName = indexItems.Key;
+                var indexManyResponse = _client.IndexMany(indexItems.Value, logDataIndexName);
+
+                if (indexManyResponse.IsValid == false || indexManyResponse.Errors)
+                {
+                    string errorMessage =
+                        $"При экспорте данных в индекс {logDataIndexName} произошли ошибки в {indexManyResponse.ItemsWithErrors.Count()} из {indexItems.Value.Count} элементов.";
+                    throw new Exception(errorMessage);
+                }
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
