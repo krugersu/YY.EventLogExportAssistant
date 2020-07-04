@@ -37,7 +37,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public EventLogOnElasticSearch(ConnectionSettings elasticSettings, int portion)
         {
-            ConnectionSettings elasticSettings1;
             _indexSeparationPeriod = IndexSeparationPeriod.None;
             _portion = portion;
 
@@ -53,7 +52,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
                 int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
 
-                elasticSettings1 = new ConnectionSettings(nodeAddress)
+                elasticSettings = new ConnectionSettings(nodeAddress)
                     .DefaultIndex(indexName)
                     .MaximumRetries(maximumRetries)
                     .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
@@ -61,10 +60,10 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             }
             else
             {
-                elasticSettings1 = elasticSettings;
+                elasticSettings = elasticSettings;
             }
 
-            _client = new ElasticClient(elasticSettings1);
+            _client = new ElasticClient(elasticSettings);
         }
 
         #endregion
