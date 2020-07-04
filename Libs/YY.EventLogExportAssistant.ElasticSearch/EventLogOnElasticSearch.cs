@@ -58,10 +58,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
                 SetIndexSeparationPeriod(indexSeparation);
             }
-            else
-            {
-                elasticSettings = elasticSettings;
-            }
 
             _client = new ElasticClient(elasticSettings);
         }
