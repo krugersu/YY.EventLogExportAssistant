@@ -10,7 +10,7 @@ addons:
 install:
   - dotnet restore
 before_script:
-  - sleep 10
+  - sleep 120
 script:
   - dotnet build --configuration Release
   - dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
