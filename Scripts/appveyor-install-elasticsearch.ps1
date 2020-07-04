@@ -20,7 +20,17 @@ Remove-Item $tempPath -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $zipPath -ErrorAction SilentlyContinue
 
 cmd /c "`"$jdkPath\bin\java`" --version"
+
+Write-Host "Java path:"
 Write-Host $jdkPath
+
+Write-Host "JAVA_HOME (before):"
+Write-Host $env:JAVA_HOME
+
+[Environment]::SetEnvironmentVariable("JAVA_HOME", $jdkPath)
+
+Write-Host "JAVA_HOME (after):"
+Write-Host $env:JAVA_HOME
 
 Write-Host "JDK 11 installed" -ForegroundColor Green
 
