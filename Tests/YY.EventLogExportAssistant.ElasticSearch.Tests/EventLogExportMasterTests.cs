@@ -283,22 +283,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
             {
-                configFilePath = "travisci-appsettings.json";
-            //    IConfiguration Configuration = new ConfigurationBuilder()
-            //        .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
-            //        .Build();
-            //    connectionString = Configuration.GetConnectionString("EventLogDatabase");
-            //    try
-            //    {
-            //        optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            //        optionsBuilder.UseNpgsql(connectionString);
-            //        using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
-            //            context.Database.EnsureDeleted();
-            //    }
-            //    catch
-            //    {
-            //        configFilePath = "appveyor-appsettings.json";
-            //    }
+                configFilePath = "ci-appsettings.json";
             }
 
             return configFilePath;
