@@ -45,6 +45,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C4D18-9F7B-4E44-9531-A191AA6F725E}"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\appveyor-build.ps1 = Scripts\appveyor-build.ps1
+		Scripts\appveyor-install-elasticsearch.ps1 = Scripts\appveyor-install-elasticsearch.ps1
 		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
 		Scripts\deploy.sh = Scripts\deploy.sh
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
@@ -64,7 +65,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ElasticSearch.Tests", "Tests\YY.EventLogExportAssistant.ElasticSearch.Tests\YY.EventLogExportAssistant.ElasticSearch.Tests.csproj", "{09105BB0-0E85-4464-A228-4FA7121BEFB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportToElasticSearch", "Apps\YY.EventLogExportToElasticSearch\YY.EventLogExportToElasticSearch.csproj", "{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToElasticSearch", "Apps\YY.EventLogExportToElasticSearch\YY.EventLogExportToElasticSearch.csproj", "{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

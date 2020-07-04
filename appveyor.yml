@@ -6,6 +6,9 @@ services:
  - mssql2017
  - postgresql101
 
+ install:
+  - ps: .\Scripts\appveyor-install-elasticsearch.ps1
+
 build_script:
 - ps: >-
     .\Scripts\appveyor-build.ps1
