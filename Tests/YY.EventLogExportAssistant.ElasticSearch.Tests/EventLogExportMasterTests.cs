@@ -281,9 +281,9 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             // Перенести формирование конфигурационного файла в скрипты CI
 
             string configFilePath = "appsettings.json";
-            //if (!File.Exists(configFilePath))
-            //{
-            //    configFilePath = "travisci-appsettings";
+            if (!File.Exists(configFilePath))
+            {
+                configFilePath = "travisci-appsettings.json";
             //    IConfiguration Configuration = new ConfigurationBuilder()
             //        .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
             //        .Build();
@@ -299,7 +299,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             //    {
             //        configFilePath = "appveyor-appsettings.json";
             //    }
-            //}
+            }
 
             return configFilePath;
         }
