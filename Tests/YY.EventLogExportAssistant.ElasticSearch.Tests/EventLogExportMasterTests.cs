@@ -184,7 +184,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             while (exporter.NewDataAvailiable())
                 exporter.SendData();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(30000);
 
             long rowsInES = 0;
             string indexNameLGF_WithData = $"{_indexNameLGF}-logdata";
@@ -250,7 +250,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             while (exporter.NewDataAvailiable())
                 exporter.SendData();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(30000);
 
             long rowsInES = 0;
             string indexNameLGD_WithData = $"{_indexNameLGD}-logdata";
