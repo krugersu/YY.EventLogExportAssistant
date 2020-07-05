@@ -45,6 +45,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C4D18-9F7B-4E44-9531-A191AA6F725E}"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\appveyor-build.ps1 = Scripts\appveyor-build.ps1
+		Scripts\appveyor-install-elasticsearch.ps1 = Scripts\appveyor-install-elasticsearch.ps1
 		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
 		Scripts\deploy.sh = Scripts\deploy.sh
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
@@ -56,9 +57,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{9C060815
 		Nuget\icon.png = Nuget\icon.png
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.SQLServer.Tests", "Tests\YY.EventLogExportAssistant.SQLServer.Tests\YY.EventLogExportAssistant.SQLServer.Tests.csproj", "{74DB2292-783C-4692-9771-EB0C27B6E373}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.SQLServer.Tests", "Tests\YY.EventLogExportAssistant.SQLServer.Tests\YY.EventLogExportAssistant.SQLServer.Tests.csproj", "{74DB2292-783C-4692-9771-EB0C27B6E373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.PostgreSQL.Tests", "Tests\YY.EventLogExportAssistant.PostgreSQL.Tests\YY.EventLogExportAssistant.PostgreSQL.Tests.csproj", "{540111EF-F6E0-427E-BD26-419119665269}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.PostgreSQL.Tests", "Tests\YY.EventLogExportAssistant.PostgreSQL.Tests\YY.EventLogExportAssistant.PostgreSQL.Tests.csproj", "{540111EF-F6E0-427E-BD26-419119665269}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ElasticSearch", "Libs\YY.EventLogExportAssistant.ElasticSearch\YY.EventLogExportAssistant.ElasticSearch.csproj", "{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ElasticSearch.Tests", "Tests\YY.EventLogExportAssistant.ElasticSearch.Tests\YY.EventLogExportAssistant.ElasticSearch.Tests.csproj", "{09105BB0-0E85-4464-A228-4FA7121BEFB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToElasticSearch", "Apps\YY.EventLogExportToElasticSearch\YY.EventLogExportToElasticSearch.csproj", "{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +105,18 @@ Global
 		{540111EF-F6E0-427E-BD26-419119665269}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{540111EF-F6E0-427E-BD26-419119665269}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{540111EF-F6E0-427E-BD26-419119665269}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09105BB0-0E85-4464-A228-4FA7121BEFB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +132,9 @@ Global
 		{9C060815-539F-46E8-83AD-89F573568BC5} = {4CA9D292-5342-4388-BC1C-A59E837CE283}
 		{74DB2292-783C-4692-9771-EB0C27B6E373} = {44948605-8B87-444A-B94D-530ADB059377}
 		{540111EF-F6E0-427E-BD26-419119665269} = {44948605-8B87-444A-B94D-530ADB059377}
+		{B511B6FE-7EB4-4CA7-8CC4-E70E70527D1A} = {0F68727D-2383-427E-AF95-1329C70898C4}
+		{09105BB0-0E85-4464-A228-4FA7121BEFB9} = {44948605-8B87-444A-B94D-530ADB059377}
+		{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}

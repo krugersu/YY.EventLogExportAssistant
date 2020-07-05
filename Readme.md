@@ -5,6 +5,7 @@
 | YY.EventLogExportAssistant.Core | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.Core.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.Core) | Базовый пакет |
 | YY.EventLogExportAssistant.SQLServer | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.SQLServer.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.SQLServer) | Пакет для экспорта в базу SQL Server |
 | YY.EventLogExportAssistant.PostgreSQL | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL) | Пакет для экспорта в базу PostgreSQL |
+| YY.EventLogExportAssistant.ElasticSearch | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch) | Пакет для экспорта в индексы ElasticSearch |
 
 Решение для экспорта данных журнала регистрации платформы 1С:Предприятие 8.x в нестандартные хранилища данных.
 С помощью библиотеки **[YY.EventLogReaderAssistant](https://github.com/YPermitin/YY.EventLogReaderAssistant)** реализовано чтение данных журнала регистрации как текстового формата (*.lgf, *.lgp), так и нового формата в виде SQLite-базы (*.lgd).
@@ -20,9 +21,11 @@
   * YY.EventLogExportAssistant.Core - ядро библиотеки с овновным функционалом чтения и передачи данных.
   * YY.EventLogExportAssistant.SQLServer - функционал для экспорта данных в базу SQL Server.
   * YY.EventLogExportAssistant.PostgreSQL - функционал для экспорта данных в базу PostgreSQL.
+  * YY.EventLogExportAssistant.ElasticSearch - функционал для экспорта данных в индексы ElasticSearch.
 * Примеры приложений
   * YY.EventLogExportToSQLServer - пример приложения для экспорта данных в базу SQL Server.
   * YY.EventLogExportToPostgreSQL - пример приложения для экспорта данных в базу PostgreSQL.
+  * YY.EventLogExportToElasticSearch - пример приложения для экспорта данных в индексы ElasticSearch.
 
 ## Требования и совместимость
 
@@ -36,10 +39,11 @@
 
 ## Пример использования
 
-Репозиторий содержит два примера консольных приложений для экспорта данных:
+Репозиторий содержит три примера консольных приложений для экспорта данных:
 
 * YY.EventLogExportToSQLServer
 * YY.EventLogExportToPostgreSQL
+* YY.EventLogExportToElasticSearch
 
 Для удобства приведем небольшой пример для выгрузки данных журнала регистрации в базу SQL Server.
 
@@ -77,6 +81,46 @@
 * **Portion** - количество записей, передаваемых в одной порции в базу данных из журнала регистрации.
 
 Настройки "UseWatchMode" и "WatchPeriod" не относятся к библиотеке. Эти параметры добавлены лишь для примеров консольных приложений и используются в них же.
+
+Для экспорта данных в ElasticSearch настройки несколько отличаются.
+
+```json
+{
+  "ElasticSearch": {
+    "Node": "http://localhost:9200/",
+    "IndexName": "YourIndexName",
+    "MaximumRetries": 2,
+    "MaxRetryTimeout": 60,
+    "IndexSeparationPeriod": "Hour"
+  },
+  "InformationSystem": {
+    "Name": "EventLogGenerator",
+    "Description": "Экспериметнальное решение для генерации файлов журнала регистрации."
+  },
+  "EventLog": {
+    "SourcePath": "\\\\SRV-1C-01-VM\\1Cv8Log",
+    "UseWatchMode": true,
+    "WatchPeriod": 5,
+    "Portion": 10000
+  }
+}
+```
+
+В секции "ElasticSearch" файла конфигурации задаются дополнительные настройки, относящиеся только к ES:
+
+* **Node** - адрес службы ElasticSearch.
+* **IndexName** - имя индекса. Фактически это начало имени индекса. Финально имя будет зависеть от параметров разделения данных по индексам и типа данных. Например, "indexname-logdata-20200412070000" - имя содержит основную часть, затем тип "logdata" и дату записей.
+* **MaximumRetries** - максимальное количество повторных попыток отправки запроса.
+* **MaxRetryTimeout** - максимальный таймаут при попытке отправки повторных запросов.
+* **IndexSeparationPeriod** - принцип разделения записей по индексам (None, Hour, Day, Week, Month, Quarter, HalfYear, Year). Если выбрано значение "None", то в имени будет содержаться название "FULL".
+
+При экспотре создаются три вида индексов:
+
+* **[имя индекса]-logdata-[период]** - индекс с записями журнала регистрации.
+* **[имя индекса]-logfiles-actual** - индекс с информацией о последних считанных данных в разрезе информационных систем.
+* **[имя индекса]-logfiles-history** - индекс с информацией об истории обработанных файлов данных в разрезе информационных систем.
+
+В остальном экспорт работает также, как и при использовании SQL Server / PostgreSQL.
 
 ### Пример использования
 
@@ -241,6 +285,7 @@ private static void AfterExportData(AfterExportDataEventArgs e)
 | - | ---- | ------------- | ----------------------------- | ----------------------- | ----------------------- |
 | 1 | SQL Server | 10000 | 0.27 | 0.7 | 60 |
 | 2 | PostgreSQL | 10000 | 0.32 | 0.8 | 97 |
+| 3 | ElasticSearch | 10000 | 0.67 | 0.9 | 48 |
 
 В целом не важно какая СУБД используется для хранения данных журнала регистрации. Разница в производительности на уровне статистической погрешности. В обоих вариантах время выгрузки около 35 тыс. записей журнала регистрации в минуту. Не часто можно встретить информационную базу, которая генерирует такой объем записей, но и она не будет препятствием для использования этой библиотеки выгрузки.
 
@@ -248,8 +293,9 @@ private static void AfterExportData(AfterExportDataEventArgs e)
 
 Планы в части разработки:
 
-* Добавить возможность экспорта данных в ElasticSearch
+* Добавить возможность экспорта данных в MySQL
 * Добавить возможность экспорта данных в MongoDB
+* Улучшить обработку ошибок по уровням возникновения (критические и нет)
 * Улучшение производительности и добавление bencmark'ов
 * Расширение unit-тестов библиотеки
 

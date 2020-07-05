@@ -1,0 +1,40 @@
+﻿{
+  "LGF": {
+    "ElasticSearch": {
+      "Node": "http://127.0.0.1:9200/",
+      "IndexName": "EventLogExport_LGF_Test",
+      "MaximumRetries": 2,
+      "MaxRetryTimeout": 60,
+      "IndexSeparationPeriod": "Hour"
+    },
+    "InformationSystem": {
+      "Name": "EventLogExport_LGF_Test",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGFFormat",
+      "UseWatchMode": true,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
+  },
+  "LGD": {
+    "ElasticSearch": {
+      "Node": "http://127.0.0.1:9200/",
+      "IndexName": "EventLogExport_LGD_Test",
+      "MaximumRetries": 2,
+      "MaxRetryTimeout": 60,
+      "IndexSeparationPeriod": "Hour"
+    },
+    "InformationSystem": {
+      "Name": "EventLogExport_LGD_Test",
+      "Description": "Тесты проверки экспорта данных журнала регистрации."
+    },
+    "EventLog": {
+      "SourcePath": "TestData\\LGDFormat",
+      "UseWatchMode": true,
+      "WatchPeriod": 5,
+      "Portion": 10000
+    }
+  }
+}
