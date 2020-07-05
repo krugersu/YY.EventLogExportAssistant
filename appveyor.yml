@@ -8,6 +8,7 @@ services:
 
 install:
 - ps: >-
+    .\Scripts\appveyor-install-java.ps1
     .\Scripts\appveyor-install-elasticsearch.ps1
 
 build_script:
