@@ -6,6 +6,10 @@ services:
  - mssql2017
  - postgresql101
 
+install:
+- ps: >-
+    .\Scripts\appveyor-install-apps.ps1
+
 build_script:
 - ps: >-
     .\Scripts\appveyor-build.ps1
