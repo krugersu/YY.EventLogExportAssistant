@@ -15,6 +15,10 @@
 |:-------:|:------:|
 | [![Build status](https://ci.appveyor.com/api/projects/status/lm4hex3gooyvaes2?svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogexportassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant) |
 
+### Code Climat
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/53754cae357167e851bd/maintainability)](https://codeclimate.com/github/YPermitin/YY.EventLogExportAssistant/maintainability)
+
 ## Состав репозитория
 
 * Библиотеки
