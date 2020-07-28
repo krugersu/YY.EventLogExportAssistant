@@ -1,15 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using YY.EventLogReaderAssistant;
 
-namespace YY.EventLogExportAssistant.SQLServer.Tests
+namespace YY.EventLogExportAssistant.MySQL.Tests
 {
-    [CollectionDefinition("YY.EventLogExportAssistant.SQLServer", DisableParallelization = true)]
+    [CollectionDefinition("YY.EventLogExportAssistant.MySQL", DisableParallelization = true)]
     public class EventLogExportMasterTests
     {
         #region Private Member Variables
@@ -54,7 +54,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseMySQL(connectionString);
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                 context.Database.EnsureDeleted();
 
@@ -133,7 +133,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPathLGF);
 
-            EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portionLGF);
+            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGF);
             target.SetInformationSystem(new InformationSystemsBase()
             {
                 Name = inforamtionSystemNameLGF,
@@ -178,7 +178,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPathLGD);
 
-            EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portionLGD);
+            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGD);
             target.SetInformationSystem(new InformationSystemsBase()
             {
                 Name = inforamtionSystemNameLGD,
@@ -231,7 +231,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 try
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                    optionsBuilder.UseSqlServer(connectionString);
+                    optionsBuilder.UseMySQL(connectionString);
                     using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                         context.Database.EnsureDeleted();
                 }

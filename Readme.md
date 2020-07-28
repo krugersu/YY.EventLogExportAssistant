@@ -5,6 +5,7 @@
 | YY.EventLogExportAssistant.Core | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.Core.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.Core) | Базовый пакет |
 | YY.EventLogExportAssistant.SQLServer | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.SQLServer.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.SQLServer) | Пакет для экспорта в базу SQL Server |
 | YY.EventLogExportAssistant.PostgreSQL | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL) | Пакет для экспорта в базу PostgreSQL |
+| YY.EventLogExportAssistant.MySQL | - | Пакет для экспорта в базу MySQL |
 | YY.EventLogExportAssistant.ElasticSearch | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch) | Пакет для экспорта в индексы ElasticSearch |
 
 Решение для экспорта данных журнала регистрации платформы 1С:Предприятие 8.x в нестандартные хранилища данных.
@@ -25,10 +26,12 @@
   * YY.EventLogExportAssistant.Core - ядро библиотеки с овновным функционалом чтения и передачи данных.
   * YY.EventLogExportAssistant.SQLServer - функционал для экспорта данных в базу SQL Server.
   * YY.EventLogExportAssistant.PostgreSQL - функционал для экспорта данных в базу PostgreSQL.
+  * YY.EventLogExportAssistant.MySQL - функционал для экспорта данных в базу MySQL.
   * YY.EventLogExportAssistant.ElasticSearch - функционал для экспорта данных в индексы ElasticSearch.
 * Примеры приложений
   * YY.EventLogExportToSQLServer - пример приложения для экспорта данных в базу SQL Server.
   * YY.EventLogExportToPostgreSQL - пример приложения для экспорта данных в базу PostgreSQL.
+  * YY.EventLogExportToMySQL - пример приложения для экспорта данных в базу MySQL.
   * YY.EventLogExportToElasticSearch - пример приложения для экспорта данных в индексы ElasticSearch.
 
 ## Требования и совместимость
@@ -38,6 +41,7 @@
 * Платформа 1С:Предприятие версии от 8.3.6 и выше.
 * SQL Server 2012 и более новые.
 * PostgreSQL 9.6 и выше.
+* MySQL 8.0 и выше.
 * ElasticSearch 7.6 и выше.
 
 В большинстве случаев работоспособность подтверждается и на более старых версиях ПО, но меньше тестируется. Основная разработка ведется для Microsoft Windows, но некоторый функционал проверялся под *.nix.*
@@ -48,6 +52,7 @@
 
 * YY.EventLogExportToSQLServer
 * YY.EventLogExportToPostgreSQL
+* YY.EventLogExportToMySQL
 * YY.EventLogExportToElasticSearch
 
 Для удобства приведем небольшой пример для выгрузки данных журнала регистрации в базу SQL Server.
@@ -290,7 +295,8 @@ private static void AfterExportData(AfterExportDataEventArgs e)
 | - | ---- | ------------- | ----------------------------- | ----------------------- | ----------------------- |
 | 1 | SQL Server | 10000 | 0.27 | 0.7 | 60 |
 | 2 | PostgreSQL | 10000 | 0.32 | 0.8 | 97 |
-| 3 | ElasticSearch | 10000 | 0.67 | 0.9 | 48 |
+| 3 | MySQL | 10000 | - | - | - |
+| 4 | ElasticSearch | 10000 | 0.67 | 0.9 | 48 |
 
 В целом не важно какая СУБД используется для хранения данных журнала регистрации. Разница в производительности на уровне статистической погрешности. В обоих вариантах время выгрузки около 35 тыс. записей журнала регистрации в минуту. Не часто можно встретить информационную базу, которая генерирует такой объем записей, но и она не будет препятствием для использования этой библиотеки выгрузки.
 
@@ -298,7 +304,6 @@ private static void AfterExportData(AfterExportDataEventArgs e)
 
 Планы в части разработки:
 
-* Добавить возможность экспорта данных в MySQL
 * Добавить возможность экспорта данных в MongoDB
 * Улучшить обработку ошибок по уровням возникновения (критические и нет)
 * Улучшение производительности и добавление bencmark'ов
