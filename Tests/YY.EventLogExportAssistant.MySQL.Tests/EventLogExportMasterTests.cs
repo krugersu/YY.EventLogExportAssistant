@@ -108,11 +108,11 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
         #region Public Methods
 
         [Fact]
-        public void ExportToSQLServerTest()
+        public void ExportToMySQLTest()
         {
-            ExportToSQLServer_LGF_Test();
+            ExportToMySQL_LGF_Test();
 
-            ExportToSQLServer_LGD_Test();
+            ExportToMySQL_LGD_Test();
 
             long informationSystemsCount;
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
@@ -125,7 +125,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
 
         #region Private Methods
 
-        private void ExportToSQLServer_LGF_Test()
+        private void ExportToMySQL_LGF_Test()
         {
             if (!Directory.Exists(eventLogPathLGF))
                 throw new Exception(" аталог данных журнала регистрации не обнаружен.");
@@ -170,7 +170,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
         }
-        private void ExportToSQLServer_LGD_Test()
+        private void ExportToMySQL_LGD_Test()
         {
             if (!Directory.Exists(eventLogPathLGD))
                 throw new Exception(" аталог данных журнала регистрации не обнаружен.");
