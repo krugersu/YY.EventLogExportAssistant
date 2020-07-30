@@ -1,15 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using YY.EventLogReaderAssistant;
 
-namespace YY.EventLogExportAssistant.SQLServer.Tests
+namespace YY.EventLogExportAssistant.MySQL.Tests
 {
-    [CollectionDefinition("YY.EventLogExportAssistant.SQLServer", DisableParallelization = true)]
+    [CollectionDefinition("YY.EventLogExportAssistant.MySQL", DisableParallelization = true)]
     public class EventLogExportMasterTests
     {
         #region Private Member Variables
@@ -54,7 +54,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseMySql(connectionString);
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                 context.Database.EnsureDeleted();
 
@@ -108,11 +108,11 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
         #region Public Methods
 
         [Fact]
-        public void ExportToSQLServerTest()
+        public void ExportToMySQLTest()
         {
-            ExportToSQLServer_LGF_Test();
+            ExportToMySQL_LGF_Test();
 
-            ExportToSQLServer_LGD_Test();
+            ExportToMySQL_LGD_Test();
 
             long informationSystemsCount;
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
@@ -125,7 +125,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         #region Private Methods
 
-        private void ExportToSQLServer_LGF_Test()
+        private void ExportToMySQL_LGF_Test()
         {
             if (!Directory.Exists(eventLogPathLGF))
                 throw new Exception(" аталог данных журнала регистрации не обнаружен.");
@@ -133,7 +133,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPathLGF);
 
-            EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portionLGF);
+            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGF);
             target.SetInformationSystem(new InformationSystemsBase()
             {
                 Name = inforamtionSystemNameLGF,
@@ -170,7 +170,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             Assert.NotEqual(0, rowsInDB);
             Assert.Equal(rowsInSourceFiles, rowsInDB);
         }
-        private void ExportToSQLServer_LGD_Test()
+        private void ExportToMySQL_LGD_Test()
         {
             if (!Directory.Exists(eventLogPathLGD))
                 throw new Exception(" аталог данных журнала регистрации не обнаружен.");
@@ -178,7 +178,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(eventLogPathLGD);
 
-            EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portionLGD);
+            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGD);
             target.SetInformationSystem(new InformationSystemsBase()
             {
                 Name = inforamtionSystemNameLGD,
@@ -231,7 +231,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 try
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                    optionsBuilder.UseSqlServer(connectionString);
+                    optionsBuilder.UseMySql(connectionString);
                     using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                         context.Database.EnsureDeleted();
                 }

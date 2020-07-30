@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.2">
@@ -21,21 +20,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
-    <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.PostgreSQL\YY.EventLogExportAssistant.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.MySQL\YY.EventLogExportAssistant.MySQL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\LGDFormat\1Cv8.lgd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="travisci-appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="appveyor-appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\LGDFormat\1Cv8.lgd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestData\LGFFormat\1Cv8.lgf">
@@ -44,10 +39,9 @@
     <None Update="TestData\LGFFormat\20200516230000.lgp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="TestData\LGDFormat\" />
+    <None Update="travisci-appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
