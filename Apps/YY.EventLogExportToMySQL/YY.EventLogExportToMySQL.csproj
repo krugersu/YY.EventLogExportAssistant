@@ -9,4 +9,10 @@
     <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.MySQL\YY.EventLogExportAssistant.MySQL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

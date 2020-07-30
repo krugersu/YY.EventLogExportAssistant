@@ -55,7 +55,7 @@ namespace YY.EventLogExportAssistant.MySQL
                 string connectionString = Configuration.GetConnectionString("EventLogDatabase");
 
                 var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                optionsBuilder.UseMySQL(connectionString);
+                optionsBuilder.UseMySql(connectionString);
                 _databaseOptions = optionsBuilder.Options;
             }
             else

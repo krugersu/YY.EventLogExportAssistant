@@ -54,7 +54,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
 
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            optionsBuilder.UseMySQL(connectionString);
+            optionsBuilder.UseMySql(connectionString);
             using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                 context.Database.EnsureDeleted();
 
@@ -231,7 +231,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 try
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                    optionsBuilder.UseMySQL(connectionString);
+                    optionsBuilder.UseMySql(connectionString);
                     using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
                         context.Database.EnsureDeleted();
                 }

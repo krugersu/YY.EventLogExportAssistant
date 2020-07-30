@@ -50,7 +50,7 @@ namespace YY.EventLogExportAssistant.MySQL
                     .Build();
 
                 string connectinString = Configuration.GetConnectionString("EventLogDatabase");
-                optionsBuilder.UseMySQL(connectinString);
+                optionsBuilder.UseMySql(connectinString);
             }
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
