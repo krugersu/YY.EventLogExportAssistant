@@ -48,6 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C
 		Scripts\appveyor-install-elasticsearch.ps1 = Scripts\appveyor-install-elasticsearch.ps1
 		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
 		Scripts\deploy.sh = Scripts\deploy.sh
+		Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql
 	EndProjectSection
