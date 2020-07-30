@@ -21,6 +21,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="appveyor-appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\LGDFormat\1Cv8.lgd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
