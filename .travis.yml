@@ -4,6 +4,7 @@ dist: xenial
 dotnet: 3.1
 services:
   - postgresql
+  - mysql
 addons:
   postgresql: "10"
 before_install:
@@ -14,6 +15,13 @@ before_install:
 - echo -e '-XX:+DisableExplicitGC\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dlog4j.skipJansi=true\n-server\n' | sudo tee -a /etc/elasticsearch/jvm.options
 - sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
 - sudo systemctl start elasticsearch
+- wget https://repo.mysql.com//mysql-apt-config_0.8.10-1_all.deb
+- sudo dpkg -i mysql-apt-config_0.8.10-1_all.deb
+- sudo apt-get update -q
+- sudo apt-get install -q -y --allow-unauthenticated -o Dpkg::Options::=--force-confnew mysql-server
+- sudo systemctl restart mysql
+- sudo mysql_upgrade
+- mysql --version 
 install:
   - dotnet restore
 before_script:
