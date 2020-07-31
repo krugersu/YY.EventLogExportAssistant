@@ -4,7 +4,6 @@ using System.Linq;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Npgsql.Bulk;
 using System;
 using YY.EventLogExportAssistant.Database;
@@ -21,7 +20,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
-        private readonly IEventLogContextExtensionActions _PostgreSqlActions;
+        private readonly IEventLogContextExtensionActions _postgreSqlActions;
 
         private IReadOnlyList<Applications> cacheApplications;
         private IReadOnlyList<Computers> cacheComputers;
@@ -48,23 +47,17 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public EventLogOnPostgreSQL(DbContextOptions<EventLogContext> databaseOptions, int portion)
         {
+            _postgreSqlActions = new EventLogPostgreSQLActions();
             _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
             if (databaseOptions == null)
             {
-                IConfiguration Configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .Build();
-                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                
                 var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                optionsBuilder.UseNpgsql(connectionString);
+                _postgreSqlActions.OnConfiguring(optionsBuilder);
                 _databaseOptions = optionsBuilder.Options;
             }
             else
                 _databaseOptions = databaseOptions;
-
-            _PostgreSqlActions = new EventLogPostgreSQLActions();
         }
 
         #endregion
@@ -73,7 +66,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
             {
                 var lastLogFile = _context.LogFiles
                     .SingleOrDefault(e => e.InformationSystemId == _system.Id
@@ -91,7 +84,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
             {
                 LogFiles foundLogFile = _context.LogFiles
                     .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
@@ -137,7 +130,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                 {
@@ -270,7 +263,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
             {
                 InformationSystems existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
                 if (existSystem == null)
@@ -298,176 +291,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
             {
-                if (data.Applications != null)
-                {
-                    foreach (var itemApplication in data.Applications)
-                    {
-                        Applications foundApplication = _context.Applications
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemApplication.Name);
-                        if (foundApplication == null)
-                        {
-                            _context.Applications.Add(new Applications()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemApplication.Name
-                            });
-                        }
-                    }
-                }
-                if (data.Computers != null)
-                {
-                    foreach (var itemComputer in data.Computers)
-                    {
-                        Computers foundComputer = _context.Computers
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemComputer.Name);
-                        if (foundComputer == null)
-                        {
-                            _context.Computers.Add(new Computers()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemComputer.Name
-                            });
-                        }
-                    }
-                }
-                if (data.Events != null)
-                {
-                    foreach (var itemEvent in data.Events)
-                    {
-                        Events foundEvents = _context.Events
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemEvent.Name);
-                        if (foundEvents == null)
-                        {
-                            _context.Events.Add(new Events()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemEvent.Name
-                            });
-                        }
-                    }
-                }
-                if (data.Metadata != null)
-                {
-                    foreach (var itemMetadata in data.Metadata)
-                    {
-                        Metadata foundMetadata = _context.Metadata
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
-                                                 && e.Name == itemMetadata.Name
-                                                 && e.Uuid == itemMetadata.Uuid);
-                        if (foundMetadata == null)
-                        {
-                            _context.Metadata.Add(new Metadata()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemMetadata.Name,
-                                Uuid = itemMetadata.Uuid
-                            });
-                        }
-                    }
-                }
-                if (data.PrimaryPorts != null)
-                {
-                    foreach (var itemPrimaryPort in data.PrimaryPorts)
-                    {
-                        PrimaryPorts foundPrimaryPort = _context.PrimaryPorts
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemPrimaryPort.Name);
-                        if (foundPrimaryPort == null)
-                        {
-                            _context.PrimaryPorts.Add(new PrimaryPorts()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemPrimaryPort.Name
-                            });
-                        }
-                    }
-                }
-                if (data.SecondaryPorts != null)
-                {
-                    foreach (var itemSecondaryPort in data.SecondaryPorts)
-                    {
-                        SecondaryPorts foundSecondaryPort = _context.SecondaryPorts
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemSecondaryPort.Name);
-                        if (foundSecondaryPort == null)
-                        {
-                            _context.SecondaryPorts.Add(new SecondaryPorts()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemSecondaryPort.Name
-                            });
-                        }
-                    }
-                }
-                if (data.Severities != null)
-                {
-                    foreach (var itemSeverity in data.Severities)
-                    {
-                        Severities foundSeverity = _context.Severities
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemSeverity.ToString());
-                        if (foundSeverity == null)
-                        {
-                            _context.Severities.Add(new Severities()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemSeverity.ToString()
-                            });
-                        }
-                    }
-                }
-                if (data.TransactionStatuses != null)
-                {
-                    foreach (var itemTransactionStatus in data.TransactionStatuses)
-                    {
-                        TransactionStatuses foundTransactionStatus = _context.TransactionStatuses
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Name == itemTransactionStatus.ToString());
-                        if (foundTransactionStatus == null)
-                        {
-                            _context.TransactionStatuses.Add(new TransactionStatuses()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemTransactionStatus.ToString()
-                            });
-                        }
-                    }
-                }
-                if (data.Users != null)
-                {
-                    foreach (var itemUser in data.Users)
-                    {
-                        Users foundUsers = _context.Users
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
-                                                 && e.Name == itemUser.Name
-                                                 && e.Uuid == itemUser.Uuid);
-                        if (foundUsers == null)
-                        {
-                            _context.Users.Add(new Users()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemUser.Name,
-                                Uuid = itemUser.Uuid
-                            });
-                        }
-                    }
-                }
-                if (data.WorkServers != null)
-                {
-                    foreach (var itemWorkServer in data.WorkServers)
-                    {
-                        WorkServers foundWorkServer = _context.WorkServers
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id
-                                                 && e.Name == itemWorkServer.Name);
-                        if (foundWorkServer == null)
-                        {
-                            _context.WorkServers.Add(new WorkServers()
-                            {
-                                InformationSystemId = _system.Id,
-                                Name = itemWorkServer.Name
-                            });
-                        }
-                    }
-                }
-
+                _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();
 
                 cacheApplications = _context.Applications.ToList().AsReadOnly();
