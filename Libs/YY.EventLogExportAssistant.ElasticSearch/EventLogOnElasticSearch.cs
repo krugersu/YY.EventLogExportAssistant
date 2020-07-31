@@ -73,31 +73,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 return _lastEventLogFilePosition;
             }
 
-            string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
-            logFilesActualIndexName = logFilesActualIndexName.ToLower();
-
-            var searchResponse = _client.Search<LogFileElement>(s => s
-                .Index(logFilesActualIndexName)
-                .From(0)
-                .Size(1)
-                .Query(q => q
-                    .Match(m => m
-                        .Field(f => f.InformationSystem)
-                        .Query(_system.Name)
-                    )
-                )
-            );
-
-            if (!searchResponse.ApiCall.Success)
-            {
-                throw searchResponse.ApiCall.OriginalException;
-            }
+            LogFileElement actualLogFileInfo = _client.GetLastLogFileElement(_system.Name, _indexName);
 
             EventLogPosition position = null;
-            if (searchResponse.Documents.Count == 1)
+            if (actualLogFileInfo != null)
             {
-                LogFileElement actualLogFileInfo = searchResponse.Documents.First();
-
                 position = new EventLogPosition(
                     actualLogFileInfo.LastEventNumber,
                     actualLogFileInfo.LastCurrentFileReferences,
@@ -107,7 +87,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             }
 
             _lastEventLogFilePosition = position;
-
             return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using Nest;
+using YY.EventLogExportAssistant.ElasticSearch.Models;
 
 namespace YY.EventLogExportAssistant.ElasticSearch.Helpers
 {
@@ -37,6 +40,41 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Helpers
             }
 
             return separationWithFormat;
+        }
+
+        public static LogFileElement GetLastLogFileElement(
+            this ElasticClient client, 
+            string systemName,
+            string indexName)
+        {
+            string logFilesActualIndexName = $"{indexName}-LogFiles-Actual";
+            logFilesActualIndexName = logFilesActualIndexName.ToLower();
+
+            var searchResponse = client.Search<LogFileElement>(s => s
+                .Index(logFilesActualIndexName)
+                .From(0)
+                .Size(1)
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.InformationSystem)
+                        .Query(systemName)
+                    )
+                )
+            );
+
+            if (!searchResponse.ApiCall.Success)
+            {
+                throw searchResponse.ApiCall.OriginalException;
+            }
+
+            if (searchResponse.Documents.Count == 1)
+            {
+                return searchResponse.Documents.First();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
