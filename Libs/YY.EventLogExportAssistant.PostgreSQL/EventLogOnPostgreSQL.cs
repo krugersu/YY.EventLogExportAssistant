@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql.Bulk;
 using System;
-using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
 

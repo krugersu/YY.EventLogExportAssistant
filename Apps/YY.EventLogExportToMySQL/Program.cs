@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Threading;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.MySQL;
 
-namespace YY.EventLogExportToSQLServer
+namespace YY.EventLogExportToMySQL
 {
     class Program
     {

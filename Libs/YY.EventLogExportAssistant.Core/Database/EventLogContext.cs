@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
 
 namespace YY.EventLogExportAssistant.Database
@@ -70,7 +68,7 @@ namespace YY.EventLogExportAssistant.Database
                 out var standardBehaviorChanged);
 
             if(standardBehaviorChanged)
-                return;;
+                return;
 
             modelBuilder.Entity<InformationSystems>()
                  .HasKey(b => new { b.Id });
@@ -133,7 +131,7 @@ namespace YY.EventLogExportAssistant.Database
         }
         private void AddExplicitStandardIndex<T>(ModelBuilder modelBuilder) where T : CommonLogObject
         {
-            modelBuilder.Entity<Applications>()
+            modelBuilder.Entity<T>()
                 .HasIndex(b => new { b.InformationSystemId, b.Id })
                 .IsUnique();
         }

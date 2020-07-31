@@ -7,7 +7,6 @@ using System.Linq;
 using Xunit;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogReaderAssistant;
-using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.SQLServer.Tests
 {
