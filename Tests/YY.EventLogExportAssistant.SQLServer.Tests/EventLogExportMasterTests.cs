@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using YY.EventLogExportAssistant.Database;
 using YY.EventLogReaderAssistant;
+using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.SQLServer.Tests
 {
@@ -16,6 +18,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         string connectionString;
         DbContextOptionsBuilder<EventLogContext> optionsBuilder;
+        private IEventLogContextExtensionActions _SqlServerActions;
 
         #region LGF Settings
 
@@ -41,6 +44,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         public EventLogExportMasterTests()
         {
+            _SqlServerActions = new EventLogSQLServerActions();
             string configFilePath = GetConfigFile();
 
             if (!File.Exists(configFilePath))
@@ -55,7 +59,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseSqlServer(connectionString);
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                _SqlServerActions, DBMSType.SQLServer))
                 context.Database.EnsureDeleted();
 
             #endregion
@@ -115,7 +120,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             ExportToSQLServer_LGD_Test();
 
             long informationSystemsCount;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                _SqlServerActions, DBMSType.SQLServer))
                 informationSystemsCount = context.InformationSystems.Count();
 
             Assert.Equal(2, informationSystemsCount);
@@ -149,7 +155,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                _SqlServerActions, DBMSType.SQLServer))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGF);
@@ -194,7 +201,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                _SqlServerActions, DBMSType.SQLServer))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGD);
@@ -232,7 +240,8 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
                     optionsBuilder.UseSqlServer(connectionString);
-                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                        _SqlServerActions, DBMSType.SQLServer))
                         context.Database.EnsureDeleted();
                 }
                 catch

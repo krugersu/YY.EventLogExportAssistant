@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using YY.EventLogExportAssistant.Database;
 using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.PostgreSQL.Tests
@@ -15,6 +16,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
         string connectionString;
         DbContextOptionsBuilder<EventLogContext> optionsBuilder;
+        private IEventLogContextExtensionActions _PostgreSqlActions;
 
         #region LGF Settings
 
@@ -40,6 +42,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
 
         public EventLogExportMasterTests()
         {
+            _PostgreSqlActions = new EventLogPostgreSQLActions();
             string configFilePath = GetConfigFile();
 
             if (!File.Exists(configFilePath))
@@ -54,7 +57,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseNpgsql(connectionString);
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options, _PostgreSqlActions, DBMSType.PostgreSQL))
                 context.Database.EnsureDeleted();
 
             #endregion
@@ -118,7 +121,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
             ExportToPostgreSQL_LGD_Test();
 
             long informationSystemsCount;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options, _PostgreSqlActions, DBMSType.PostgreSQL))
                 informationSystemsCount = context.InformationSystems.Count();
 
             Assert.Equal(2, informationSystemsCount);
@@ -152,7 +155,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGF);
@@ -197,7 +200,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+            using (EventLogContext context = new EventLogContext(optionsBuilder.Options, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGD);
@@ -235,7 +238,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
                     optionsBuilder.UseNpgsql(connectionString);
-                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options))
+                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options, _PostgreSqlActions, DBMSType.PostgreSQL))
                         context.Database.EnsureDeleted();
                 }
                 catch

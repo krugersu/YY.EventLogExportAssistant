@@ -68,11 +68,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToElasticSearch", "Apps\YY.EventLogExportToElasticSearch\YY.EventLogExportToElasticSearch.csproj", "{AFE9FF1D-EBED-4174-8FA2-835D37E87B5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.MySQL", "Libs\YY.EventLogExportAssistant.MySQL\YY.EventLogExportAssistant.MySQL.csproj", "{38A5A1D0-BC76-43D8-9B1D-F347D7AC45AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.MySQL", "Libs\YY.EventLogExportAssistant.MySQL\YY.EventLogExportAssistant.MySQL.csproj", "{38A5A1D0-BC76-43D8-9B1D-F347D7AC45AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.MySQL.Tests", "Tests\YY.EventLogExportAssistant.MySQL.Tests\YY.EventLogExportAssistant.MySQL.Tests.csproj", "{AF3653B3-495A-4FDE-AC22-C06C9BE72766}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.MySQL.Tests", "Tests\YY.EventLogExportAssistant.MySQL.Tests\YY.EventLogExportAssistant.MySQL.Tests.csproj", "{AF3653B3-495A-4FDE-AC22-C06C9BE72766}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportToMySQL", "Apps\YY.EventLogExportToMySQL\YY.EventLogExportToMySQL.csproj", "{D268DD2D-7693-471A-A657-1132C0E2DB4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToMySQL", "Apps\YY.EventLogExportToMySQL\YY.EventLogExportToMySQL.csproj", "{D268DD2D-7693-471A-A657-1132C0E2DB4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

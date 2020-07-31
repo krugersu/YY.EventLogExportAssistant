@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using YY.EventLogExportAssistant;
+using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.MySQL;
 
 namespace YY.EventLogExportToSQLServer
