@@ -73,7 +73,7 @@ namespace YY.EventLogExportAssistant.SQLServer
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
             {
                 var lastLogFile = _context.LogFiles
                     .SingleOrDefault(e => e.InformationSystemId == _system.Id 
@@ -91,7 +91,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
             {
                 LogFiles foundLogFile = _context.LogFiles
                     .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
@@ -137,7 +137,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                 {
@@ -269,7 +269,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
             {
                 InformationSystems existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
                 if (existSystem == null)
@@ -297,7 +297,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _SQLServerActions, DBMSType.SQLServer))
             {
                 if (data.Applications != null)
                 {

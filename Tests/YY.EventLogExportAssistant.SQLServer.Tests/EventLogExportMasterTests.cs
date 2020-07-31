@@ -17,7 +17,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
 
         string connectionString;
         DbContextOptionsBuilder<EventLogContext> optionsBuilder;
-        private IEventLogContextExtensionActions _SqlServerActions;
+        private readonly IEventLogContextExtensionActions _SqlServerActions;
 
         #region LGF Settings
 
@@ -58,7 +58,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseSqlServer(connectionString);
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options,
                 _SqlServerActions, DBMSType.SQLServer))
                 context.Database.EnsureDeleted();
 
@@ -119,7 +119,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
             ExportToSQLServer_LGD_Test();
 
             long informationSystemsCount;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options,
                 _SqlServerActions, DBMSType.SQLServer))
                 informationSystemsCount = context.InformationSystems.Count();
 
@@ -154,7 +154,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options,
                 _SqlServerActions, DBMSType.SQLServer))
             {
                 var informationSystem = context.InformationSystems
@@ -200,7 +200,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options,
                 _SqlServerActions, DBMSType.SQLServer))
             {
                 var informationSystem = context.InformationSystems
@@ -239,7 +239,7 @@ namespace YY.EventLogExportAssistant.SQLServer.Tests
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
                     optionsBuilder.UseSqlServer(connectionString);
-                    using (EventLogContext context = new EventLogContext(optionsBuilder.Options,
+                    using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options,
                         _SqlServerActions, DBMSType.SQLServer))
                         context.Database.EnsureDeleted();
                 }

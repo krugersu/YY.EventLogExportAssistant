@@ -21,7 +21,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
-        private IEventLogContextExtensionActions _PostgreSqlActions;
+        private readonly IEventLogContextExtensionActions _PostgreSqlActions;
 
         private IReadOnlyList<Applications> cacheApplications;
         private IReadOnlyList<Computers> cacheComputers;
@@ -73,7 +73,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 var lastLogFile = _context.LogFiles
                     .SingleOrDefault(e => e.InformationSystemId == _system.Id
@@ -91,7 +91,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 LogFiles foundLogFile = _context.LogFiles
                     .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
@@ -137,7 +137,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                 {
@@ -270,7 +270,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 InformationSystems existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
                 if (existSystem == null)
@@ -298,7 +298,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = new EventLogContext(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _PostgreSqlActions, DBMSType.PostgreSQL))
             {
                 if (data.Applications != null)
                 {

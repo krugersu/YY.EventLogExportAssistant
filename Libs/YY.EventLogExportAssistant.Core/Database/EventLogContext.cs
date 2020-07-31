@@ -6,6 +6,19 @@ namespace YY.EventLogExportAssistant.Database
 {
     public class EventLogContext : DbContext
     {
+        #region Public Static Methods
+
+        public static EventLogContext Create(IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
+        {
+            return new EventLogContext(extensionActions, DBMSType);
+        }
+        public static EventLogContext Create(DbContextOptions<EventLogContext> options, IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
+        {
+            return new EventLogContext(options, extensionActions, DBMSType);
+        }
+
+        #endregion
+
         #region Private Properties
 
         private readonly IEventLogContextExtensionActions _extensionActions;
@@ -33,6 +46,9 @@ namespace YY.EventLogExportAssistant.Database
 
         #region Constructor
 
+        private EventLogContext()
+        {
+        }
         public EventLogContext(IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
         {
             _extensionActions = extensionActions;
