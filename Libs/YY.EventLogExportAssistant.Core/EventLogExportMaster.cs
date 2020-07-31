@@ -156,7 +156,34 @@ namespace YY.EventLogExportAssistant
         }
         private void SendDataCurrentPortion(EventLogReader reader)
         {
-            bool cancel = false;
+            RiseBeforeExportData(out var cancel);
+            if (!cancel)
+            {
+                UpdateReferences(reader);
+                _target.Save(_dataToSend);
+                RiseAfterExportData(reader.GetCurrentPosition());
+            }
+
+            if (reader.CurrentFile != null)
+            {
+                _target.SaveLogPosition(
+                    new FileInfo(reader.CurrentFile),
+                    reader.GetCurrentPosition());
+            }
+            _dataToSend.Clear();
+        }
+
+        private void RiseAfterExportData(EventLogPosition currentPosition)
+        {
+            AfterExportDataHandler handlerAfterExportData = AfterExportData;
+            handlerAfterExportData?.Invoke(new AfterExportDataEventArgs()
+            {
+                CurrentPosition = currentPosition
+            });
+
+        }
+        private void RiseBeforeExportData(out bool cancel)
+        {
             BeforeExportDataHandler handlerBeforeExportData = BeforeExportData;
             if (handlerBeforeExportData != null)
             {
@@ -167,30 +194,10 @@ namespace YY.EventLogExportAssistant
                 handlerBeforeExportData.Invoke(beforeExportArgs);
                 cancel = beforeExportArgs.Cancel;
             }
-
-            EventLogPosition currentPosition = reader.GetCurrentPosition();
-            if (!cancel)
+            else
             {
-                UpdateReferences(reader);
-                _target.Save(_dataToSend);
-
-                AfterExportDataHandler handlerAfterExportData = AfterExportData;
-                if (handlerAfterExportData != null)
-                {
-                    handlerAfterExportData.Invoke(new AfterExportDataEventArgs()
-                    {
-                        CurrentPosition = currentPosition
-                    });
-                }
+                cancel = false;
             }
-
-            if (reader.CurrentFile != null)
-            {
-                FileInfo logFileInfo = new FileInfo(reader.CurrentFile);
-                _target.SaveLogPosition(logFileInfo, currentPosition);
-            }
-
-            _dataToSend.Clear();
         }
 
         #endregion
