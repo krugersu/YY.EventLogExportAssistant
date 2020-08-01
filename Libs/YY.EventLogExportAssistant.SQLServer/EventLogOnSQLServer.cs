@@ -57,20 +57,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         public override EventLogPosition GetLastPosition()
         {
             using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
-            {
-                var lastLogFile = _context.LogFiles
-                    .SingleOrDefault(e => e.InformationSystemId == _system.Id 
-                                          && e.Id == _context.LogFiles.Where(i => i.InformationSystemId == _system.Id).Max(m => m.Id));
-
-                if (lastLogFile == null)
-                    return null;
-                else
-                    return new EventLogPosition(
-                        lastLogFile.LastEventNumber,
-                        lastLogFile.LastCurrentFileReferences,
-                        lastLogFile.LastCurrentFileData,
-                        lastLogFile.LastStreamPosition);
-            }
+                return _context.GetLastPosition(_system);
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {

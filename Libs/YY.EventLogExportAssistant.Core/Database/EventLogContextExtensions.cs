@@ -106,6 +106,21 @@ namespace YY.EventLogExportAssistant.Database
 
             return (checkExist != null);
         }
+        public static EventLogPosition GetLastPosition(this EventLogContext context, InformationSystemsBase system)
+        {
+            var lastLogFile = context.LogFiles
+                .SingleOrDefault(e => e.InformationSystemId == system.Id
+                                      && e.Id == context.LogFiles.Where(i => i.InformationSystemId == system.Id).Max(m => m.Id));
+
+            if (lastLogFile == null)
+                return null;
+            else
+                return new EventLogPosition(
+                    lastLogFile.LastEventNumber,
+                    lastLogFile.LastCurrentFileReferences,
+                    lastLogFile.LastCurrentFileData,
+                    lastLogFile.LastStreamPosition);
+        }
 
         #endregion
 
