@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using YY.EventLogExportAssistant.Database;
 using YY.EventLogReaderAssistant.Models;
+using ReferenceObject = YY.EventLogExportAssistant.Database.Models.ReferenceObject;
 
 namespace YY.EventLogExportAssistant
 {
@@ -25,7 +25,7 @@ namespace YY.EventLogExportAssistant
 
         #region Public Methods
 
-        public IReadOnlyList<T> GetReferencesListForDatabaseType<T>(InformationSystemsBase system) where T : IDatabaseReferenceItem
+        public IReadOnlyList<T> GetReferencesListForDatabaseType<T>(InformationSystemsBase system) where T : ReferenceObject
         {
             IReadOnlyList<T> result;
             if (typeof(T) == typeof(Database.Models.Applications))

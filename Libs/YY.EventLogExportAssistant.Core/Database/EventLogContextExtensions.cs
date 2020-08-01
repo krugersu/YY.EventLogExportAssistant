@@ -21,12 +21,17 @@ namespace YY.EventLogExportAssistant.Database
             FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Users>(system));
             FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<WorkServers>(system));
         }
-        public static void AddReferenceToSaveInDB<T>(this EventLogContext context, T item) where T : class, IDatabaseReferenceItem
+        public static void AddReferenceToSaveInDB<T>(this EventLogContext context, T item) where T : ReferenceObject
         {
             context.Set<T>().Add(item);
+        }
 
-            //if(typeof(T) == typeof(Applications))
-            //    context.Set<Applications>().Add((Applications)item);
+        public static bool ReferenceExistInDB<T>(this EventLogContext context, InformationSystemsBase system, T item) where T : ReferenceObject
+        {
+            T foundItem = context.Set<T>()
+                .FirstOrDefault(e => e.InformationSystemId == system.Id && e.Name == item.Name);
+
+            return (foundItem != null);
         }
 
         #endregion
@@ -34,16 +39,15 @@ namespace YY.EventLogExportAssistant.Database
         #region Private Methods
 
         private static void FillReferencesToSave<T>(EventLogContext context, InformationSystemsBase system, IReadOnlyList<T> sourceReferences)
-            where T : class, IDatabaseReferenceItem
+            where T : ReferenceObject
         {
             if (sourceReferences == null)
                 return;
 
             foreach (var itemReference in sourceReferences)
             {
-                if (!itemReference.ReferenceExistInDB(context, system))
+                if (!context.ReferenceExistInDB<T>(system, itemReference))
                 {
-                    //itemReference.AddReferenceToSaveInDB(context, system);
                     context.AddReferenceToSaveInDB<T>(itemReference);
                 }
             }

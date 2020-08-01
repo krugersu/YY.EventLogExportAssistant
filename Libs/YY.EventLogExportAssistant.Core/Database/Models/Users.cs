@@ -11,20 +11,5 @@ namespace YY.EventLogExportAssistant.Database.Models
         public Guid Uuid { get; set; }
 
         #endregion
-
-        #region Public Methods
-
-        public override bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
-        {
-            Users foundItem = context.Users
-                .FirstOrDefault(e => e.InformationSystemId == InformationSystemId && e.Name == Name);
-
-            if (foundItem == null)
-                return false;
-            else
-                return true;
-        }
-
-        #endregion
     }
 }

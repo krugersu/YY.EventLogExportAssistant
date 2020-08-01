@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace YY.EventLogExportAssistant.Database.Models
 {
-    public abstract class ReferenceObject : CommonLogObject, IDatabaseReferenceItem
+    public abstract class ReferenceObject : CommonLogObject
     {
         #region Public Static Methods
 
-        public static IReadOnlyList<T> PrepareItemsToSave<T>(InformationSystemsBase system, ReferencesData data) where T : IDatabaseReferenceItem
+        public static IReadOnlyList<T> PrepareItemsToSave<T>(InformationSystemsBase system, ReferencesData data) where T : ReferenceObject
         {
             IReadOnlyList<T> sourceReferenceList = data.GetReferencesListForDatabaseType<T>(system);
 
@@ -27,10 +27,6 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         #region Public Methods
         
-        public virtual bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
-        {
-            throw new System.NotImplementedException();
-        }
         public override string ToString()
         {
             return Name;
