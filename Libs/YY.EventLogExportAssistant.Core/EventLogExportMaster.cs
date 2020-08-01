@@ -225,15 +225,12 @@ namespace YY.EventLogExportAssistant
         private void EventLogReader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
         {
             OnErrorExportDataHandler handlerOnErrorExportData = OnErrorExportData;
-            if (handlerOnErrorExportData != null)
+            handlerOnErrorExportData?.Invoke(new OnErrorExportDataEventArgs()
             {
-                handlerOnErrorExportData.Invoke(new OnErrorExportDataEventArgs()
-                {
-                    Exception = args.Exception,
-                    SourceData = args.SourceData,
-                    Critical = args.Critical
-                });
-            }
+                Exception = args.Exception,
+                SourceData = args.SourceData,
+                Critical = args.Critical
+            });
         }
 
         #endregion
