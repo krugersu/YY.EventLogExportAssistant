@@ -21,18 +21,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
         private readonly IEventLogContextExtensionActions _postgreSqlActions;
-
-        private IReadOnlyList<Applications> cacheApplications;
-        private IReadOnlyList<Computers> cacheComputers;
-        private IReadOnlyList<Events> cacheEvents;
-        private IReadOnlyList<Metadata> cacheMetadata;
-        private IReadOnlyList<PrimaryPorts> cachePrimaryPorts;
-        private IReadOnlyList<SecondaryPorts> cacheSecondaryPorts;
-        private IReadOnlyList<Severities> cacheSeverities;
-        private IReadOnlyList<TransactionStatuses> cacheTransactionStatuses;
-        private IReadOnlyList<Users> cacheUsers;
-        private IReadOnlyList<WorkServers> cacheWorkServers;
-
+        private RefferencesDataCache _referencesCache;
+        
         #endregion
 
         #region Constructor
@@ -147,101 +137,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                             continue;
                     }
 
-                    long? rowApplicationId = null;
-                    if (itemRow.Application != null)
-                    {
-                        var rowApplication = cacheApplications
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Application.Name);
-                        rowApplicationId = rowApplication.Id;
-                    }
-
-                    long? rowComputerId = null;
-                    if (itemRow.Computer != null)
-                    {
-                        var rowComputer = cacheComputers
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Computer.Name);
-                        rowComputerId = rowComputer.Id;
-                    }
-
-                    long? rowEventId = null;
-                    if (itemRow.Event != null)
-                    {
-                        var rowEvent = cacheEvents
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Event.Name);
-                        rowEventId = rowEvent.Id;
-                    }
-
-                    long? rowMetadataId = null;
-                    if (itemRow.Metadata != null)
-                    {
-                        var rowMetadata = cacheMetadata
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Metadata.Name && e.Uuid == itemRow.Metadata.Uuid);
-                        rowMetadataId = rowMetadata.Id;
-                    }
-
-                    long? rowPrimaryPortId = null;
-                    if (itemRow.PrimaryPort != null)
-                    {
-                        var rowPrimaryPort = cachePrimaryPorts
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.PrimaryPort.Name);
-                        rowPrimaryPortId = rowPrimaryPort.Id;
-                    }
-
-                    long? rowSecondaryPortId = null;
-                    if (itemRow.SecondaryPort != null)
-                    {
-                        var rowSecondaryPort = cacheSecondaryPorts
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.SecondaryPort.Name);
-                        rowSecondaryPortId = rowSecondaryPort.Id;
-                    }
-
-                    var rowSeverity = cacheSeverities
-                        .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.Severity.ToString());
-                    var rowTransactionStatus = cacheTransactionStatuses
-                        .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.TransactionStatus.ToString());
-
-                    long? rowUserId = null;
-                    if (itemRow.User != null)
-                    {
-                        var rowUser = cacheUsers
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.User.Name);
-                        rowUserId = rowUser.Id;
-                    }
-
-                    long? rowWorkServerId = null;
-                    if (itemRow.WorkServer != null)
-                    {
-                        var rowWorkServer = cacheWorkServers
-                            .First(e => e.InformationSystemId == _system.Id && e.Name == itemRow.WorkServer.Name);
-                        rowWorkServerId = rowWorkServer.Id;
-                    }
-
-                    Database.Models.RowData rowData = new Database.Models.RowData()
-                    {
-                        ApplicationId = rowApplicationId,
-                        Comment = itemRow.Comment,
-                        ComputerId = rowComputerId,
-                        ConnectId = itemRow.ConnectId,
-                        Data = itemRow.Data,
-                        DataPresentation = itemRow.DataPresentation,
-                        DataUUID = itemRow.DataUuid,
-                        EventId = rowEventId,
-                        Id = itemRow.RowId,
-                        InformationSystemId = _system.Id,
-                        MetadataId = rowMetadataId,
-                        Period = itemRow.Period,
-                        PrimaryPortId = rowPrimaryPortId,
-                        SecondaryPortId = rowSecondaryPortId,
-                        Session = itemRow.Session,
-                        SeverityId = rowSeverity.Id,
-                        TransactionDate = itemRow.TransactionDate,
-                        TransactionId = itemRow.TransactionId,
-                        TransactionStatusId = rowTransactionStatus.Id,
-                        UserId = rowUserId,
-                        WorkServerId = rowWorkServerId
-                    };
-
-                    newEntities.Add(rowData);
+                    newEntities.Add(new Database.Models.RowData(_system, itemRow, _referencesCache));
                 }
 
                 var bulkUploader = new NpgsqlBulkUploader(_context);
@@ -260,16 +156,9 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                 _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();
 
-                cacheApplications = _context.Applications.ToList().AsReadOnly();
-                cacheComputers = _context.Computers.ToList().AsReadOnly();
-                cacheEvents = _context.Events.ToList().AsReadOnly();
-                cacheMetadata = _context.Metadata.ToList().AsReadOnly();
-                cachePrimaryPorts = _context.PrimaryPorts.ToList().AsReadOnly();
-                cacheSecondaryPorts = _context.SecondaryPorts.ToList().AsReadOnly();
-                cacheSeverities = _context.Severities.ToList().AsReadOnly();
-                cacheTransactionStatuses = _context.TransactionStatuses.ToList().AsReadOnly();
-                cacheUsers = _context.Users.ToList().AsReadOnly();
-                cacheWorkServers = _context.WorkServers.ToList().AsReadOnly();
+                if (_referencesCache == null)
+                    _referencesCache = new RefferencesDataCache(_system);
+                _referencesCache.FillByDatabaseContext(_context);
             }
         }
 
