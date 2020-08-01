@@ -85,8 +85,7 @@ namespace YY.EventLogExportAssistant
                 result = (IReadOnlyList<T>)Users.Select(i => new Database.Models.Users() { Name = i.Name, InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.WorkServers))
                 result = (IReadOnlyList<T>) WorkServers.Select(i => new Database.Models.WorkServers() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
-            else
-                throw new Exception("Неизвестный тип для формирования списка исходных ссылок");
+            else throw new Exception("Неизвестный тип для формирования списка исходных ссылок");
             return result;
         }
 

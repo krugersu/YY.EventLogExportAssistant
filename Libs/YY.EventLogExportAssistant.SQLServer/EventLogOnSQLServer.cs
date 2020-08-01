@@ -101,12 +101,8 @@ namespace YY.EventLogExportAssistant.SQLServer
                     if (itemRow == null)
                         continue;
                     if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
-                    {
-                        var checkExist = _context.RowsData
-                            .FirstOrDefault(e => e.InformationSystemId == _system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowId);
-                        if (checkExist != null)
+                        if (_context.RowDataExistOnDatabase(_system, itemRow))
                             continue;
-                    }
 
                     newEntities.Add(new Database.Models.RowData(_system, itemRow, _referencesCache));
                 }

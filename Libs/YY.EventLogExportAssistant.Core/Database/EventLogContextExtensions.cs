@@ -78,7 +78,6 @@ namespace YY.EventLogExportAssistant.Database
 
             return existSystem;
         }
-
         public static void SaveLogPosition(this EventLogContext context, InformationSystemsBase system, FileInfo logFileInfo, EventLogPosition position)
         {
             LogFiles foundLogFile = context.LogFiles
@@ -86,17 +85,7 @@ namespace YY.EventLogExportAssistant.Database
 
             if (foundLogFile == null)
             {
-                context.LogFiles.Add(new LogFiles()
-                {
-                    InformationSystemId = system.Id,
-                    FileName = logFileInfo.Name,
-                    CreateDate = logFileInfo.CreationTimeUtc,
-                    ModificationDate = logFileInfo.LastWriteTimeUtc,
-                    LastCurrentFileData = position.CurrentFileData,
-                    LastCurrentFileReferences = position.CurrentFileReferences,
-                    LastEventNumber = position.EventNumber,
-                    LastStreamPosition = position.StreamPosition
-                });
+                context.LogFiles.Add(new LogFiles(system, logFileInfo, position));
             }
             else
             {
@@ -109,6 +98,13 @@ namespace YY.EventLogExportAssistant.Database
             }
 
             context.SaveChanges();
+        }
+        public static bool RowDataExistOnDatabase(this EventLogContext context, InformationSystemsBase system, YY.EventLogReaderAssistant.Models.RowData itemRow)
+        {
+            var checkExist = context.RowsData
+                .FirstOrDefault(e => e.InformationSystemId == system.Id && e.Period == itemRow.Period && e.Id == itemRow.RowId);
+
+            return (checkExist != null);
         }
 
         #endregion
