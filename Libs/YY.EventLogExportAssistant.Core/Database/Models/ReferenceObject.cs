@@ -27,10 +27,6 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         #region Public Methods
         
-        public virtual void AddReferenceToSaveInDB(EventLogContext context, InformationSystemsBase system)
-        {
-            throw new System.NotImplementedException();
-        }
         public virtual bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
         {
             throw new System.NotImplementedException();

@@ -24,10 +24,6 @@ namespace YY.EventLogExportAssistant.Database.Models
             else
                 return true;
         }
-        public override void AddReferenceToSaveInDB(EventLogContext context, InformationSystemsBase system)
-        {
-            context.Metadata.Add(this);
-        }
 
         #endregion
     }

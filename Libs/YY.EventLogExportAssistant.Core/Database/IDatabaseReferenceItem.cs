@@ -7,6 +7,5 @@ namespace YY.EventLogExportAssistant.Database
     public interface IDatabaseReferenceItem
     {
         bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system);
-        void AddReferenceToSaveInDB(EventLogContext context, InformationSystemsBase system);
     }
 }
