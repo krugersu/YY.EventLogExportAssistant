@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using YY.EventLogExportAssistant.Database.Models;
 
@@ -25,13 +26,29 @@ namespace YY.EventLogExportAssistant.Database
         {
             context.Set<T>().Add(item);
         }
-
         public static bool ReferenceExistInDB<T>(this EventLogContext context, InformationSystemsBase system, T item) where T : ReferenceObject
         {
             T foundItem = context.Set<T>()
                 .FirstOrDefault(e => e.InformationSystemId == system.Id && e.Name == item.Name);
 
             return (foundItem != null);
+        }
+        public static DateTime GetRowsDataMaxPeriod(this EventLogContext context, InformationSystemsBase system)
+        {
+            DateTime maxPeriodRowData = DateTime.MinValue;
+            Database.Models.RowData firstRow = context.RowsData.FirstOrDefault();
+            if (firstRow != null)
+            {
+                var _maxPeriodData = context.RowsData
+                    .Where(p => p.InformationSystemId == system.Id);
+                if (_maxPeriodData.Any())
+                {
+                    DateTimeOffset _maxPeriodRowDataTimeOffset = _maxPeriodData.Max(m => m.Period);
+                    maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
+                }
+            }
+
+            return maxPeriodRowData;
         }
 
         #endregion

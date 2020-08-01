@@ -122,30 +122,17 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void Save(RowData rowData)
         {
-            IList<RowData> rowsData = new List<RowData>
+            Save(new List<RowData>
             {
                 rowData
-            };
-            Save(rowsData);
+            });
         }
         public override void Save(IList<RowData> rowsData)
         {
             using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
-                {
-                    Database.Models.RowData firstRow = _context.RowsData.FirstOrDefault();
-                    if (firstRow != null)
-                    {
-                        var _maxPeriodData = _context.RowsData
-                            .Where(p => p.InformationSystemId == _system.Id);
-                        if (_maxPeriodData.Any())
-                        {
-                            DateTimeOffset _maxPeriodRowDataTimeOffset = _maxPeriodData.Max(m => m.Period);
-                            _maxPeriodRowData = _maxPeriodRowDataTimeOffset.DateTime;
-                        }
-                    }
-                }
+                    _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
 
                 List<Database.Models.RowData> newEntities = new List<Database.Models.RowData>();
                 foreach (var itemRow in rowsData)
