@@ -6,16 +6,7 @@ namespace YY.EventLogExportAssistant.Database.Models
     public class Severities : ReferenceObject
     {
         #region Public Methods
-
-        public static IReadOnlyList<Severities> PrepearedItemsToSave(InformationSystemsBase system, ReferencesData data)
-        {
-            return data.Severities.Select(e =>
-                new Severities()
-                {
-                    InformationSystemId = system.Id,
-                    Name = e.ToString()
-                }).ToList().AsReadOnly();
-        }
+        
         public override bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
         {
             Severities foundItem = context.Severities

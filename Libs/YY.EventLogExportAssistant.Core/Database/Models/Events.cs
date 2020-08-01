@@ -7,15 +7,6 @@ namespace YY.EventLogExportAssistant.Database.Models
     {
         #region Public Methods
 
-        public static IReadOnlyList<Events> PrepearedItemsToSave(InformationSystemsBase system, ReferencesData data)
-        {
-            return data.Events.Select(e =>
-                new Events()
-                {
-                    InformationSystemId = system.Id,
-                    Name = e.Name
-                }).ToList().AsReadOnly();
-        }
         public override bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
         {
             Events foundItem = context.Events

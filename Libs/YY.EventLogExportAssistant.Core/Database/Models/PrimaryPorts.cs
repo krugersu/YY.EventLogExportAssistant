@@ -8,15 +8,6 @@ namespace YY.EventLogExportAssistant.Database.Models
     {
         #region Public Methods
 
-        public static IReadOnlyList<PrimaryPorts> PrepearedItemsToSave(InformationSystemsBase system, ReferencesData data)
-        {
-            return data.PrimaryPorts.Select(e =>
-                new PrimaryPorts()
-                {
-                    InformationSystemId = system.Id,
-                    Name = e.Name
-                }).ToList().AsReadOnly();
-        }
         public override bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
         {
             PrimaryPorts foundItem = context.PrimaryPorts

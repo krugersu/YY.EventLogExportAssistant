@@ -14,16 +14,6 @@ namespace YY.EventLogExportAssistant.Database.Models
         
         #region Public Methods
 
-        public static IReadOnlyList<Metadata> PrepearedItemsToSave(InformationSystemsBase system, ReferencesData data)
-        {
-            return data.Metadata.Select(e =>
-                new Metadata()
-                {
-                    InformationSystemId = system.Id,
-                    Name = e.Name,
-                    Uuid = e.Uuid
-                }).ToList().AsReadOnly();
-        }
         public override bool ReferenceExistInDB(EventLogContext context, InformationSystemsBase system)
         {
             Metadata foundItem = context.Metadata

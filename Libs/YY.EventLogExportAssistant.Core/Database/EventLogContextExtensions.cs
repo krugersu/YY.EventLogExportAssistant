@@ -10,16 +10,16 @@ namespace YY.EventLogExportAssistant.Database
         
         public static void FillReferencesToSave(this EventLogContext context, InformationSystemsBase system, ReferencesData data)
         {
-            FillReferencesToSave(context, system, Applications.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, Computers.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, Events.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, Metadata.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, PrimaryPorts.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, SecondaryPorts.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, Severities.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, TransactionStatuses.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, Users.PrepearedItemsToSave(system, data));
-            FillReferencesToSave(context, system, WorkServers.PrepearedItemsToSave(system, data));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Applications>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Computers>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Events>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Metadata>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<PrimaryPorts>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<SecondaryPorts>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Severities>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<TransactionStatuses>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<Users>(system));
+            FillReferencesToSave(context, system, data.GetReferencesListForDatabaseType<WorkServers>(system));
         }
 
         #endregion
