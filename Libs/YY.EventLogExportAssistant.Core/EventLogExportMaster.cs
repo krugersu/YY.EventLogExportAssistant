@@ -119,37 +119,7 @@ namespace YY.EventLogExportAssistant
         {
             if (_referenceDataHash != reader.ReferencesHash)
             {
-                List<Severity> severities = new List<Severity>
-                {
-                    Severity.Error,
-                    Severity.Information,
-                    Severity.Note,
-                    Severity.Unknown,
-                    Severity.Warning
-                };
-
-                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>
-                {
-                    TransactionStatus.Committed,
-                    TransactionStatus.NotApplicable,
-                    TransactionStatus.RolledBack,
-                    TransactionStatus.Unfinished,
-                    TransactionStatus.Unknown
-                };
-
-                ReferencesData data = new ReferencesData()
-                {
-                    Applications = reader.Applications,
-                    Computers = reader.Computers,
-                    Events = reader.Events,
-                    Metadata = reader.Metadata,
-                    PrimaryPorts = reader.PrimaryPorts,
-                    SecondaryPorts = reader.SecondaryPorts,
-                    Severities = severities.AsReadOnly(),
-                    TransactionStatuses = transactionStatuses.AsReadOnly(),
-                    Users = reader.Users,
-                    WorkServers = reader.WorkServers
-                };
+                ReferencesData data = new ReferencesData(reader);
                 _target.UpdateReferences(data);
                 _referenceDataHash = reader.ReferencesHash;
             }
