@@ -79,15 +79,18 @@ namespace YY.EventLogExportAssistant.Database
         {
             CheckSettings();
 
-            _extensionActions.OnModelCreating(
-                modelBuilder,
-                out var standardBehaviorChanged);
+            _extensionActions.OnModelCreating(modelBuilder, out var standardBehaviorChanged);
 
             if(standardBehaviorChanged)
                 return;
 
+            InitializeAllStandardEntities(modelBuilder);
+            InitializeAllAdditionalEntities(modelBuilder, _DBMSType);
+        }
+        private void InitializeAllStandardEntities(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<InformationSystems>()
-                 .HasKey(b => new { b.Id });
+                .HasKey(b => new { b.Id });
             modelBuilder.Entity<InformationSystems>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
@@ -110,8 +113,10 @@ namespace YY.EventLogExportAssistant.Database
                 .HasIndex(i => new { i.InformationSystemId, i.UserId, i.Period });
             modelBuilder.Entity<RowData>()
                 .HasIndex(i => new { i.InformationSystemId, i.DataUUID });
-
-            if (_DBMSType != DBMSType.SQLServer)
+        }
+        private void InitializeAllAdditionalEntities(ModelBuilder modelBuilder, DBMSType DBMSType)
+        {
+            if (DBMSType != DBMSType.SQLServer)
             {
                 modelBuilder.Entity<InformationSystems>()
                     .HasIndex(b => new { b.Id })
@@ -136,7 +141,6 @@ namespace YY.EventLogExportAssistant.Database
                     .IsUnique();
             }
         }
-
         private void InitializeStandardEntity<T>(ModelBuilder modelBuilder) where T : CommonLogObject
         {
             modelBuilder.Entity<T>()
