@@ -251,30 +251,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         public override void SetInformationSystem(InformationSystemsBase system)
         {
             using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
-            {
-                InformationSystems existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
-                if (existSystem == null)
-                {
-                    _context.InformationSystems.Add(new InformationSystems()
-                    {
-                        Name = system.Name,
-                        Description = system.Description
-                    });
-                    _context.SaveChanges();
-                    existSystem = _context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
-                }
-                else
-                {
-                    if (existSystem.Description != system.Description)
-                    {
-                        existSystem.Description = system.Description;
-                        _context.Update(system);
-                        _context.SaveChanges();
-                    }
-                }
-
-                _system = existSystem;
-            }
+                _system = _context.CreateOrUpdateInformationSystem(system);
         }
         public override void UpdateReferences(ReferencesData data)
         {

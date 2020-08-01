@@ -50,6 +50,31 @@ namespace YY.EventLogExportAssistant.Database
 
             return maxPeriodRowData;
         }
+        public static InformationSystems CreateOrUpdateInformationSystem(this EventLogContext context, InformationSystemsBase system)
+        {
+            InformationSystems existSystem = context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
+            if (existSystem == null)
+            {
+                context.InformationSystems.Add(new InformationSystems()
+                {
+                    Name = system.Name,
+                    Description = system.Description
+                });
+                context.SaveChanges();
+                existSystem = context.InformationSystems.FirstOrDefault(e => e.Name == system.Name);
+            }
+            else
+            {
+                if (existSystem.Description != system.Description)
+                {
+                    existSystem.Description = system.Description;
+                    context.Update(system);
+                    context.SaveChanges();
+                }
+            }
+
+            return existSystem;
+        }
 
         #endregion
 
