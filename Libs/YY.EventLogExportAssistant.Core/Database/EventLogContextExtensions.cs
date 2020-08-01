@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using YY.EventLogExportAssistant.Database.Models;
+using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.Database
 {
@@ -74,6 +77,38 @@ namespace YY.EventLogExportAssistant.Database
             }
 
             return existSystem;
+        }
+
+        public static void SaveLogPosition(this EventLogContext context, InformationSystemsBase system, FileInfo logFileInfo, EventLogPosition position)
+        {
+            LogFiles foundLogFile = context.LogFiles
+                .FirstOrDefault(l => l.InformationSystemId == system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
+
+            if (foundLogFile == null)
+            {
+                context.LogFiles.Add(new LogFiles()
+                {
+                    InformationSystemId = system.Id,
+                    FileName = logFileInfo.Name,
+                    CreateDate = logFileInfo.CreationTimeUtc,
+                    ModificationDate = logFileInfo.LastWriteTimeUtc,
+                    LastCurrentFileData = position.CurrentFileData,
+                    LastCurrentFileReferences = position.CurrentFileReferences,
+                    LastEventNumber = position.EventNumber,
+                    LastStreamPosition = position.StreamPosition
+                });
+            }
+            else
+            {
+                foundLogFile.ModificationDate = logFileInfo.LastWriteTimeUtc;
+                foundLogFile.LastCurrentFileData = position.CurrentFileData;
+                foundLogFile.LastCurrentFileReferences = position.CurrentFileReferences;
+                foundLogFile.LastEventNumber = position.EventNumber;
+                foundLogFile.LastStreamPosition = position.StreamPosition;
+                context.Entry(foundLogFile).State = EntityState.Modified;
+            }
+
+            context.SaveChanges();
         }
 
         #endregion

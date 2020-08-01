@@ -75,36 +75,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
             using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
-            {
-                LogFiles foundLogFile = _context.LogFiles
-                    .FirstOrDefault(l => l.InformationSystemId == _system.Id && l.FileName == logFileInfo.Name && l.CreateDate == logFileInfo.CreationTimeUtc);
-
-                if (foundLogFile == null)
-                {
-                    _context.LogFiles.Add(new LogFiles()
-                    {
-                        InformationSystemId = _system.Id,
-                        FileName = logFileInfo.Name,
-                        CreateDate = logFileInfo.CreationTimeUtc,
-                        ModificationDate = logFileInfo.LastWriteTimeUtc,
-                        LastCurrentFileData = position.CurrentFileData,
-                        LastCurrentFileReferences = position.CurrentFileReferences,
-                        LastEventNumber = position.EventNumber,
-                        LastStreamPosition = position.StreamPosition
-                    });
-                }
-                else
-                {
-                    foundLogFile.ModificationDate = logFileInfo.LastWriteTimeUtc;
-                    foundLogFile.LastCurrentFileData = position.CurrentFileData;
-                    foundLogFile.LastCurrentFileReferences = position.CurrentFileReferences;
-                    foundLogFile.LastEventNumber = position.EventNumber;
-                    foundLogFile.LastStreamPosition = position.StreamPosition;
-                    _context.Entry(foundLogFile).State = EntityState.Modified;
-                }
-
-                _context.SaveChanges();
-            }
+                _context.SaveLogPosition(_system, logFileInfo, position);
         }
         public override int GetPortionSize()
         {
