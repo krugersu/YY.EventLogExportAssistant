@@ -29,4 +29,16 @@
     <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestData\LGDFormat\1Cv8.lgd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\LGFFormat\1Cv8.lgf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\LGFFormat\20200516230000.lgp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
