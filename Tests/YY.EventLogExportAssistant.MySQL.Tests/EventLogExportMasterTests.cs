@@ -1,11 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 using YY.EventLogExportAssistant.Database;
+using YY.EventLogExportAssistant.Tests.Helpers;
+using YY.EventLogExportAssistant.Tests.Helpers.Models;
 using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.MySQL.Tests
@@ -15,27 +16,8 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
     {
         #region Private Member Variables
 
-        string connectionString;
-        DbContextOptionsBuilder<EventLogContext> optionsBuilder;
-        private readonly IEventLogContextExtensionActions _MySqlActions;
-
-        #region LGF Settings
-
-        string eventLogPathLGF;
-        int portionLGF;
-        string inforamtionSystemNameLGF;
-        string inforamtionSystemDescriptionLGF;
-
-        #endregion
-
-        #region LGD Settings
-
-        string eventLogPathLGD;
-        int portionLGD;
-        string inforamtionSystemNameLGD;
-        string inforamtionSystemDescriptionLGD;
-
-        #endregion
+        private readonly CommonTestSettings _settings;
+        DbContextOptionsBuilder<EventLogContext> _optionsBuilder;
 
         #endregion
 
@@ -43,67 +25,17 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
 
         public EventLogExportMasterTests()
         {
-            _MySqlActions = new EventLogMySQLActions();
             string configFilePath = GetConfigFile();
 
-            if (!File.Exists(configFilePath))
-                throw new Exception("Файл конфигурации не обнаружен.");
+            _settings = new CommonTestSettings(
+                configFilePath,
+                new EventLogMySQLActions());
 
-            IConfiguration Configuration = new ConfigurationBuilder()
-                .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
-                .Build();
+            _optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+            _optionsBuilder.UseMySql(_settings.ConnectionString);
 
-            #region Database Settings
-
-            connectionString = Configuration.GetConnectionString("EventLogDatabase");
-            optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            optionsBuilder.UseMySql(connectionString);
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
+            using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, _settings.DBMSActions))
                 context.Database.EnsureDeleted();
-
-            #endregion
-
-            IConfigurationSection LGFSection = Configuration.GetSection("LGF");
-            #region LGF Format
-
-            IConfigurationSection eventLogSectionLGF = LGFSection.GetSection("EventLog");
-            eventLogPathLGF = eventLogSectionLGF.GetValue("SourcePath", string.Empty);
-            if (!Directory.Exists(eventLogPathLGF))
-            {
-                List<string> pathParts = eventLogPathLGF.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
-                pathParts.Insert(0, Directory.GetCurrentDirectory());
-                eventLogPathLGF = Path.Combine(pathParts.ToArray());
-            }
-            eventLogSectionLGF.GetValue("WatchPeriod", 60);
-            eventLogSectionLGF.GetValue("UseWatchMode", false);
-            portionLGF = eventLogSectionLGF.GetValue("Portion", 1000);
-
-            IConfigurationSection inforamtionSystemSectionLGF = LGFSection.GetSection("InformationSystem");
-            inforamtionSystemNameLGF = inforamtionSystemSectionLGF.GetValue("Name", string.Empty);
-            inforamtionSystemDescriptionLGF = inforamtionSystemSectionLGF.GetValue("Description", string.Empty);
-
-            #endregion
-
-            IConfigurationSection LGDSection = Configuration.GetSection("LGD");
-            #region LGF Format
-
-            IConfigurationSection eventLogSectionLGD = LGDSection.GetSection("EventLog");
-            eventLogPathLGD = eventLogSectionLGD.GetValue("SourcePath", string.Empty);
-            if (!Directory.Exists(eventLogPathLGD))
-            {
-                List<string> pathParts = eventLogPathLGD.Split('\\', StringSplitOptions.RemoveEmptyEntries).ToList();
-                pathParts.Insert(0, Directory.GetCurrentDirectory());
-                eventLogPathLGD = Path.Combine(pathParts.ToArray());
-            }
-            eventLogSectionLGD.GetValue("WatchPeriod", 60);
-            eventLogSectionLGD.GetValue("UseWatchMode", false);
-            portionLGD = eventLogSectionLGD.GetValue("Portion", 1000);
-
-            IConfigurationSection inforamtionSystemSectionLGD = LGDSection.GetSection("InformationSystem");
-            inforamtionSystemNameLGD = inforamtionSystemSectionLGD.GetValue("Name", string.Empty);
-            inforamtionSystemDescriptionLGD = inforamtionSystemSectionLGD.GetValue("Description", string.Empty);
-
-            #endregion
         }
 
         #endregion
@@ -111,51 +43,36 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
         #region Public Methods
 
         [Fact]
-        public void ExportToMySQLTest()
+        public void ExportFormatLGFToSQLServerTest()
         {
-            ExportToMySQL_LGF_Test();
-
-            ExportToMySQL_LGD_Test();
-
-            long informationSystemsCount;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
-                informationSystemsCount = context.InformationSystems.Count();
-
-            Assert.Equal(2, informationSystemsCount);
+            ExportToPostgreSQL(_settings.SettingsLGF);
+        }
+        [Fact]
+        public void ExportFormatLGDToSQLServerTest()
+        {
+            ExportToPostgreSQL(_settings.SettingsLGD);
         }
 
         #endregion
 
         #region Private Methods
 
-        private void ExportToMySQL_LGF_Test()
+        private void ExportToPostgreSQL(EventLogExportSettings eventLogSettings)
         {
-            if (!Directory.Exists(eventLogPathLGF))
-                throw new Exception("Каталог данных журнала регистрации не обнаружен.");
-
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogPathLGF);
-
-            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGF);
+            EventLogOnMySQL target = new EventLogOnMySQL(_optionsBuilder.Options, eventLogSettings.Portion);
             target.SetInformationSystem(new InformationSystemsBase()
             {
-                Name = inforamtionSystemNameLGF,
-                Description = inforamtionSystemDescriptionLGF
+                Name = eventLogSettings.InforamtionSystemName,
+                Description = eventLogSettings.InforamtionSystemDescription
             });
-            exporter.SetTarget(target);
 
-            exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-            exporter.OnErrorExportData += OnErrorExportData;
-
-            while (exporter.NewDataAvailiable())
-                exporter.SendData();
+            ExportHelper.ExportToTargetStorage(eventLogSettings, target);
 
             long rowsInDB;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
+            using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, _settings.DBMSActions))
             {
                 var informationSystem = context.InformationSystems
-                    .First(i => i.Name == inforamtionSystemNameLGF);
+                    .First(i => i.Name == eventLogSettings.InforamtionSystemName);
                 var getCount = context.RowsData
                     .Where(r => r.InformationSystemId == informationSystem.Id)
                     .LongCountAsync();
@@ -164,55 +81,8 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
             }
 
             long rowsInSourceFiles;
-            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPathLGF))
-            {
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogSettings.EventLogPath))
                 rowsInSourceFiles = reader.Count();
-            }
-
-            Assert.NotEqual(0, rowsInSourceFiles);
-            Assert.NotEqual(0, rowsInDB);
-            Assert.Equal(rowsInSourceFiles, rowsInDB);
-        }
-        private void ExportToMySQL_LGD_Test()
-        {
-            if (!Directory.Exists(eventLogPathLGD))
-                throw new Exception("Каталог данных журнала регистрации не обнаружен.");
-
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogPathLGD);
-
-            EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portionLGD);
-            target.SetInformationSystem(new InformationSystemsBase()
-            {
-                Name = inforamtionSystemNameLGD,
-                Description = inforamtionSystemDescriptionLGD
-            });
-            exporter.SetTarget(target);
-
-            exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-            exporter.OnErrorExportData += OnErrorExportData;
-
-            while (exporter.NewDataAvailiable())
-                exporter.SendData();
-
-            long rowsInDB;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
-            {
-                var informationSystem = context.InformationSystems
-                    .First(i => i.Name == inforamtionSystemNameLGD);
-                var getCount = context.RowsData
-                    .Where(r => r.InformationSystemId == informationSystem.Id)
-                    .LongCountAsync();
-                getCount.Wait();
-                rowsInDB = getCount.Result;
-            }
-
-            long rowsInSourceFiles;
-            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPathLGD))
-            {
-                rowsInSourceFiles = reader.Count();
-            }
 
             Assert.NotEqual(0, rowsInSourceFiles);
             Assert.NotEqual(0, rowsInDB);
@@ -230,12 +100,12 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
-                connectionString = Configuration.GetConnectionString("EventLogDatabase");
+                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
                 try
                 {
-                    optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                    optionsBuilder.UseMySql(connectionString);
-                    using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
+                    _optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
+                    _optionsBuilder.UseMySql(connectionString);
+                    using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, new EventLogMySQLActions()))
                         context.Database.EnsureDeleted();
                 }
                 catch
@@ -244,22 +114,10 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 }
             }
 
+            if (!File.Exists(configFilePath))
+                throw new Exception("Файл конфигурации не обнаружен.");
+
             return configFilePath;
-        }
-
-        #endregion
-
-        #region Events
-
-        private static void BeforeExportData(BeforeExportDataEventArgs e)
-        {
-        }
-        private static void AfterExportData(AfterExportDataEventArgs e)
-        {
-        }
-        private static void OnErrorExportData(OnErrorExportDataEventArgs e)
-        {
-            throw e.Exception;
         }
 
         #endregion

@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
+    <ProjectReference Include="..\Helpers\YY.EventLogExportAssistant.Tests.Helpers\YY.EventLogExportAssistant.Tests.Helpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

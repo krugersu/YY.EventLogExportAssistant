@@ -83,8 +83,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
                 eventLogPathLGF = Path.Combine(pathParts.ToArray());
             }
 
-            eventLogSectionLGF.GetValue("WatchPeriod", 60);
-            eventLogSectionLGF.GetValue("UseWatchMode", false);
             portionLGF = eventLogSectionLGF.GetValue("Portion", 1000);
 
             IConfigurationSection inforamtionSystemSectionLGF = LGFSection.GetSection("InformationSystem");
