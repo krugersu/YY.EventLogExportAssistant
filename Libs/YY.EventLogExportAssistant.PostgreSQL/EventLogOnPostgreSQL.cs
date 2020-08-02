@@ -56,12 +56,12 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
                 return _context.GetLastPosition(_system);
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
                 _context.SaveLogPosition(_system, logFileInfo, position);
         }
         public override int GetPortionSize()
@@ -77,7 +77,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
@@ -100,12 +100,12 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
                 _system = _context.CreateOrUpdateInformationSystem(system);
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions, DBMSType.PostgreSQL))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
             {
                 _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();

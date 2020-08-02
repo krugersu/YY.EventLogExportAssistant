@@ -7,17 +7,19 @@ namespace YY.EventLogExportAssistant.SQLServer
 {
     public sealed class EventLogSQLServerActions : IEventLogContextExtensionActions
     {
+        #region Public Methods
+
         public void AdditionalInitializationActions(DatabaseFacade database)
         {
             database.ExecuteSqlRaw(Resources.Query_CreateView_vw_EventLog);
-		}
+        }
         public void OnModelCreating(ModelBuilder modelBuilder, out bool standardBehaviorChanged)
         {
             standardBehaviorChanged = false;
         }
         public void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-			if (!optionsBuilder.IsConfigured)
+            if (!optionsBuilder.IsConfigured)
             {
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -26,6 +28,12 @@ namespace YY.EventLogExportAssistant.SQLServer
                 string connectinString = Configuration.GetConnectionString("EventLogDatabase");
                 optionsBuilder.UseSqlServer(connectinString);
             }
-		}
+        }
+        public bool UseExplicitKeyIndicesInitialization()
+        {
+            return false;
+        }
+
+        #endregion
     }
 }

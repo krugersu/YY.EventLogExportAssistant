@@ -8,13 +8,13 @@ namespace YY.EventLogExportAssistant.Database
     {
         #region Public Static Methods
 
-        public static EventLogContext Create(IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
+        public static EventLogContext Create(IEventLogContextExtensionActions extensionActions)
         {
-            return new EventLogContext(extensionActions, DBMSType);
+            return new EventLogContext(extensionActions);
         }
-        public static EventLogContext Create(DbContextOptions<EventLogContext> options, IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
+        public static EventLogContext Create(DbContextOptions<EventLogContext> options, IEventLogContextExtensionActions extensionActions)
         {
-            return new EventLogContext(options, extensionActions, DBMSType);
+            return new EventLogContext(options, extensionActions);
         }
 
         #endregion
@@ -22,7 +22,6 @@ namespace YY.EventLogExportAssistant.Database
         #region Private Properties
 
         private readonly IEventLogContextExtensionActions _extensionActions;
-        private readonly DBMSType _DBMSType;
 
         #endregion
 
@@ -49,15 +48,14 @@ namespace YY.EventLogExportAssistant.Database
         private EventLogContext()
         {
         }
-        public EventLogContext(IEventLogContextExtensionActions extensionActions, DBMSType DBMSType)
+        public EventLogContext(IEventLogContextExtensionActions extensionActions)
         {
             _extensionActions = extensionActions;
-            _DBMSType = DBMSType;
 
             Database.EnsureCreated();
             _extensionActions.AdditionalInitializationActions(Database);
         }
-        public EventLogContext(DbContextOptions<EventLogContext> options, IEventLogContextExtensionActions extensionActions, DBMSType DBMSType) : base(options)
+        public EventLogContext(DbContextOptions<EventLogContext> options, IEventLogContextExtensionActions extensionActions) : base(options)
         {
             _extensionActions = extensionActions;
 
@@ -85,7 +83,7 @@ namespace YY.EventLogExportAssistant.Database
                 return;
 
             InitializeAllStandardEntities(modelBuilder);
-            InitializeAllAdditionalEntities(modelBuilder, _DBMSType);
+            InitializeAllAdditionalEntities(modelBuilder);
         }
         private void InitializeAllStandardEntities(ModelBuilder modelBuilder)
         {
@@ -114,9 +112,9 @@ namespace YY.EventLogExportAssistant.Database
             modelBuilder.Entity<RowData>()
                 .HasIndex(i => new { i.InformationSystemId, i.DataUUID });
         }
-        private void InitializeAllAdditionalEntities(ModelBuilder modelBuilder, DBMSType DBMSType)
+        private void InitializeAllAdditionalEntities(ModelBuilder modelBuilder)
         {
-            if (DBMSType != DBMSType.SQLServer)
+            if (_extensionActions.UseExplicitKeyIndicesInitialization())
             {
                 modelBuilder.Entity<InformationSystems>()
                     .HasIndex(b => new { b.Id })

@@ -56,12 +56,12 @@ namespace YY.EventLogExportAssistant.SQLServer
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
                 return _context.GetLastPosition(_system);
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
                 _context.SaveLogPosition(_system, logFileInfo, position);
         }
         public override int GetPortionSize()
@@ -77,7 +77,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
@@ -99,12 +99,12 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
                 _system = _context.CreateOrUpdateInformationSystem(system);
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions, DBMSType.SQLServer))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
             {
                 _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();

@@ -58,7 +58,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
             connectionString = Configuration.GetConnectionString("EventLogDatabase");
             optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseMySql(connectionString);
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions, DBMSType.MySQL))
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
                 context.Database.EnsureDeleted();
 
             #endregion
@@ -118,7 +118,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
             ExportToMySQL_LGD_Test();
 
             long informationSystemsCount;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions, DBMSType.MySQL))
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
                 informationSystemsCount = context.InformationSystems.Count();
 
             Assert.Equal(2, informationSystemsCount);
@@ -152,7 +152,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions, DBMSType.MySQL))
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGF);
@@ -197,7 +197,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 exporter.SendData();
 
             long rowsInDB;
-            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions, DBMSType.MySQL))
+            using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
             {
                 var informationSystem = context.InformationSystems
                     .First(i => i.Name == inforamtionSystemNameLGD);
@@ -235,7 +235,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 {
                     optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
                     optionsBuilder.UseMySql(connectionString);
-                    using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions, DBMSType.MySQL))
+                    using (EventLogContext context = EventLogContext.Create(optionsBuilder.Options, _MySqlActions))
                         context.Database.EnsureDeleted();
                 }
                 catch

@@ -8,5 +8,6 @@ namespace YY.EventLogExportAssistant.Database
         void AdditionalInitializationActions(DatabaseFacade database);
         void OnModelCreating(ModelBuilder modelBuilder, out bool standardBehaviorChanged);
         void OnConfiguring(DbContextOptionsBuilder optionsBuilder);
+        bool UseExplicitKeyIndicesInitialization();
     }
 }

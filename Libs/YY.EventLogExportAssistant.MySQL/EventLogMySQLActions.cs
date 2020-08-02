@@ -7,6 +7,8 @@ namespace YY.EventLogExportAssistant.MySQL
 {
     public sealed class EventLogMySQLActions : IEventLogContextExtensionActions
     {
+        #region Public Methods
+
         public void AdditionalInitializationActions(DatabaseFacade database)
         {
             database.ExecuteSqlRaw(Resources.Query_CreateView_vw_EventLog);
@@ -27,5 +29,11 @@ namespace YY.EventLogExportAssistant.MySQL
                 optionsBuilder.UseMySql(connectinString);
             }
         }
+        public bool UseExplicitKeyIndicesInitialization()
+        {
+            return true;
+        }
+
+        #endregion
     }
 }

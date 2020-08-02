@@ -7,6 +7,8 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 {
     public sealed class EventLogPostgreSQLActions : IEventLogContextExtensionActions
     {
+        #region Public Methods
+
         public void AdditionalInitializationActions(DatabaseFacade database)
         {
             database.ExecuteSqlRaw(Resources.Query_CreateView_vw_EventLog);
@@ -27,5 +29,11 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                 optionsBuilder.UseNpgsql(connectinString);
             }
         }
+        public bool UseExplicitKeyIndicesInitialization()
+        {
+            return true;
+        }
+
+        #endregion
     }
 }
