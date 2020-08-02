@@ -73,31 +73,11 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                 return _lastEventLogFilePosition;
             }
 
-            string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
-            logFilesActualIndexName = logFilesActualIndexName.ToLower();
-
-            var searchResponse = _client.Search<LogFileElement>(s => s
-                .Index(logFilesActualIndexName)
-                .From(0)
-                .Size(1)
-                .Query(q => q
-                    .Match(m => m
-                        .Field(f => f.InformationSystem)
-                        .Query(_system.Name)
-                    )
-                )
-            );
-
-            if (!searchResponse.ApiCall.Success)
-            {
-                throw searchResponse.ApiCall.OriginalException;
-            }
+            LogFileElement actualLogFileInfo = _client.GetLastLogFileElement(_system.Name, _indexName);
 
             EventLogPosition position = null;
-            if (searchResponse.Documents.Count == 1)
+            if (actualLogFileInfo != null)
             {
-                LogFileElement actualLogFileInfo = searchResponse.Documents.First();
-
                 position = new EventLogPosition(
                     actualLogFileInfo.LastEventNumber,
                     actualLogFileInfo.LastCurrentFileReferences,
@@ -107,46 +87,12 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             }
 
             _lastEventLogFilePosition = position;
-
             return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            LogFileElement logFileHistoryElement = new LogFileElement()
-            {
-                Id = $"[{_system.Name}][{logFileInfo.Name}][{logFileInfo.CreationTimeUtc:yyyyMMddhhmmss}]",
-                CreateDate = logFileInfo.CreationTimeUtc,
-                FileName = logFileInfo.Name,
-                InformationSystem = _system.Name,
-                LastCurrentFileData = position.CurrentFileData,
-                LastCurrentFileReferences = position.CurrentFileReferences,
-                LastEventNumber = position.EventNumber,
-                LastStreamPosition = position.StreamPosition,
-                ModificationDate = logFileInfo.LastWriteTimeUtc
-            };
-            string logFilesHistoryIndexName = $"{ _indexName }-LogFiles-History";
-            logFilesHistoryIndexName = logFilesHistoryIndexName.ToLower();
-            _client.Index(logFileHistoryElement, idx => idx.Index(logFilesHistoryIndexName));
-
-            LogFileElement logFilActualElement = new LogFileElement()
-            {
-                Id = _system.Name,
-                CreateDate = logFileInfo.CreationTimeUtc,
-                FileName = logFileInfo.Name,
-                InformationSystem = _system.Name,
-                LastCurrentFileData = position.CurrentFileData,
-                LastCurrentFileReferences = position.CurrentFileReferences,
-                LastEventNumber = position.EventNumber,
-                LastStreamPosition = position.StreamPosition,
-                ModificationDate = logFileInfo.LastWriteTimeUtc
-            };
-            string logFilesActualIndexName = $"{ _indexName }-LogFiles-Actual";
-            logFilesActualIndexName = logFilesActualIndexName.ToLower();
-            var indexResponse = _client.Index(logFilActualElement, idx => idx.Index(logFilesActualIndexName));
-            if (!indexResponse.ApiCall.Success)
-            {
-                throw indexResponse.ApiCall.OriginalException;
-            }
+            SaveLogFileHistoryElement(logFileInfo, position);
+            SaveLogFileActualElement(logFileInfo, position);
 
             _lastEventLogFilePosition = position;
         }
@@ -168,59 +114,19 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
             foreach (RowData item in rowsData)
             {
-                string logDataCurrentIndexName = $"{ _indexName }-LogData-{ ElasticSearchHelper.GetIndexSeparationPeriod(item.Period.DateTime, _indexSeparationPeriod) }";
+                string logDataCurrentIndexName = $"{ _indexName }-LogData-{ item.Period.DateTime.GetIndexSeparationPeriod(_indexSeparationPeriod) }";
                 logDataCurrentIndexName = logDataCurrentIndexName.ToLower();
                 if (logDataByIndices.ContainsKey(logDataCurrentIndexName) == false)
                 {
                     logDataByIndices.Add(logDataCurrentIndexName, new List<LogDataElement>());
                 }
 
-                logDataByIndices[logDataCurrentIndexName].Add(new LogDataElement()
-                {
-                    Id = $"[{_system.Name}][{item.Period:yyyyMMddhhmmss}][{item.RowId}]",
-                    Application = item.Application.Name,
-                    Comment = item.Comment,
-                    Computer = item.Computer?.Name,
-                    ConnectionId = item.ConnectId,
-                    Data = item.Data,
-                    DataPresentation = item.DataPresentation,
-                    DataUUID = item.DataUuid,
-                    Event = item.Event?.Name,
-                    RowId = item.RowId,
-                    InformationSystem = _system.Name,
-                    Metadata = item.Metadata?.Name,
-                    MetadataUUID = item.Metadata?.Uuid.ToString(),
-                    Period = item.Period,
-                    PrimaryPort = item.PrimaryPort?.Name,
-                    SecondaryPort = item.SecondaryPort?.Name,
-                    Session = item.Session,
-                    Severity = item.Severity.ToString(),
-                    TransactionDate = item.TransactionDate,
-                    TransactionId = item.TransactionId,
-                    TransactionStatus = item.TransactionStatus.ToString(),
-                    User = item.User?.Name,
-                    UserUUID = item.User?.Uuid.ToString(),
-                    WorkServer = item.WorkServer?.Name
-                });
+                logDataByIndices[logDataCurrentIndexName].Add(new LogDataElement(_system, item));
             }
 
             foreach (var indexItems in logDataByIndices)
-            {
-                string logDataIndexName = indexItems.Key;
-                var indexManyResponse = _client.IndexMany(indexItems.Value, logDataIndexName);
-
-                if (!indexManyResponse.ApiCall.Success)
-                {
-                    throw indexManyResponse.ApiCall.OriginalException;
-                }
-
-                if (indexManyResponse.IsValid == false || indexManyResponse.Errors)
-                {
-                    string errorMessage =
-                        $"При экспорте данных в индекс {logDataIndexName} произошли ошибки в {indexManyResponse.ItemsWithErrors.Count()} из {indexItems.Value.Count} элементов.";
-                    throw new Exception(errorMessage);
-                }
-            }
+                _client.SaveLogData(indexItems.Value, indexItems.Key);
+            
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
@@ -257,6 +163,41 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         }
         public override void UpdateReferences(ReferencesData data)
         {
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void SaveLogFileHistoryElement(FileInfo logFileInfo, EventLogPosition position)
+        {
+            _client.SaveLogFileHistoryElement(new LogFileElement()
+            {
+                Id = $"[{_system.Name}][{logFileInfo.Name}][{logFileInfo.CreationTimeUtc:yyyyMMddhhmmss}]",
+                CreateDate = logFileInfo.CreationTimeUtc,
+                FileName = logFileInfo.Name,
+                InformationSystem = _system.Name,
+                LastCurrentFileData = position.CurrentFileData,
+                LastCurrentFileReferences = position.CurrentFileReferences,
+                LastEventNumber = position.EventNumber,
+                LastStreamPosition = position.StreamPosition,
+                ModificationDate = logFileInfo.LastWriteTimeUtc
+            }, _indexName);
+        }
+        private void SaveLogFileActualElement(FileInfo logFileInfo, EventLogPosition position)
+        {
+            _client.SaveLogFileActualElement(new LogFileElement()
+            {
+                Id = _system.Name,
+                CreateDate = logFileInfo.CreationTimeUtc,
+                FileName = logFileInfo.Name,
+                InformationSystem = _system.Name,
+                LastCurrentFileData = position.CurrentFileData,
+                LastCurrentFileReferences = position.CurrentFileReferences,
+                LastEventNumber = position.EventNumber,
+                LastStreamPosition = position.StreamPosition,
+                ModificationDate = logFileInfo.LastWriteTimeUtc
+            }, _indexName);
         }
 
         #endregion

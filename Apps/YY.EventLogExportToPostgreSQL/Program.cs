@@ -4,6 +4,7 @@ using YY.EventLogExportAssistant.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
+using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportToPostgreSQL
 {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.23</Version>
+    <Version>1.0.0.24</Version>
     <PackageId>YY.EventLogExportAssistant.PostgreSQL</PackageId>
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log export assistant for PostgreSQL</Product>
@@ -14,9 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>event, log, 1C, enterprise, export, postgres, postgresql</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.23</AssemblyVersion>
+    <AssemblyVersion>1.0.0.24</AssemblyVersion>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
-    <FileVersion>1.0.0.23</FileVersion>
+    <FileVersion>1.0.0.24</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +44,21 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
