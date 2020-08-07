@@ -42,7 +42,8 @@ namespace YY.EventLogExportAssistant
         public void SetEventLogPath(string eventLogPath)
         {
             _eventLogPath = eventLogPath;
-            _reader = EventLogReader.CreateReader(_eventLogPath);
+            if(!string.IsNullOrEmpty(_eventLogPath))
+                _reader = EventLogReader.CreateReader(_eventLogPath);
         }
         public void SetTarget(IEventLogOnTarget target)
         {
