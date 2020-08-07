@@ -1,5 +1,4 @@
 ﻿using System;
-using YY.EventLogExportAssistant.Database.Models;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 
 namespace YY.EventLogExportAssistant.ElasticSearch.Models

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.Tests.Helpers.Models

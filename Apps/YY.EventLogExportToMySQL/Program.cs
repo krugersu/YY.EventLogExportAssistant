@@ -34,9 +34,9 @@ namespace YY.EventLogExportToMySQL
             bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
             int portion = eventLogSection.GetValue("Portion", 1000);
 
-            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
-            string inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
-            string inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
+            IConfigurationSection informationSystemSection = Configuration.GetSection("InformationSystem");
+            string informationSystemName = informationSystemSection.GetValue("Name", string.Empty);
+            string informationSystemDescription = informationSystemSection.GetValue("Description", string.Empty);
 
             if (string.IsNullOrEmpty(eventLogPath))
             {
@@ -59,8 +59,8 @@ namespace YY.EventLogExportToMySQL
             EventLogOnMySQL target = new EventLogOnMySQL(optionsBuilder.Options, portion);
             target.SetInformationSystem(new InformationSystemsBase()
             {
-                Name = inforamtionSystemName,
-                Description = inforamtionSystemDescription
+                Name = informationSystemName,
+                Description = informationSystemDescription
             });
             exporter.SetTarget(target);
 
@@ -76,7 +76,7 @@ namespace YY.EventLogExportToMySQL
                         if (Console.ReadKey().KeyChar == 'q')
                             break;
 
-                    while (exporter.NewDataAvailiable())
+                    while (exporter.NewDataAvailable())
                     {
                         exporter.SendData();
                         Thread.Sleep(watchPeriodSecondsMs);
@@ -84,7 +84,7 @@ namespace YY.EventLogExportToMySQL
                 }
             }
             else
-                while (exporter.NewDataAvailiable())
+                while (exporter.NewDataAvailable())
                     exporter.SendData();
 
             Console.WriteLine();

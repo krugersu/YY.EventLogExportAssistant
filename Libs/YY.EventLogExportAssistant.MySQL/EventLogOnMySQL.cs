@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using Microsoft.EntityFrameworkCore;
 using System;
 using YY.EventLogExportAssistant.Database;
-using YY.EventLogExportAssistant.Database.Models;
 
 namespace YY.EventLogExportAssistant.MySQL
 {
@@ -20,7 +18,7 @@ namespace YY.EventLogExportAssistant.MySQL
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
         private readonly IEventLogContextExtensionActions _mySqlActions;
-        private RefferencesDataCache _referencesCache;
+        private ReferencesDataCache _referencesCache;
 
         #endregion
 
@@ -110,7 +108,7 @@ namespace YY.EventLogExportAssistant.MySQL
                 _context.SaveChanges();
 
                 if (_referencesCache == null)
-                    _referencesCache = new RefferencesDataCache(_system);
+                    _referencesCache = new ReferencesDataCache(_system);
                 _referencesCache.FillByDatabaseContext(_context);
             }
         }

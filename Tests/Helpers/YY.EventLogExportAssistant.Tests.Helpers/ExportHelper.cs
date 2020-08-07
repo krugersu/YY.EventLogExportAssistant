@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Tests.Helpers.Models;
-using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.Tests.Helpers
 {
@@ -25,7 +19,7 @@ namespace YY.EventLogExportAssistant.Tests.Helpers
             exporter.AfterExportData += AfterExportData;
             exporter.OnErrorExportData += OnErrorExportData;
 
-            while (exporter.NewDataAvailiable())
+            while (exporter.NewDataAvailable())
                 exporter.SendData();
         }
 

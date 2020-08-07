@@ -34,7 +34,7 @@ namespace YY.EventLogExportAssistant.Database.Models
         {
         }
 
-        public RowData(InformationSystemsBase system, EventLogReaderAssistant.Models.RowData sourceRow, RefferencesDataCache referencesCache)
+        public RowData(InformationSystemsBase system, EventLogReaderAssistant.Models.RowData sourceRow, ReferencesDataCache referencesCache)
         {
             ApplicationId = referencesCache.GetReferenceDatabaseId<EventLogReaderAssistant.Models.Applications>(sourceRow);
             Comment = sourceRow.Comment;

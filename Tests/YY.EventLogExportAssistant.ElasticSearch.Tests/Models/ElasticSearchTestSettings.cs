@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.ElasticSearch.Tests.Models
 {

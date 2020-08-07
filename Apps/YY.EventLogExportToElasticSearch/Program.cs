@@ -33,9 +33,9 @@ namespace YY.EventLogExportToElasticSearch
             bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
             int portion = eventLogSection.GetValue("Portion", 1000);
 
-            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
-            string inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
-            string inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
+            IConfigurationSection informationSystemSection = Configuration.GetSection("InformationSystem");
+            string informationSystemName = informationSystemSection.GetValue("Name", string.Empty);
+            string informationSystemDescription = informationSystemSection.GetValue("Description", string.Empty);
 
             IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
             Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
@@ -67,8 +67,8 @@ namespace YY.EventLogExportToElasticSearch
             EventLogOnElasticSearch target = new EventLogOnElasticSearch(elasticSettings, portion);
             target.SetInformationSystem(new InformationSystemsBase()
             {
-                Name = inforamtionSystemName,
-                Description = inforamtionSystemDescription
+                Name = informationSystemName,
+                Description = informationSystemDescription
             });
             target.SetIndexName(indexName);
             target.SetIndexSeparationPeriod(indexSeparation);
@@ -86,7 +86,7 @@ namespace YY.EventLogExportToElasticSearch
                         if (Console.ReadKey().KeyChar == 'q')
                             break;
 
-                    while (exporter.NewDataAvailiable())
+                    while (exporter.NewDataAvailable())
                     {
                         exporter.SendData();
                         Thread.Sleep(watchPeriodSecondsMs);
@@ -94,7 +94,7 @@ namespace YY.EventLogExportToElasticSearch
                 }
             }
             else
-                while (exporter.NewDataAvailiable())
+                while (exporter.NewDataAvailable())
                     exporter.SendData();
 
             Console.WriteLine();
