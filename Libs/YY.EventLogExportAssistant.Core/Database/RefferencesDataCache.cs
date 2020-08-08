@@ -15,6 +15,7 @@ namespace YY.EventLogExportAssistant.Database
         #region Public Members
 
         public InformationSystemsBase System => _system;
+
         public IReadOnlyList<Models.Applications> Applications;
         public IReadOnlyList<Models.Computers> Computers;
         public IReadOnlyList<Models.Events> Events;
@@ -25,6 +26,17 @@ namespace YY.EventLogExportAssistant.Database
         public IReadOnlyList<Models.TransactionStatuses> TransactionStatuses;
         public IReadOnlyList<Models.Users> Users;
         public IReadOnlyList<Models.WorkServers> WorkServers;
+
+        public IDictionary<string, List<Models.Applications>> ApplicationsDictionary;
+        public IDictionary<string, List<Models.Computers>> ComputersDictionary;
+        public IDictionary<string, List<Models.Events>> EventsDictionary;
+        public IDictionary<string, List<Models.Metadata>> MetadataDictionary;
+        public IDictionary<string, List<Models.PrimaryPorts>> PrimaryPortsDictionary;
+        public IDictionary<string, List<Models.SecondaryPorts>> SecondaryPortsDictionary;
+        public IDictionary<string, List<Models.Severities>> SeveritiesDictionary;
+        public IDictionary<string, List<Models.TransactionStatuses>> TransactionStatusesDictionary;
+        public IDictionary<string, List<Models.Users>> UsersDictionary;
+        public IDictionary<string, List<Models.WorkServers>> WorkServersDictionary;
 
         #endregion
 
@@ -69,119 +81,88 @@ namespace YY.EventLogExportAssistant.Database
         }
         public void FillByDatabaseContext(EventLogContext context)
         {
-            Applications = context.Applications.ToList().AsReadOnly();
-            Computers = context.Computers.ToList().AsReadOnly();
-            Events = context.Events.ToList().AsReadOnly();
-            Metadata = context.Metadata.ToList().AsReadOnly();
-            PrimaryPorts = context.PrimaryPorts.ToList().AsReadOnly();
-            SecondaryPorts = context.SecondaryPorts.ToList().AsReadOnly();
-            Severities = context.Severities.ToList().AsReadOnly();
-            TransactionStatuses = context.TransactionStatuses.ToList().AsReadOnly();
-            Users = context.Users.ToList().AsReadOnly();
-            WorkServers = context.WorkServers.ToList().AsReadOnly();
+            Applications = context.Applications.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            Computers = context.Computers.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            Events = context.Events.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            Metadata = context.Metadata.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            PrimaryPorts = context.PrimaryPorts.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            SecondaryPorts = context.SecondaryPorts.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            Severities = context.Severities.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            TransactionStatuses = context.TransactionStatuses.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            Users = context.Users.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+            WorkServers = context.WorkServers.Where(e => e.InformationSystemId == _system.Id).ToList().AsReadOnly();
+
+            ApplicationsDictionary = Applications.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            ComputersDictionary = Computers.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            EventsDictionary = Events.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            MetadataDictionary = Metadata.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            PrimaryPortsDictionary = PrimaryPorts.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            SecondaryPortsDictionary = SecondaryPorts.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            SeveritiesDictionary = Severities.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            TransactionStatusesDictionary = TransactionStatuses.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            UsersDictionary = Users.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            WorkServersDictionary = WorkServers.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
         }
 
         #endregion
 
         #region Private Methods
 
-        private long? GetApplicationId(YY.EventLogReaderAssistant.Models.Applications item)
+        private long? GetApplicationId(EventLogReaderAssistant.Models.Applications item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = Applications.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return ApplicationsDictionary[item.Name].First().Id;
         }
-        private long? GetComputerId(YY.EventLogReaderAssistant.Models.Computers item)
+        private long? GetComputerId(EventLogReaderAssistant.Models.Computers item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = Computers.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return ComputersDictionary[item.Name].First().Id;
         }
-        private long? GetEventId(YY.EventLogReaderAssistant.Models.Events item)
+        private long? GetEventId(EventLogReaderAssistant.Models.Events item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = Events.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return EventsDictionary[item.Name].First().Id;
         }
-        private long? GetMetadataId(YY.EventLogReaderAssistant.Models.Metadata item)
+        private long? GetMetadataId(EventLogReaderAssistant.Models.Metadata item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = Metadata.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name && e.Uuid == item.Uuid).Id;
-
-            return id;
+            return MetadataDictionary[item.Name].First(e => e.Uuid == item.Uuid).Id;
         }
-        private long? GetPrimaryPortId(YY.EventLogReaderAssistant.Models.PrimaryPorts item)
+        private long? GetPrimaryPortId(EventLogReaderAssistant.Models.PrimaryPorts item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = PrimaryPorts.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return PrimaryPortsDictionary[item.Name].First().Id;
         }
-        private long? GetSecondaryPortId(YY.EventLogReaderAssistant.Models.SecondaryPorts item)
+        private long? GetSecondaryPortId(EventLogReaderAssistant.Models.SecondaryPorts item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = SecondaryPorts.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return SecondaryPortsDictionary[item.Name].First().Id;
         }
-        private long? GetSeverityId(YY.EventLogReaderAssistant.Models.Severity item)
+        private long? GetSeverityId(EventLogReaderAssistant.Models.Severity item)
         {
-            long? id = Severities.First(e => e.InformationSystemId == _system.Id && e.Name == item.ToString()).Id;
-            return id;
+            return SeveritiesDictionary[item.ToString()].First().Id;
         }
-        private long? GetTransactionStatusId(YY.EventLogReaderAssistant.Models.TransactionStatus item)
+        private long? GetTransactionStatusId(EventLogReaderAssistant.Models.TransactionStatus item)
         {
-            long? id = TransactionStatuses.First(e => e.InformationSystemId == _system.Id && e.Name == item.ToString()).Id;
-            return id;
+            return TransactionStatusesDictionary[item.ToString()].First().Id;
         }
-        private long? GetUserId(YY.EventLogReaderAssistant.Models.Users item)
+        private long? GetUserId(EventLogReaderAssistant.Models.Users item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = Users.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name && item.Uuid == e.Uuid).Id;
-
-            return id;
+            return UsersDictionary[item.Name].First(e => e.Uuid == item.Uuid).Id;
         }
-        private long? GetWorkServerId(YY.EventLogReaderAssistant.Models.WorkServers item)
+        private long? GetWorkServerId(EventLogReaderAssistant.Models.WorkServers item)
         {
-            long? id;
+            if (item == null) return null;
 
-            if (item == null)
-                id = null;
-            else
-                id = WorkServers.First(e => e.InformationSystemId == _system.Id && e.Name == item.Name).Id;
-
-            return id;
+            return WorkServersDictionary[item.Name].First().Id;
         }
 
         #endregion
