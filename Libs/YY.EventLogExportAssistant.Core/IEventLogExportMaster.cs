@@ -4,7 +4,7 @@
     {
         void SetEventLogPath(string eventLogPath);
         void SetTarget(IEventLogOnTarget target);
-        bool NewDataAvailiable();
+        bool NewDataAvailable();
         void SendData();
     }
 }

@@ -1,38 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using YY.EventLogExportAssistant.Database;
-using YY.EventLogReaderAssistant.Models;
 
-namespace YY.EventLogExportAssistant
+namespace YY.EventLogExportAssistant.Database
 {
-    public sealed class RefferencesDataCache
+    public sealed class ReferencesDataCache
     {
         #region Private Members
 
-        private InformationSystemsBase _system;
+        private readonly InformationSystemsBase _system;
 
         #endregion
 
         #region Public Members
 
         public InformationSystemsBase System => _system;
-        public IReadOnlyList<Database.Models.Applications> Applications;
-        public IReadOnlyList<Database.Models.Computers> Computers;
-        public IReadOnlyList<Database.Models.Events> Events;
-        public IReadOnlyList<Database.Models.Metadata> Metadata;
-        public IReadOnlyList<Database.Models.PrimaryPorts> PrimaryPorts;
-        public IReadOnlyList<Database.Models.SecondaryPorts> SecondaryPorts;
-        public IReadOnlyList<Database.Models.Severities> Severities;
-        public IReadOnlyList<Database.Models.TransactionStatuses> TransactionStatuses;
-        public IReadOnlyList<Database.Models.Users> Users;
-        public IReadOnlyList<Database.Models.WorkServers> WorkServers;
+        public IReadOnlyList<Models.Applications> Applications;
+        public IReadOnlyList<Models.Computers> Computers;
+        public IReadOnlyList<Models.Events> Events;
+        public IReadOnlyList<Models.Metadata> Metadata;
+        public IReadOnlyList<Models.PrimaryPorts> PrimaryPorts;
+        public IReadOnlyList<Models.SecondaryPorts> SecondaryPorts;
+        public IReadOnlyList<Models.Severities> Severities;
+        public IReadOnlyList<Models.TransactionStatuses> TransactionStatuses;
+        public IReadOnlyList<Models.Users> Users;
+        public IReadOnlyList<Models.WorkServers> WorkServers;
 
         #endregion
 
         #region Constructors
 
-        public RefferencesDataCache(InformationSystemsBase system)
+        public ReferencesDataCache(InformationSystemsBase system)
         {
             _system = system;
         }

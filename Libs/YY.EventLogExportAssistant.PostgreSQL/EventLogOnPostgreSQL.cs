@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.Bulk;
 using System;
 using YY.EventLogExportAssistant.Database;
-using YY.EventLogExportAssistant.Database.Models;
 
 namespace YY.EventLogExportAssistant.PostgreSQL
 {
@@ -21,7 +19,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
         private readonly IEventLogContextExtensionActions _postgreSqlActions;
-        private RefferencesDataCache _referencesCache;
+        private ReferencesDataCache _referencesCache;
         
         #endregion
 
@@ -111,7 +109,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
                 _context.SaveChanges();
 
                 if (_referencesCache == null)
-                    _referencesCache = new RefferencesDataCache(_system);
+                    _referencesCache = new ReferencesDataCache(_system);
                 _referencesCache.FillByDatabaseContext(_context);
             }
         }

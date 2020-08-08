@@ -1,15 +1,11 @@
-using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Nest;
 using Xunit;
 using YY.EventLogExportAssistant.ElasticSearch.Models;
 using YY.EventLogExportAssistant.ElasticSearch.Tests.Models;
 using YY.EventLogReaderAssistant;
-using YY.EventLogExportAssistant.Tests.Helpers;
 
 namespace YY.EventLogExportAssistant.ElasticSearch.Tests
 {

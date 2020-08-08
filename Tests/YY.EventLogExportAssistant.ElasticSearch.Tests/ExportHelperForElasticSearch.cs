@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using YY.EventLogExportAssistant.ElasticSearch.Tests.Models;
-using YY.EventLogExportAssistant.Tests.Helpers.Models;
 
 namespace YY.EventLogExportAssistant.ElasticSearch.Tests
 {
@@ -20,7 +19,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             exporter.AfterExportData += AfterExportData;
             exporter.OnErrorExportData += OnErrorExportData;
 
-            while (exporter.NewDataAvailiable())
+            while (exporter.NewDataAvailable())
                 exporter.SendData();
         }
 

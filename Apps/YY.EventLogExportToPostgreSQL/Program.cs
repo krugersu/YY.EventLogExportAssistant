@@ -34,9 +34,9 @@ namespace YY.EventLogExportToPostgreSQL
             bool useWatchMode = eventLogSection.GetValue("UseWatchMode", false);
             int portion = eventLogSection.GetValue("Portion", 1000);
 
-            IConfigurationSection inforamtionSystemSection = Configuration.GetSection("InformationSystem");
-            string inforamtionSystemName = inforamtionSystemSection.GetValue("Name", string.Empty);
-            string inforamtionSystemDescription = inforamtionSystemSection.GetValue("Description", string.Empty);
+            IConfigurationSection informationSystemSection = Configuration.GetSection("InformationSystem");
+            string informationSystemName = informationSystemSection.GetValue("Name", string.Empty);
+            string informationSystemDescription = informationSystemSection.GetValue("Description", string.Empty);
 
             if (string.IsNullOrEmpty(eventLogPath))
             {
@@ -59,8 +59,8 @@ namespace YY.EventLogExportToPostgreSQL
             EventLogOnPostgreSQL target = new EventLogOnPostgreSQL(optionsBuilder.Options, portion);
             target.SetInformationSystem(new InformationSystemsBase()
             {
-                Name = inforamtionSystemName,
-                Description = inforamtionSystemDescription
+                Name = informationSystemName,
+                Description = informationSystemDescription
             });
             exporter.SetTarget(target);
 
@@ -76,14 +76,14 @@ namespace YY.EventLogExportToPostgreSQL
                         if (Console.ReadKey().KeyChar == 'q')
                             break;
 
-                    while (exporter.NewDataAvailiable())
+                    while (exporter.NewDataAvailable())
                     {
                         exporter.SendData();
                         Thread.Sleep(watchPeriodSecondsMs);
                     }
                 }
             } else
-                while (exporter.NewDataAvailiable())
+                while (exporter.NewDataAvailable())
                     exporter.SendData();
 
             Console.WriteLine();

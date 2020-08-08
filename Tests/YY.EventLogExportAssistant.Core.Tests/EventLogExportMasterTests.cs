@@ -10,7 +10,7 @@ namespace YY.EventLogExportAssistant.Core.Tests
             EventLogExportMaster exporter = new EventLogExportMaster();
             exporter.SetEventLogPath(string.Empty);
             exporter.SetTarget(null);
-            exporter.NewDataAvailiable();
+            exporter.NewDataAvailable();
             exporter.SendData();
         }
     }

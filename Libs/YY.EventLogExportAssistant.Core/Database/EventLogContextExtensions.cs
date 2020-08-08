@@ -39,7 +39,7 @@ namespace YY.EventLogExportAssistant.Database
         public static DateTime GetRowsDataMaxPeriod(this EventLogContext context, InformationSystemsBase system)
         {
             DateTime maxPeriodRowData = DateTime.MinValue;
-            Database.Models.RowData firstRow = context.RowsData.FirstOrDefault();
+            RowData firstRow = context.RowsData.FirstOrDefault();
             if (firstRow != null)
             {
                 var _maxPeriodData = context.RowsData
@@ -134,9 +134,9 @@ namespace YY.EventLogExportAssistant.Database
 
             foreach (var itemReference in sourceReferences)
             {
-                if (!context.ReferenceExistInDB<T>(system, itemReference))
+                if (!context.ReferenceExistInDB(system, itemReference))
                 {
-                    context.AddReferenceToSaveInDB<T>(itemReference);
+                    context.AddReferenceToSaveInDB(itemReference);
                 }
             }
         }

@@ -13,7 +13,8 @@ namespace YY.EventLogExportAssistant
         private string _eventLogPath;
         private string _referenceDataHash;
         private IEventLogOnTarget _target;
-        private List<RowData> _dataToSend;
+        private EventLogReader _reader;
+        private readonly List<RowData> _dataToSend;
         private int _portionSize;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
@@ -41,6 +42,8 @@ namespace YY.EventLogExportAssistant
         public void SetEventLogPath(string eventLogPath)
         {
             _eventLogPath = eventLogPath;
+            if(!string.IsNullOrEmpty(_eventLogPath))
+                _reader = EventLogReader.CreateReader(_eventLogPath);
         }
         public void SetTarget(IEventLogOnTarget target)
         {
@@ -50,7 +53,7 @@ namespace YY.EventLogExportAssistant
                 _portionSize = _target.GetPortionSize();
             }
         }
-        public bool NewDataAvailiable()
+        public bool NewDataAvailable()
         {
             if (_target == null)
                 return false;
@@ -60,24 +63,27 @@ namespace YY.EventLogExportAssistant
             EventLogPosition lastPosition = _target.GetLastPosition();
 
             bool newDataExist;
-            using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
-            {
-                // В случае, если каталог последней позиции не совпадает 
-                // с текущим каталогом данных, то предыдущую позицию не учитываем
-                if (lastPosition != null)
-                {
-                    FileInfo lastDataFileInfo = new FileInfo(lastPosition.CurrentFileReferences);
-                    FileInfo currentDataFileInfo = new FileInfo(reader.CurrentFile);
+            _reader.AfterReadFile -= EventLogReader_AfterReadFile;
+            _reader.AfterReadEvent -= EventLogReader_AfterReadEvent;
+            _reader.OnErrorEvent -= EventLogReader_OnErrorEvent;
+            _reader.Reset();
 
-                    if (lastDataFileInfo.Directory != null && currentDataFileInfo.Directory != null)
-                    {
-                        if (lastDataFileInfo.Directory.FullName != currentDataFileInfo.Directory.FullName)
-                            lastPosition = null;
-                    }
+            // В случае, если каталог последней позиции не совпадает 
+            // с текущим каталогом данных, то предыдущую позицию не учитываем
+            if (lastPosition != null)
+            {
+                FileInfo lastDataFileInfo = new FileInfo(lastPosition.CurrentFileReferences);
+                FileInfo currentDataFileInfo = new FileInfo(_reader.CurrentFile);
+
+                if (lastDataFileInfo.Directory != null && currentDataFileInfo.Directory != null)
+                {
+                    if (lastDataFileInfo.Directory.FullName != currentDataFileInfo.Directory.FullName)
+                        lastPosition = null;
                 }
-                reader.SetCurrentPosition(lastPosition);
-                newDataExist = reader.Read();
             }
+
+            _reader.SetCurrentPosition(lastPosition);
+            newDataExist = _reader.Read();
 
             return newDataExist;
         }
@@ -89,26 +95,24 @@ namespace YY.EventLogExportAssistant
                 return;
 
             EventLogPosition lastPosition = _target.GetLastPosition();
-            using (EventLogReader reader = EventLogReader.CreateReader(_eventLogPath))
+            _reader.Reset();
+            _reader.AfterReadFile += EventLogReader_AfterReadFile;
+            _reader.AfterReadEvent += EventLogReader_AfterReadEvent;
+            _reader.OnErrorEvent += EventLogReader_OnErrorEvent;
+            _reader.SetCurrentPosition(lastPosition);
+
+            long totalReadEvents = 0;
+            while (_reader.Read())
             {
-                reader.AfterReadFile += EventLogReader_AfterReadFile;
-                reader.AfterReadEvent += EventLogReader_AfterReadEvent;
-                reader.OnErrorEvent += EventLogReader_OnErrorEvent;
-                reader.SetCurrentPosition(lastPosition);
+                if (_reader.CurrentRow != null)
+                    totalReadEvents += 1;
 
-                long totalReadEvents = 0;
-                while (reader.Read())
-                {
-                    if(reader.CurrentRow != null)
-                        totalReadEvents += 1;
-
-                    if (totalReadEvents >= _portionSize)
-                        break;
-                }
-
-                if (_dataToSend.Count > 0)                
-                    SendDataCurrentPortion(reader);                
+                if (totalReadEvents >= _portionSize)
+                    break;
             }
+
+            if (_dataToSend.Count > 0)
+                SendDataCurrentPortion(_reader);
         }
 
         #endregion

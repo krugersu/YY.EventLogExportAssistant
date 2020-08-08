@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace YY.EventLogExportAssistant.Database.Models
+﻿namespace YY.EventLogExportAssistant.Database.Models
 {
     public abstract class CommonLogObject
     {
