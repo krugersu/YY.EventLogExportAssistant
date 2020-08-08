@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
-    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.31" />
+    <PackageReference Include="YY.EventLogReaderAssistant" Version="1.0.0.33" />
   </ItemGroup>
 
   <ItemGroup>

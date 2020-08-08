@@ -48,14 +48,14 @@ namespace YY.EventLogExportAssistant
         }
         public ReferencesData(EventLogReader reader) : this()
         {
-            Applications = reader.Applications.ToList().AsReadOnly();
-            Computers = reader.Computers.ToList().AsReadOnly();
-            Events = reader.Events.ToList().AsReadOnly();
-            Metadata = reader.Metadata.ToList().AsReadOnly();
-            PrimaryPorts = reader.PrimaryPorts.ToList().AsReadOnly();
-            SecondaryPorts = reader.SecondaryPorts.ToList().AsReadOnly();
-            Users = reader.Users.ToList().AsReadOnly();
-            WorkServers = reader.WorkServers.ToList().AsReadOnly();
+            Applications = reader.References.Applications.Select(e => e.Value).ToList().AsReadOnly();
+            Computers = reader.References.Computers.Select(e => e.Value).ToList().AsReadOnly();
+            Events = reader.References.Events.Select(e => e.Value).ToList().AsReadOnly();
+            Metadata = reader.References.Metadata.Select(e => e.Value).ToList().AsReadOnly();
+            PrimaryPorts = reader.References.PrimaryPorts.Select(e => e.Value).ToList().AsReadOnly();
+            SecondaryPorts = reader.References.SecondaryPorts.Select(e => e.Value).ToList().AsReadOnly();
+            Users = reader.References.Users.Select(e => e.Value).ToList().AsReadOnly();
+            WorkServers = reader.References.WorkServers.Select(e => e.Value).ToList().AsReadOnly();
         }
 
         #endregion
