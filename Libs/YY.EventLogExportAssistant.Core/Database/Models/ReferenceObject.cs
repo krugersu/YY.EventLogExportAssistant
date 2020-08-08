@@ -18,7 +18,7 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         #region Public Properties
 
-        [MaxLength(250)]
+        [MaxLength(500)]
         public string Name { get; set; }
 
         #endregion
