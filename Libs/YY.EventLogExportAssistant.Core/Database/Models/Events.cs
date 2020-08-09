@@ -99,7 +99,7 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         public static string GetPresentationByName(string name)
         {
-            if (_mapEventPresentation.TryGetValue(name, out string output))
+            if (_mapEventPresentation.TryGetValue(name.Replace("\"", string.Empty), out string output))
                 return output;
 
             return name;
