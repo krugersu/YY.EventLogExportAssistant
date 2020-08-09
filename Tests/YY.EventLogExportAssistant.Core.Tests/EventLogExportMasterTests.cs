@@ -7,11 +7,13 @@ namespace YY.EventLogExportAssistant.Core.Tests
         [Fact]
         public void CreateEventLogExportMasterObject()
         {
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(string.Empty);
-            exporter.SetTarget(null);
-            exporter.NewDataAvailable();
-            exporter.SendData();
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
+            {
+                exporter.SetEventLogPath(string.Empty);
+                exporter.SetTarget(null);
+                exporter.NewDataAvailable();
+                exporter.SendData();
+            }
         }
     }
 }

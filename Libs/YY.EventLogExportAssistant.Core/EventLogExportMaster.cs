@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.EventArguments;
@@ -6,7 +7,7 @@ using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogExportAssistant
 {
-    public sealed class EventLogExportMaster : IEventLogExportMaster
+    public sealed class EventLogExportMaster : IEventLogExportMaster, IDisposable
     {
         #region Private Member Variables
 
@@ -55,6 +56,8 @@ namespace YY.EventLogExportAssistant
         }
         public bool NewDataAvailable()
         {
+            if (_reader == null)
+                return false;
             if (_target == null)
                 return false;
             if (_eventLogPath == null)
@@ -89,6 +92,8 @@ namespace YY.EventLogExportAssistant
         }
         public void SendData()
         {
+            if (_reader == null)
+                return;
             if (_target == null)
                 return;
             if (_eventLogPath == null)
@@ -113,6 +118,15 @@ namespace YY.EventLogExportAssistant
 
             if (_dataToSend.Count > 0)
                 SendDataCurrentPortion(_reader);
+        }
+        public void Dispose()
+        {
+            if (_reader != null)
+            {
+                _reader.Reset();
+                _reader.Dispose();
+                _reader = null;
+            }
         }
 
         #endregion

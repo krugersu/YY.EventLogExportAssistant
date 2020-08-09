@@ -60,42 +60,44 @@ namespace YY.EventLogExportToElasticSearch
                 .DefaultIndex(indexName)
                 .MaximumRetries(maximumRetries)
                 .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
-            
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogPath);
 
-            EventLogOnElasticSearch target = new EventLogOnElasticSearch(elasticSettings, portion);
-            target.SetInformationSystem(new InformationSystemsBase()
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
-                Name = informationSystemName,
-                Description = informationSystemDescription
-            });
-            target.SetIndexName(indexName);
-            target.SetIndexSeparationPeriod(indexSeparation);
-            exporter.SetTarget(target);
+                exporter.SetEventLogPath(eventLogPath);
 
-            exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-            exporter.OnErrorExportData += OnErrorExportData;
-
-            if (useWatchMode)
-            {
-                while (true)
+                EventLogOnElasticSearch target = new EventLogOnElasticSearch(elasticSettings, portion);
+                target.SetInformationSystem(new InformationSystemsBase()
                 {
-                    if (Console.KeyAvailable)
-                        if (Console.ReadKey().KeyChar == 'q')
-                            break;
+                    Name = informationSystemName,
+                    Description = informationSystemDescription
+                });
+                target.SetIndexName(indexName);
+                target.SetIndexSeparationPeriod(indexSeparation);
+                exporter.SetTarget(target);
 
-                    while (exporter.NewDataAvailable())
+                exporter.BeforeExportData += BeforeExportData;
+                exporter.AfterExportData += AfterExportData;
+                exporter.OnErrorExportData += OnErrorExportData;
+
+                if (useWatchMode)
+                {
+                    while (true)
                     {
-                        exporter.SendData();
-                        Thread.Sleep(watchPeriodSecondsMs);
+                        if (Console.KeyAvailable)
+                            if (Console.ReadKey().KeyChar == 'q')
+                                break;
+
+                        while (exporter.NewDataAvailable())
+                        {
+                            exporter.SendData();
+                            Thread.Sleep(watchPeriodSecondsMs);
+                        }
                     }
                 }
+                else
+                    while (exporter.NewDataAvailable())
+                        exporter.SendData();
             }
-            else
-                while (exporter.NewDataAvailable())
-                    exporter.SendData();
 
             Console.WriteLine();
             Console.WriteLine();
