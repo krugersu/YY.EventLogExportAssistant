@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using YY.EventLogExportAssistant.Helpers;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.Models;
 using ReferenceObject = YY.EventLogExportAssistant.Database.Models.ReferenceObject;
@@ -66,25 +67,25 @@ namespace YY.EventLogExportAssistant
         {
             IReadOnlyList<T> result;
             if (typeof(T) == typeof(Database.Models.Applications))
-                result = (IReadOnlyList<T>)Applications.Select(i => new Database.Models.Applications() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Applications.Select(i => new Database.Models.Applications() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Computers))
-                result = (IReadOnlyList<T>)Computers.Select(i => new Database.Models.Computers() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Computers.Select(i => new Database.Models.Computers() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Events))
-                result = (IReadOnlyList<T>)Events.Select(i => new Database.Models.Events() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Events.Select(i => new Database.Models.Events() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Presentation = Database.Models.Events.GetPresentationByName(i.Name).Truncate(500) }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Metadata))
-                result = (IReadOnlyList<T>)Metadata.Select(i => new Database.Models.Metadata() { Name = i.Name, InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Metadata.Select(i => new Database.Models.Metadata() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.PrimaryPorts))
-                result = (IReadOnlyList<T>)PrimaryPorts.Select(i => new Database.Models.PrimaryPorts() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)PrimaryPorts.Select(i => new Database.Models.PrimaryPorts() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.SecondaryPorts))
-                result = (IReadOnlyList<T>)SecondaryPorts.Select(i => new Database.Models.SecondaryPorts() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)SecondaryPorts.Select(i => new Database.Models.SecondaryPorts() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Severities))
                 result = (IReadOnlyList<T>)Severities.Select(i => new Database.Models.Severities() { Name = i.ToString(), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.TransactionStatuses))
                 result = (IReadOnlyList<T>)TransactionStatuses.Select(i => new Database.Models.TransactionStatuses() { Name = i.ToString(), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Users))
-                result = (IReadOnlyList<T>)Users.Select(i => new Database.Models.Users() { Name = i.Name, InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Users.Select(i => new Database.Models.Users() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.WorkServers))
-                result = (IReadOnlyList<T>) WorkServers.Select(i => new Database.Models.WorkServers() { Name = i.Name, InformationSystemId = system.Id }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>) WorkServers.Select(i => new Database.Models.WorkServers() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else throw new Exception("Неизвестный тип для формирования списка исходных ссылок");
             return result;
         }
