@@ -92,11 +92,7 @@ namespace YY.EventLogExportAssistant
         }
         public void SendData()
         {
-            if (_reader == null)
-                return;
-            if (_target == null)
-                return;
-            if (_eventLogPath == null)
+            if (_reader == null || _target == null || _eventLogPath == null)
                 return;
 
             EventLogPosition lastPosition = _target.GetLastPosition();
@@ -111,11 +107,9 @@ namespace YY.EventLogExportAssistant
             {
                 if (_reader.CurrentRow != null)
                     totalReadEvents += 1;
-
                 if (totalReadEvents >= _portionSize)
                     break;
             }
-
             if (_dataToSend.Count > 0)
                 SendDataCurrentPortion(_reader);
         }
