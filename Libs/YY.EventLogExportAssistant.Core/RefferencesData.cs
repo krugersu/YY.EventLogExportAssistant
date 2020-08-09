@@ -65,6 +65,7 @@ namespace YY.EventLogExportAssistant
 
         public IReadOnlyList<T> GetReferencesListForDatabaseType<T>(InformationSystemsBase system) where T : ReferenceObject
         {
+            // TODO: Необходим рефакторинг этого ужаса :)
             IReadOnlyList<T> result;
             if (typeof(T) == typeof(Database.Models.Applications))
                 result = (IReadOnlyList<T>)Applications.Select(i => new Database.Models.Applications() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
