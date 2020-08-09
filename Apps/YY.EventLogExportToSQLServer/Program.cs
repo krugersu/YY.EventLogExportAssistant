@@ -53,38 +53,41 @@ namespace YY.EventLogExportToSQLServer
             var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
             optionsBuilder.UseSqlServer(connectionString);
 
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogPath);
-
-            EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
-            target.SetInformationSystem(new InformationSystemsBase()
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
-                Name = informationSystemName,
-                Description = informationSystemDescription
-            });
-            exporter.SetTarget(target);
+                exporter.SetEventLogPath(eventLogPath);
 
-            exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-            exporter.OnErrorExportData += OnErrorExportData;
-
-            if (useWatchMode)
-            {
-                while (true)
+                EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
+                target.SetInformationSystem(new InformationSystemsBase()
                 {
-                    if (Console.KeyAvailable)
-                        if (Console.ReadKey().KeyChar == 'q')
-                            break;
+                    Name = informationSystemName,
+                    Description = informationSystemDescription
+                });
+                exporter.SetTarget(target);
 
-                    while (exporter.NewDataAvailable())
+                exporter.BeforeExportData += BeforeExportData;
+                exporter.AfterExportData += AfterExportData;
+                exporter.OnErrorExportData += OnErrorExportData;
+
+                if (useWatchMode)
+                {
+                    while (true)
                     {
-                        exporter.SendData();
-                        Thread.Sleep(watchPeriodSecondsMs);
-                    }                    
+                        if (Console.KeyAvailable)
+                            if (Console.ReadKey().KeyChar == 'q')
+                                break;
+
+                        while (exporter.NewDataAvailable())
+                        {
+                            exporter.SendData();
+                            Thread.Sleep(watchPeriodSecondsMs);
+                        }
+                    }
                 }
-            } else
-                while (exporter.NewDataAvailable())
-                    exporter.SendData();
+                else
+                    while (exporter.NewDataAvailable())
+                        exporter.SendData();
+            }
 
             Console.WriteLine();
             Console.WriteLine();

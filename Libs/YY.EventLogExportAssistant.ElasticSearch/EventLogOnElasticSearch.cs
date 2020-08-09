@@ -68,12 +68,9 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         public override EventLogPosition GetLastPosition()
         {
             if (_lastEventLogFilePosition != null)
-            {
                 return _lastEventLogFilePosition;
-            }
 
             LogFileElement actualLogFileInfo = _client.GetLastLogFileElement(_system.Name, _indexName);
-
             EventLogPosition position = null;
             if (actualLogFileInfo != null)
             {
@@ -84,7 +81,6 @@ namespace YY.EventLogExportAssistant.ElasticSearch
                     actualLogFileInfo.LastStreamPosition
                 );
             }
-
             _lastEventLogFilePosition = position;
             return position;
         }

@@ -76,14 +76,13 @@ namespace YY.EventLogExportAssistant.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             CheckSettings();
-
             _extensionActions.OnModelCreating(modelBuilder, out var standardBehaviorChanged);
-
             if(standardBehaviorChanged)
                 return;
 
             InitializeAllStandardEntities(modelBuilder);
             InitializeAllAdditionalEntities(modelBuilder);
+            InitializeAllSpecialEntities(modelBuilder);
         }
         private void InitializeAllStandardEntities(ModelBuilder modelBuilder)
         {
@@ -120,15 +119,15 @@ namespace YY.EventLogExportAssistant.Database
                     .HasIndex(b => new { b.Id })
                     .IsUnique();
 
-                AddExplicitStandardIndex<Applications>(modelBuilder);
-                AddExplicitStandardIndex<Computers>(modelBuilder);
-                AddExplicitStandardIndex<Events>(modelBuilder);
-                AddExplicitStandardIndex<Metadata>(modelBuilder);
-                AddExplicitStandardIndex<PrimaryPorts>(modelBuilder);
-                AddExplicitStandardIndex<SecondaryPorts>(modelBuilder);
-                AddExplicitStandardIndex<Severities>(modelBuilder);
-                AddExplicitStandardIndex<Users>(modelBuilder);
-                AddExplicitStandardIndex<WorkServers>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Applications>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Computers>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Events>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Metadata>(modelBuilder);
+                AddExplicitStandardReferenceIndex<PrimaryPorts>(modelBuilder);
+                AddExplicitStandardReferenceIndex<SecondaryPorts>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Severities>(modelBuilder);
+                AddExplicitStandardReferenceIndex<Users>(modelBuilder);
+                AddExplicitStandardReferenceIndex<WorkServers>(modelBuilder);
 
                 modelBuilder.Entity<LogFiles>()
                     .HasIndex(b => new { b.InformationSystemId, b.FileName, b.CreateDate, b.Id })
@@ -139,6 +138,19 @@ namespace YY.EventLogExportAssistant.Database
                     .IsUnique();
             }
         }
+        private void InitializeAllSpecialEntities(ModelBuilder modelBuilder)
+        {
+            AddExplicitSpecialReferenceIndex<Applications>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<Computers>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<Events>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<PrimaryPorts>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<SecondaryPorts>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<Severities>(modelBuilder);
+            AddExplicitSpecialReferenceIndex<WorkServers>(modelBuilder);
+
+            modelBuilder.Entity<Users>().HasIndex(b => new { b.InformationSystemId, b.Name, b.Uuid });
+            modelBuilder.Entity<Metadata>().HasIndex(b => new { b.InformationSystemId, b.Name, b.Uuid });
+        }
         private void InitializeStandardEntity<T>(ModelBuilder modelBuilder) where T : CommonLogObject
         {
             modelBuilder.Entity<T>()
@@ -147,11 +159,16 @@ namespace YY.EventLogExportAssistant.Database
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
         }
-        private void AddExplicitStandardIndex<T>(ModelBuilder modelBuilder) where T : CommonLogObject
+        private void AddExplicitStandardReferenceIndex<T>(ModelBuilder modelBuilder) where T : ReferenceObject
         {
             modelBuilder.Entity<T>()
                 .HasIndex(b => new { b.InformationSystemId, b.Id })
                 .IsUnique();
+        }
+        private void AddExplicitSpecialReferenceIndex<T>(ModelBuilder modelBuilder) where T : ReferenceObject
+        {
+            modelBuilder.Entity<T>()
+                .HasIndex(b => new { b.InformationSystemId, b.Name });
         }
         private void CheckSettings()
         {

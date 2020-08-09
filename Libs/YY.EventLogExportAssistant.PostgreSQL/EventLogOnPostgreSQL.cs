@@ -18,9 +18,10 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
-        private readonly IEventLogContextExtensionActions _postgreSqlActions;
+        private readonly IEventLogContextExtensionActions _databaseActions;
         private ReferencesDataCache _referencesCache;
-        
+        private EventLogPosition _lastEventLogFilePosition;
+
         #endregion
 
         #region Constructor
@@ -35,13 +36,13 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public EventLogOnPostgreSQL(DbContextOptions<EventLogContext> databaseOptions, int portion)
         {
-            _postgreSqlActions = new EventLogPostgreSQLActions();
+            _databaseActions = new EventLogPostgreSQLActions();
             _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
             if (databaseOptions == null)
             {
                 var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                _postgreSqlActions.OnConfiguring(optionsBuilder);
+                _databaseActions.OnConfiguring(optionsBuilder);
                 _databaseOptions = optionsBuilder.Options;
             }
             else
@@ -54,13 +55,22 @@ namespace YY.EventLogExportAssistant.PostgreSQL
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
-                return _context.GetLastPosition(_system);
+            if (_lastEventLogFilePosition != null)
+                return _lastEventLogFilePosition;
+
+            EventLogPosition position;
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
+                position = _context.GetLastPosition(_system);
+            _lastEventLogFilePosition = position;
+
+            return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
                 _context.SaveLogPosition(_system, logFileInfo, position);
+
+            _lastEventLogFilePosition = position;
         }
         public override int GetPortionSize()
         {
@@ -75,7 +85,7 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
@@ -98,12 +108,12 @@ namespace YY.EventLogExportAssistant.PostgreSQL
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
                 _system = _context.CreateOrUpdateInformationSystem(system);
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _postgreSqlActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
             {
                 _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();

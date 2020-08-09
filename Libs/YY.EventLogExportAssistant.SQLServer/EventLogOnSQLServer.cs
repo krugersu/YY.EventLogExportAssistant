@@ -18,9 +18,10 @@ namespace YY.EventLogExportAssistant.SQLServer
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
         private InformationSystemsBase _system;
         private DateTime _maxPeriodRowData;
-        private readonly IEventLogContextExtensionActions _sqlServerActions;
+        private readonly IEventLogContextExtensionActions _databaseActions;
         private ReferencesDataCache _referencesCache;
-        
+        private EventLogPosition _lastEventLogFilePosition;
+
         #endregion
 
         #region Constructor
@@ -35,13 +36,13 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public EventLogOnSQLServer(DbContextOptions<EventLogContext> databaseOptions, int portion)
         {
-            _sqlServerActions = new EventLogSQLServerActions();
+            _databaseActions = new EventLogSQLServerActions();
             _maxPeriodRowData = DateTime.MinValue;
             _portion = portion;
             if (databaseOptions == null)
             {
                 var optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                _sqlServerActions.OnConfiguring(optionsBuilder);
+                _databaseActions.OnConfiguring(optionsBuilder);
                 _databaseOptions = optionsBuilder.Options;
             }
             else
@@ -54,13 +55,22 @@ namespace YY.EventLogExportAssistant.SQLServer
 
         public override EventLogPosition GetLastPosition()
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
-                return _context.GetLastPosition(_system);
+            if (_lastEventLogFilePosition != null)
+                return _lastEventLogFilePosition;
+
+            EventLogPosition position;
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
+                position = _context.GetLastPosition(_system);
+            _lastEventLogFilePosition = position;
+
+            return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
                 _context.SaveLogPosition(_system, logFileInfo, position);
+
+            _lastEventLogFilePosition = position;
         }
         public override int GetPortionSize()
         {
@@ -75,7 +85,7 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void Save(IList<RowData> rowsData)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
@@ -97,12 +107,12 @@ namespace YY.EventLogExportAssistant.SQLServer
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
                 _system = _context.CreateOrUpdateInformationSystem(system);
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _sqlServerActions))
+            using (EventLogContext _context = EventLogContext.Create(_databaseOptions, _databaseActions))
             {
                 _context.FillReferencesToSave(_system, data);
                 _context.SaveChanges();

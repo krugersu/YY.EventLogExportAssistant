@@ -11,16 +11,18 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
             if (!Directory.Exists(eventLogSettings.EventLogPath))
                 throw new Exception("Каталог данных журнала регистрации не обнаружен.");
 
-            EventLogExportMaster exporter = new EventLogExportMaster();
-            exporter.SetEventLogPath(eventLogSettings.EventLogPath);
-            exporter.SetTarget(targetStorage);
+            using (EventLogExportMaster exporter = new EventLogExportMaster())
+            {
+                exporter.SetEventLogPath(eventLogSettings.EventLogPath);
+                exporter.SetTarget(targetStorage);
 
-            exporter.BeforeExportData += BeforeExportData;
-            exporter.AfterExportData += AfterExportData;
-            exporter.OnErrorExportData += OnErrorExportData;
+                exporter.BeforeExportData += BeforeExportData;
+                exporter.AfterExportData += AfterExportData;
+                exporter.OnErrorExportData += OnErrorExportData;
 
-            while (exporter.NewDataAvailable())
-                exporter.SendData();
+                while (exporter.NewDataAvailable())
+                    exporter.SendData();
+            }
         }
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
