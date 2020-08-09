@@ -184,51 +184,53 @@ static void Main()
     optionsBuilder.UseSqlServer(connectionString);
 
     // 3. Создаем объект для экспорта данных
-    EventLogExportMaster exporter = new EventLogExportMaster();
-    // 3.1. Устанавливаем каталог с файлами журнала регистрации
-    exporter.SetEventLogPath(eventLogPath);
-
-    // 3.2. Инициализируем назначение экспорта данных. Для каждого назначения - свой класс, наследуемый от класса
-    // "EventLogOnTarget" и устанавливаем в нем информационную систему для выгрузки.
-    // Для SQL Server - "EventLogOnSQLServer"
-    // Для PostgreSQL - "EventLogOnPostgreSQL"
-    // Можно создать собственный класс для выгрузки в произвольное хранилище.
-    EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
-    target.SetInformationSystem(new InformationSystemsBase()
+    using(EventLogExportMaster exporter = new EventLogExportMaster())
     {
-        Name = inforamtionSystemName,
-        Description = inforamtionSystemDescription
-    });
+        // 3.1. Устанавливаем каталог с файлами журнала регистрации
+        exporter.SetEventLogPath(eventLogPath);
 
-    // 4. Устанавливаем назначение экспорта
-    exporter.SetTarget(target);
-
-    // 5. Подписываемся на события экспорта данных
-    // 5.1. Событие "Перед отправкой данных"
-    exporter.BeforeExportData += BeforeExportData;
-    // 5.2. Событие "После отправки данных"
-    exporter.AfterExportData += AfterExportData;         
-
-    // 6. Выгрузка данных
-    if (useWatchMode)
-    {
-        // При настройке "WatchMode" = true выгружаем все накопившиеся данные,
-        // а после проверяем новые данные для выгрузки каждые N секунд из настройки "WatchPeriod"
-        while (true)
+        // 3.2. Инициализируем назначение экспорта данных. Для каждого назначения - свой класс, наследуемый от класса
+        // "EventLogOnTarget" и устанавливаем в нем информационную систему для выгрузки.
+        // Для SQL Server - "EventLogOnSQLServer"
+        // Для PostgreSQL - "EventLogOnPostgreSQL"
+        // Можно создать собственный класс для выгрузки в произвольное хранилище.
+        EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
+        target.SetInformationSystem(new InformationSystemsBase()
         {
-            if (Console.KeyAvailable)
-                if (Console.ReadKey().KeyChar == 'q')
-                    break;
+            Name = inforamtionSystemName,
+            Description = inforamtionSystemDescription
+        });
 
-            while (exporter.NewDataAvailiable())
+        // 4. Устанавливаем назначение экспорта
+        exporter.SetTarget(target);
+
+        // 5. Подписываемся на события экспорта данных
+        // 5.1. Событие "Перед отправкой данных"
+        exporter.BeforeExportData += BeforeExportData;
+        // 5.2. Событие "После отправки данных"
+        exporter.AfterExportData += AfterExportData;         
+
+        // 6. Выгрузка данных
+        if (useWatchMode)
+        {
+            // При настройке "WatchMode" = true выгружаем все накопившиеся данные,
+            // а после проверяем новые данные для выгрузки каждые N секунд из настройки "WatchPeriod"
+            while (true)
             {
+                if (Console.KeyAvailable)
+                    if (Console.ReadKey().KeyChar == 'q')
+                        break;
+
+                while (exporter.NewDataAvailiable())
+                {
+                    exporter.SendData();
+                    Thread.Sleep(watchPeriodSecondsMs);
+                }                    
+            }
+        } else // При настройке "WatchMode" = false просто выгружаем все накопившиеся данные
+            while (exporter.NewDataAvailiable())
                 exporter.SendData();
-                Thread.Sleep(watchPeriodSecondsMs);
-            }                    
-        }
-    } else // При настройке "WatchMode" = false просто выгружаем все накопившиеся данные
-        while (exporter.NewDataAvailiable())
-            exporter.SendData();
+    }
 
     Console.WriteLine();
     Console.WriteLine();
