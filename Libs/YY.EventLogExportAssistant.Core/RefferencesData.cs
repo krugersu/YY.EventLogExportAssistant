@@ -72,7 +72,8 @@ namespace YY.EventLogExportAssistant
             else if (typeof(T) == typeof(Database.Models.Computers))
                 result = (IReadOnlyList<T>)Computers.Select(i => new Database.Models.Computers() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Events))
-                result = (IReadOnlyList<T>)Events.Select(i => new Database.Models.Events() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Presentation = Database.Models.Events.GetPresentationByName(i.Name).Truncate(500) }).ToList().AsReadOnly();
+                //result = (IReadOnlyList<T>)Events.Select(i => new Database.Models.Events() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Presentation = Database.Models.Events.GetPresentationByName(i.Name).Truncate(500) }).ToList().AsReadOnly();
+                result = (IReadOnlyList<T>)Events.Select(i => new Database.Models.Events() { Name = i.Name.Truncate(500), InformationSystemId = system.Id }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.Metadata))
                 result = (IReadOnlyList<T>)Metadata.Select(i => new Database.Models.Metadata() { Name = i.Name.Truncate(500), InformationSystemId = system.Id, Uuid = i.Uuid }).ToList().AsReadOnly();
             else if (typeof(T) == typeof(Database.Models.PrimaryPorts))
