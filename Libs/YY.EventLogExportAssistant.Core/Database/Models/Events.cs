@@ -7,7 +7,7 @@ namespace YY.EventLogExportAssistant.Database.Models
     {
         #region Private Static Members
 
-        private static Dictionary<string, string> _mapEventPresentation = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> _mapPresentation = new Dictionary<string, string>()
         {
             { "_$Access$_.Access", "Доступ.Доступ" },
             { "_$Access$_.AccessDenied", "Доступ.Отказ в доступе" },
@@ -29,7 +29,7 @@ namespace YY.EventLogExportAssistant.Database.Models
             { "_$Data$_.Update", "Данные.Изменение" },
             { "_$Data$_.UpdatePredefinedData", "Данные.Изменение предопределенных данных" },
             { "_$Data$_.VersionCommentUpdate", "Данные.Изменение комментария версии" },
-            { "_$InfoBase$_.ConfigExtensionUpdate", " Информационная база.Изменение расширения конфигурации" },
+            { "_$InfoBase$_.ConfigExtensionUpdate", "Информационная база.Изменение расширения конфигурации" },
             { "_$InfoBase$_.ConfigUpdate", "Информационная база.Изменение конфигурации" },
             { "_$InfoBase$_.DBConfigBackgroundUpdateCancel", "Информационная база.Отмена фонового обновления" },
             { "_$InfoBase$_.DBConfigBackgroundUpdateFinish", "Информационная база.Завершение фонового обновления" },
@@ -95,14 +95,11 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         #endregion
 
-        #region Public Static Methods
+        #region Private Static Methods
 
-        public static string GetPresentationByName(string name)
+        private static string GetPresentationByName(string name)
         {
-            if (_mapEventPresentation.TryGetValue(name.Replace("\"", string.Empty), out string output))
-                return output;
-
-            return name;
+            return _mapPresentation.TryGetValue(name, out string output) ? output : name;
         }
 
         #endregion
@@ -110,7 +107,10 @@ namespace YY.EventLogExportAssistant.Database.Models
         #region Public Members
 
         [MaxLength(500)]
-        public string Presentation { get; set; }
+        public string Presentation {
+            get => GetPresentationByName(Name);
+            set { }
+        }
 
         #endregion
     }
