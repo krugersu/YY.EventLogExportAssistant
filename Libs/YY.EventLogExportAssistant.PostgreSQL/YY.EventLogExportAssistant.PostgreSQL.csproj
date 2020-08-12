@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.29</Version>
+    <Version>1.0.0.30</Version>
     <PackageId>YY.EventLogExportAssistant.PostgreSQL</PackageId>
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log export assistant for PostgreSQL</Product>
@@ -14,23 +14,23 @@
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>event, log, 1C, enterprise, export, postgres, postgresql</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.29</AssemblyVersion>
+    <AssemblyVersion>1.0.0.30</AssemblyVersion>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
-    <FileVersion>1.0.0.29</FileVersion>
+    <FileVersion>1.0.0.30</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.4" />
     <PackageReference Include="NpgsqlBulk.EFCore" Version="0.8.1.1" />
   </ItemGroup>
