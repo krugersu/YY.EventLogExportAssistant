@@ -76,7 +76,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToMySQL", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{C61F7DD3-3071-42F4-83BF-29D2F23B1664}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.Tests.Helpers", "Tests\Helpers\YY.EventLogExportAssistant.Tests.Helpers\YY.EventLogExportAssistant.Tests.Helpers.csproj", "{42AA4836-53F7-4A62-AB9F-C4D1A598E49A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.Tests.Helpers", "Tests\Helpers\YY.EventLogExportAssistant.Tests.Helpers\YY.EventLogExportAssistant.Tests.Helpers.csproj", "{42AA4836-53F7-4A62-AB9F-C4D1A598E49A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Special", "Special", "{01BFB6AD-381B-4022-984A-E6ED03FA2BCD}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\Special\20200812_Изменение базы данных с версии 1.0.0.29 на 1.0.0.31.sql = Scripts\Special\20200812_Изменение базы данных с версии 1.0.0.29 на 1.0.0.31.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -167,6 +172,7 @@ Global
 		{D268DD2D-7693-471A-A657-1132C0E2DB4E} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 		{C61F7DD3-3071-42F4-83BF-29D2F23B1664} = {44948605-8B87-444A-B94D-530ADB059377}
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A} = {C61F7DD3-3071-42F4-83BF-29D2F23B1664}
+		{01BFB6AD-381B-4022-984A-E6ED03FA2BCD} = {AF6C4D18-9F7B-4E44-9531-A191AA6F725E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}
