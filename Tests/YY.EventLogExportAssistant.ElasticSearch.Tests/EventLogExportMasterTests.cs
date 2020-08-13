@@ -31,12 +31,12 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Tests
         #region Public Methods
 
         [Fact]
-        public void ExportFormatLGFToSQLServerTest()
+        public void ExportFormatLGFToElasticSearchTest()
         {
             ExportToElasticSearch(_settings.SettingsLGF);
         }
         [Fact]
-        public void ExportFormatLGDToSQLServerTest()
+        public void ExportFormatLGDToElasticSearchTest()
         {
             ExportToElasticSearch(_settings.SettingsLGD);
         }

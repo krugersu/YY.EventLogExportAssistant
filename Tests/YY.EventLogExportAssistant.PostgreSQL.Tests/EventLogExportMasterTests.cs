@@ -43,12 +43,12 @@ namespace YY.EventLogExportAssistant.PostgreSQL.Tests
         #region Public Methods
 
         [Fact]
-        public void ExportFormatLGFToSQLServerTest()
+        public void ExportFormatLGFToPostgreSQLTest()
         {
             ExportToPostgreSQL(_settings.SettingsLGF);
         }
         [Fact]
-        public void ExportFormatLGDToSQLServerTest()
+        public void ExportFormatLGDToPostgreSQLTest()
         {
             ExportToPostgreSQL(_settings.SettingsLGD);
         }
