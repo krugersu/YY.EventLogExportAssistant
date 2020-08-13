@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.11</Version>
+    <Version>1.0.0.12</Version>
     <Company>Permitin Yuriy</Company>
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log export assistant to ElasticSearch</Product>
@@ -15,7 +15,7 @@
     <PackageTags>event, log, 1C, enterprise, export, elasticsearch, elk</PackageTags>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.11</AssemblyVersion>
+    <AssemblyVersion>1.0.0.12</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
