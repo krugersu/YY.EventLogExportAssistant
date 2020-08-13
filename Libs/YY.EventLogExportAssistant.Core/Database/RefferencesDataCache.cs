@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using YY.EventLogExportAssistant.Helpers;
 
 namespace YY.EventLogExportAssistant.Database
 {
@@ -112,37 +113,37 @@ namespace YY.EventLogExportAssistant.Database
         {
             if (item == null) return null;
 
-            return ApplicationsDictionary[item.Name].First().Id;
+            return ApplicationsDictionary[item.Name.Truncate(500)].First().Id;
         }
         private long? GetComputerId(EventLogReaderAssistant.Models.Computers item)
         {
             if (item == null) return null;
 
-            return ComputersDictionary[item.Name].First().Id;
+            return ComputersDictionary[item.Name.Truncate(500)].First().Id;
         }
         private long? GetEventId(EventLogReaderAssistant.Models.Events item)
         {
             if (item == null) return null;
 
-            return EventsDictionary[item.Name].First().Id;
+            return EventsDictionary[item.Name.Truncate(500)].First().Id;
         }
         private long? GetMetadataId(EventLogReaderAssistant.Models.Metadata item)
         {
             if (item == null) return null;
 
-            return MetadataDictionary[item.Name].First(e => e.Uuid == item.Uuid).Id;
+            return MetadataDictionary[item.Name.Truncate(500)].First(e => e.Uuid == item.Uuid).Id;
         }
         private long? GetPrimaryPortId(EventLogReaderAssistant.Models.PrimaryPorts item)
         {
             if (item == null) return null;
 
-            return PrimaryPortsDictionary[item.Name].First().Id;
+            return PrimaryPortsDictionary[item.Name.Truncate(500)].First().Id;
         }
         private long? GetSecondaryPortId(EventLogReaderAssistant.Models.SecondaryPorts item)
         {
             if (item == null) return null;
 
-            return SecondaryPortsDictionary[item.Name].First().Id;
+            return SecondaryPortsDictionary[item.Name.Truncate(500)].First().Id;
         }
         private long? GetSeverityId(EventLogReaderAssistant.Models.Severity item)
         {
@@ -156,13 +157,13 @@ namespace YY.EventLogExportAssistant.Database
         {
             if (item == null) return null;
 
-            return UsersDictionary[item.Name].First(e => e.Uuid == item.Uuid).Id;
+            return UsersDictionary[item.Name.Truncate(500)].First(e => e.Uuid == item.Uuid).Id;
         }
         private long? GetWorkServerId(EventLogReaderAssistant.Models.WorkServers item)
         {
             if (item == null) return null;
 
-            return WorkServersDictionary[item.Name].First().Id;
+            return WorkServersDictionary[item.Name.Truncate(500)].First().Id;
         }
 
         #endregion
