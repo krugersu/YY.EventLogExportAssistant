@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0.1</Version>
+    <Authors>Permitin Yuriy</Authors>
+    <Company>Permitin YuriyPermitin Yuriy</Company>
+    <Product>Event log export assistant to ClickHouse</Product>
+    <Description>Library for exprorting 1C:Enterprise 8.x platform's event log files to ClickHouse</Description>
+    <Copyright>Copyright (c) 2020 Permitin Yury</Copyright>
+    <PackageProjectUrl>https://github.com/YPermitin/YY.EventLogExportAssistant</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/YPermitin/YY.EventLogExportAssistant</RepositoryUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <PackageTags>event, log, 1C, enterprise, export, elasticsearch, elk</PackageTags>
+    <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\Nuget\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
+  </ItemGroup>
+
+</Project>

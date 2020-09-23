@@ -83,6 +83,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Special", "Special", "{01BF
 		Scripts\Special\20200812_Изменение базы данных с версии 1.0.0.29 на 1.0.0.31.sql = Scripts\Special\20200812_Изменение базы данных с версии 1.0.0.29 на 1.0.0.31.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.ClickHouse", "Libs\YY.EventLogExportAssistant.ClickHouse\YY.EventLogExportAssistant.ClickHouse.csproj", "{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,10 @@ Global
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -173,6 +179,7 @@ Global
 		{C61F7DD3-3071-42F4-83BF-29D2F23B1664} = {44948605-8B87-444A-B94D-530ADB059377}
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A} = {C61F7DD3-3071-42F4-83BF-29D2F23B1664}
 		{01BFB6AD-381B-4022-984A-E6ED03FA2BCD} = {AF6C4D18-9F7B-4E44-9531-A191AA6F725E}
+		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C} = {0F68727D-2383-427E-AF95-1329C70898C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}
