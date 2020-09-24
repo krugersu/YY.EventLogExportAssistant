@@ -171,6 +171,56 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 ORDER BY (InformationSystemId, Id)
                 SETTINGS index_granularity = 8192;";
             cmdDDL.ExecuteNonQuery();
+
+            cmdDDL.CommandText =
+                @"create table if not exists RowsData
+                (
+	                InformationSystemId Int64,
+	                Id Int64,
+	                Period DateTime,
+	                SeverityId Int64,
+	                ConnectId Int64,
+	                Session Int64,
+	                TransactionStatusId Int64,
+	                TransactionDate DateTime,
+	                TransactionId Int64,
+	                UserId Int64,
+	                ComputerId Int64,
+	                ApplicationId Int64,
+	                EventId Int64,
+	                Comment String,
+	                MetadataId Int64,
+	                Data String,
+	                DataUUID String,
+	                DataPresentation String,
+	                WorkServerId Int64,
+	                PrimaryPortId Int64,
+	                SecondaryPortId Int64
+                )
+                engine = MergeTree()
+                PRIMARY KEY (InformationSystemId, Id, Period)
+                ORDER BY (InformationSystemId, Id, Period)
+                SETTINGS index_granularity = 8192;";
+            cmdDDL.ExecuteNonQuery();
+
+            cmdDDL.CommandText =
+                @"create table if not exists LogFiles
+                (
+	                InformationSystemId Int64,
+	                Id Int64,
+	                FileName String,
+	                CreateDate DateTime,
+	                ModificationDate DateTime,
+	                LastEventNumber Int64,
+	                LastCurrentFileReferences String,
+	                LastCurrentFileData String,
+	                LastStreamPosition Int64
+                )
+                engine = MergeTree()
+                PRIMARY KEY (InformationSystemId, Id)
+                ORDER BY (InformationSystemId, Id)
+                SETTINGS index_granularity = 8192;";
+            cmdDDL.ExecuteNonQuery();
         }
 
         #endregion
