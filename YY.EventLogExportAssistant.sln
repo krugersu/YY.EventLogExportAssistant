@@ -85,6 +85,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Special", "Special", "{01BF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.ClickHouse", "Libs\YY.EventLogExportAssistant.ClickHouse\YY.EventLogExportAssistant.ClickHouse.csproj", "{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportToClickHouse", "Apps\YY.EventLogExportToClickHouse\YY.EventLogExportToClickHouse.csproj", "{922D62B9-D5A7-4806-B2BC-D7C9631B7939}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{922D62B9-D5A7-4806-B2BC-D7C9631B7939}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{922D62B9-D5A7-4806-B2BC-D7C9631B7939}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{922D62B9-D5A7-4806-B2BC-D7C9631B7939}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{922D62B9-D5A7-4806-B2BC-D7C9631B7939}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +186,7 @@ Global
 		{42AA4836-53F7-4A62-AB9F-C4D1A598E49A} = {C61F7DD3-3071-42F4-83BF-29D2F23B1664}
 		{01BFB6AD-381B-4022-984A-E6ED03FA2BCD} = {AF6C4D18-9F7B-4E44-9531-A191AA6F725E}
 		{D281D0F7-70D6-4046-A36D-8D6E6B1BA33C} = {0F68727D-2383-427E-AF95-1329C70898C4}
+		{922D62B9-D5A7-4806-B2BC-D7C9631B7939} = {6EBA96D1-CD22-4055-B272-ABD22E864DF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FD699DA7-A963-4E80-A744-FFB504828AF5}

@@ -3,6 +3,7 @@ using System.IO;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using System;
+using ClickHouse.Ado;
 using Microsoft.Extensions.Configuration;
 
 namespace YY.EventLogExportAssistant.ClickHouse
@@ -13,50 +14,38 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         private const int _defaultPortion = 1000;
         private readonly int _portion;
-        //private readonly ElasticClient _client;
+        private readonly ClickHouseContext _context;
         private InformationSystemsBase _system;
-        private string _indexName;
-        //private IndexSeparationPeriod _indexSeparationPeriod;
         private EventLogPosition _lastEventLogFilePosition;
 
         #endregion
 
         #region Constructor
 
-        //public EventLogOnClickHouse() : this(null, _defaultPortion)
-        //{
+        public EventLogOnClickHouse() : this(null, _defaultPortion)
+        {
 
-        //}
-        //public EventLogOnClickHouse(int portion) : this(null, portion)
-        //{
-        //    _portion = portion;
-        //}
-        //public EventLogOnClickHouse(ConnectionSettings elasticSettings, int portion)
-        //{
-        //    _indexSeparationPeriod = IndexSeparationPeriod.None;
-        //    _portion = portion;
+        }
+        public EventLogOnClickHouse(int portion) : this(null, portion)
+        {
+            _portion = portion;
+        }
+        public EventLogOnClickHouse(ClickHouseConnectionSettings clickHouseSettings, int portion)
+        {
+            _portion = portion;
 
-        //    if (elasticSettings == null)
-        //    {
-        //        IConfiguration Configuration = new ConfigurationBuilder()
-        //            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        //            .Build();
-        //        IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
-        //        Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
-        //        string indexName = elasticSearchSection.GetValue<string>("IndexName");
-        //        string indexSeparation = elasticSearchSection.GetValue<string>("IndexSeparationPeriod");
-        //        int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
-        //        int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
+            if (clickHouseSettings == null)
+            {
+                IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .Build();
+                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
 
-        //        elasticSettings = new ConnectionSettings(nodeAddress)
-        //            .DefaultIndex(indexName)
-        //            .MaximumRetries(maximumRetries)
-        //            .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
-        //        SetIndexSeparationPeriod(indexSeparation);
-        //    }
+                clickHouseSettings = new ClickHouseConnectionSettings(connectionString);
+            }
 
-        //    _client = new ElasticClient(elasticSettings);
-        //}
+            _context = new ClickHouseContext(clickHouseSettings);
+        }
 
         #endregion
 
@@ -83,9 +72,6 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            SaveLogFileHistoryElement(logFileInfo, position);
-            SaveLogFileActualElement(logFileInfo, position);
-
             _lastEventLogFilePosition = position;
         }
         public override int GetPortionSize()
@@ -122,75 +108,46 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            //_system = new InformationSystems()
-            //{
-            //    Id = system.Id,
-            //    Name = system.Name,
-            //    Description = system.Description
-            //};
-
-            //if (_indexName == null)
-            //{
-            //    _indexName = _system.Name;
-            //}
+            _system = _context.CreateOrUpdateInformationSystem(system.Name, system.Description);
         }
-        public void SetIndexName(string indexName)
-        {
-            _indexName = indexName;
-        }
-        public void SetIndexSeparationPeriod(string separation)
-        {
-            //if (separation != null && Enum.TryParse(separation, true, out IndexSeparationPeriod separationValue))
-            //{
-            //    SetIndexSaparationPeriod(separationValue);
-            //}
-            //else
-            //{
-            //    SetIndexSaparationPeriod(IndexSeparationPeriod.None);
-            //}
-        }
-        //public void SetIndexSaparationPeriod(IndexSeparationPeriod separation)
-        //{
-        //    _indexSeparationPeriod = separation;
-        //}
         public override void UpdateReferences(ReferencesData data)
         {
+            foreach (var item in data.Applications)
+                _context.AddApplicationIfNotExist(_system.Id, item);
+
+            foreach (var item in data.Computers)
+                _context.AddComputerIfNotExist(_system.Id, item);
+
+            foreach (var item in data.Events)
+                _context.AddEventIfNotExist(_system.Id, item);
+
+            foreach (var item in data.Metadata)
+                _context.AddMetadataIfNotExist(_system.Id, item);
+
+            foreach (var item in data.PrimaryPorts)
+                _context.AddPrimaryPortIfNotExist(_system.Id, item);
+
+            foreach (var item in data.SecondaryPorts)
+                _context.AddSecondaryPortIfNotExist(_system.Id, item);
+
+            foreach (var item in data.Severities)
+                _context.AddSeverityIfNotExist(_system.Id, item);
+
+            foreach (var item in data.TransactionStatuses)
+                _context.AddTransactionStatusIfNotExist(_system.Id, item);
+
+            foreach (var item in data.Users)
+                _context.AddUserIfNotExist(_system.Id, item);
+
+            foreach (var item in data.WorkServers)
+                _context.AddWorkServerIfNotExist(_system.Id, item);
         }
 
         #endregion
 
         #region Private Methods
+        
 
-        private void SaveLogFileHistoryElement(FileInfo logFileInfo, EventLogPosition position)
-        {
-            //_client.SaveLogFileHistoryElement(new LogFileElement()
-            //{
-            //    Id = $"[{_system.Name}][{logFileInfo.Name}][{logFileInfo.CreationTimeUtc:yyyyMMddhhmmss}]",
-            //    CreateDate = logFileInfo.CreationTimeUtc,
-            //    FileName = logFileInfo.Name,
-            //    InformationSystem = _system.Name,
-            //    LastCurrentFileData = position.CurrentFileData,
-            //    LastCurrentFileReferences = position.CurrentFileReferences,
-            //    LastEventNumber = position.EventNumber,
-            //    LastStreamPosition = position.StreamPosition,
-            //    ModificationDate = logFileInfo.LastWriteTimeUtc
-            //}, _indexName);
-        }
-        private void SaveLogFileActualElement(FileInfo logFileInfo, EventLogPosition position)
-        {
-            //_client.SaveLogFileActualElement(new LogFileElement()
-            //{
-            //    Id = _system.Name,
-            //    CreateDate = logFileInfo.CreationTimeUtc,
-            //    FileName = logFileInfo.Name,
-            //    InformationSystem = _system.Name,
-            //    LastCurrentFileData = position.CurrentFileData,
-            //    LastCurrentFileReferences = position.CurrentFileReferences,
-            //    LastEventNumber = position.EventNumber,
-            //    LastStreamPosition = position.StreamPosition,
-            //    ModificationDate = logFileInfo.LastWriteTimeUtc
-            //}, _indexName);
-        }
 
         #endregion
     }

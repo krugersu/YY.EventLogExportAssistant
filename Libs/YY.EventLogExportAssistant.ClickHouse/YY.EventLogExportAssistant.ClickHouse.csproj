@@ -25,7 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClickHouse.Ado" Version="1.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>
