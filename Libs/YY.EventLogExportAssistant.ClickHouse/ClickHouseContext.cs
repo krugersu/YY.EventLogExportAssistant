@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using YY.EventLogExportAssistant.ClickHouse.Models;
+using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
 using YY.EventLogReaderAssistant;
+using RowData = YY.EventLogReaderAssistant.Models.RowData;
 
 namespace YY.EventLogExportAssistant.ClickHouse
 {
@@ -15,6 +19,22 @@ namespace YY.EventLogExportAssistant.ClickHouse
         #region Private Members
 
         private ClickHouseConnection _connection;
+
+        #endregion
+
+        #region Public Members
+
+        public List<InformationSystems> InformationSystems { get; }
+        public List<Events> Events { get; }
+        public List<Metadata> Metadata { get; }
+        public List<PrimaryPorts> PrimaryPorts { get; }
+        public List<RowData> RowsData { get; }
+        public List<SecondaryPorts> SecondaryPorts { get; }
+        public List<Severities> Severities { get; }
+        public List<TransactionStatuses> TransactionStatuses { get; }
+        public List<Users> Users { get; }
+        public List<WorkServers> WorkServers { get; }
+        public List<LogFiles> LogFiles { get; }
 
         #endregion
 
@@ -229,6 +249,142 @@ namespace YY.EventLogExportAssistant.ClickHouse
         #endregion
 
         #region Public Methods
+
+        #region ReferencesCache
+
+        public void FillReferencesCacheByDatabaseContext(long informationSystemId, ReferencesDataCache referencesDataCache)
+        {
+            referencesDataCache.Applications = GetAllApplications(informationSystemId);
+            referencesDataCache.Computers = GetAllComputers(informationSystemId);
+            referencesDataCache.Events = GetAllEvents(informationSystemId);
+            referencesDataCache.Metadata = GetAllMetadata(informationSystemId);
+            referencesDataCache.PrimaryPorts = GetAllPrimaryPorts(informationSystemId);
+            referencesDataCache.SecondaryPorts = GetAllSecondaryPorts(informationSystemId);
+            referencesDataCache.Severities = GetAllSeverities(informationSystemId);
+            referencesDataCache.TransactionStatuses = GetAllTransactionStatuses(informationSystemId);
+            referencesDataCache.Users = GetAllUsers(informationSystemId);
+            referencesDataCache.WorkServers = GetAllWorkServers(informationSystemId);
+
+            referencesDataCache.ApplicationsDictionary = referencesDataCache.Applications.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.ComputersDictionary = referencesDataCache.Computers.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.EventsDictionary = referencesDataCache.Events.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.MetadataDictionary = referencesDataCache.Metadata.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.PrimaryPortsDictionary = referencesDataCache.PrimaryPorts.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.SecondaryPortsDictionary = referencesDataCache.SecondaryPorts.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.SeveritiesDictionary = referencesDataCache.Severities.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.TransactionStatusesDictionary = referencesDataCache.TransactionStatuses.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.UsersDictionary = referencesDataCache.Users.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+            referencesDataCache.WorkServersDictionary = referencesDataCache.WorkServers.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
+        }
+
+        #endregion
+
+        #region RowsData
+
+        public void SaveRowsData(List<RowDataBulkInsert> rowsData)
+        {
+            var commandBulk = _connection.CreateCommand();
+            commandBulk.CommandText = @"INSERT INTO RowsData 
+            (
+                InformationSystemId,
+                Id,
+                Period,
+                SeverityId,
+                ConnectId,
+                Session,
+                TransactionStatusId,
+                TransactionDate,
+                TransactionId,
+                UserId,
+                ComputerId,
+                ApplicationId,
+                EventId,
+                Comment,
+                MetadataId,
+                Data,
+                DataUUID,
+                DataPresentation,
+                WorkServerId,
+                PrimaryPortId,
+                SecondaryPortId
+            ) VALUES @bulk";
+            commandBulk.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "bulk",
+                Value = rowsData
+            });
+            commandBulk.ExecuteNonQuery();
+        }
+        public DateTime GetRowsDataMaxPeriod(InformationSystemsBase system)
+        {
+            DateTime output = DateTime.MinValue;
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        MAX(Period) AS MaxPeriod
+                    FROM RowsData AS RD
+                    WHERE InformationSystemId = @InformationSystemId ";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    Value = system.Id
+                });
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    if (cmdReader.NextResult() && cmdReader.Read())
+                        output = cmdReader.GetDateTime(0);
+                };
+            }
+
+            return output;
+        }
+        public bool RowDataExistOnDatabase(InformationSystemsBase system, RowData rowData)
+        {
+            bool output = false;
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        InformationSystemId,
+                        Id,
+                        Period
+                    FROM RowsData AS RD
+                    WHERE InformationSystemId = @existInfSysId
+                        AND Id = @existId
+                        AND Period = @existPeriod";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "existInfSysId",
+                    DbType = DbType.Int64,
+                    Value = system.Id
+                });
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "existId",
+                    DbType = DbType.Int64,
+                    Value = rowData.RowId
+                });
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "existPeriod",
+                    DbType = DbType.DateTime,
+                    Value = rowData.Period.DateTime
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    if (cmdReader.NextResult() && cmdReader.Read())
+                        output = true;
+                };
+            }
+
+            return output;
+        }
+
+        #endregion
 
         #region LogFiles
 
@@ -526,7 +682,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
-                    Value = Applications.GetPresentationByName(sourceItem.Name)
+                    Value = Database.Models.Applications.GetPresentationByName(sourceItem.Name)
                 });
                 commandAdd.ExecuteNonQuery();
             }
@@ -568,6 +724,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Name = cmdReader.GetString(1),
                             Presentation = cmdReader.GetString(2)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<Applications> GetAllApplications(long informationSystemId)
+        {
+            List<Applications> output = new List<Applications>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Presentation
+                    FROM Applications as APPS
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Applications()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Presentation = cmdReader.GetString(2)
+                            });
+                        }
                 }
             }
 
@@ -673,6 +867,42 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             return output;
         }
+        public List<Computers> GetAllComputers(long informationSystemId)
+        {
+            List<Computers> output = new List<Computers>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name                        
+                    FROM Computers as CMPS
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Computers()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1)
+                            });
+                        }
+                }
+            }
+
+            return output;
+        }
         public long GetComputerNewId(long informationSystemId)
         {
             long output = 0;
@@ -734,7 +964,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
-                    Value = Events.GetPresentationByName(sourceItem.Name)
+                    Value = Database.Models.Events.GetPresentationByName(sourceItem.Name)
                 });
                 commandAdd.ExecuteNonQuery();
             }
@@ -776,6 +1006,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Name = cmdReader.GetString(1),
                             Presentation = cmdReader.GetString(2)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<Events> GetAllEvents(long informationSystemId)
+        {
+            List<Events> output = new List<Events>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Presentation
+                    FROM Events as EVNTS
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Events()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Presentation = cmdReader.GetString(2)
+                            });
+                        }
                 }
             }
 
@@ -896,6 +1164,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             return output;
         }
+        public List<Metadata> GetAllMetadata(long informationSystemId)
+        {
+            List<Metadata> output = new List<Metadata>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Uuid
+                    FROM Metadata as MT
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Metadata()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Uuid = cmdReader.GetGuid(2)
+                            });
+                        }
+                }
+            }
+
+            return output;
+        }
         public long GetMetadataNewId(long informationSystemId)
         {
             long output = 0;
@@ -991,6 +1297,42 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Id = cmdReader.GetInt64(0),
                             Name = cmdReader.GetString(1)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<PrimaryPorts> GetAllPrimaryPorts(long informationSystemId)
+        {
+            List<PrimaryPorts> output = new List<PrimaryPorts>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name                        
+                    FROM PrimaryPorts as PP
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new PrimaryPorts()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1)
+                            });
+                        }
                 }
             }
 
@@ -1096,6 +1438,42 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             return output;
         }
+        public List<SecondaryPorts> GetAllSecondaryPorts(long informationSystemId)
+        {
+            List<SecondaryPorts> output = new List<SecondaryPorts>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name                        
+                    FROM SecondaryPorts as SP
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new SecondaryPorts()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1)
+                            });
+                        }
+                }
+            }
+
+            return output;
+        }
         public long GetSecondaryPortNewId(long informationSystemId)
         {
             long output = 0;
@@ -1157,7 +1535,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
-                    Value = Severities.GetPresentationByName(sourceItem.ToString())
+                    Value = Database.Models.Severities.GetPresentationByName(sourceItem.ToString())
                 });
                 commandAdd.ExecuteNonQuery();
             }
@@ -1199,6 +1577,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Name = cmdReader.GetString(1),
                             Presentation = cmdReader.GetString(2)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<Severities> GetAllSeverities(long informationSystemId)
+        {
+            List<Severities> output = new List<Severities>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Presentation
+                    FROM Severities as SV
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Severities()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Presentation = cmdReader.GetString(2)
+                            });
+                        }
                 }
             }
 
@@ -1265,7 +1681,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
-                    Value = TransactionStatuses.GetPresentationByName(sourceItem.ToString())
+                    Value = Database.Models.TransactionStatuses.GetPresentationByName(sourceItem.ToString())
                 });
                 commandAdd.ExecuteNonQuery();
             }
@@ -1312,6 +1728,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             return output;
         }
+        public List<TransactionStatuses> GetAllTransactionStatuses(long informationSystemId)
+        {
+            List<TransactionStatuses> output = new List<TransactionStatuses>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Presentation
+                    FROM TransactionStatuses as TS
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new TransactionStatuses()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Presentation = cmdReader.GetString(2)
+                            });
+                        }
+                }
+            }
+
+            return output;
+        }
         public long GetTransactionStatusNewId(long informationSystemId)
         {
             long output = 0;
@@ -1342,7 +1796,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         #endregion
 
-        #region Metadata
+        #region Users
 
         public void AddUserIfNotExist(long informationSystemId, EventLogReaderAssistant.Models.Users sourceItem)
         {
@@ -1422,6 +1876,44 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Name = cmdReader.GetString(1),
                             Uuid = cmdReader.GetGuid(2)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<Users> GetAllUsers(long informationSystemId)
+        {
+            List<Users> output = new List<Users>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name,
+                        Uuid
+                    FROM Users as USR
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new Users()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1),
+                                Uuid = cmdReader.GetGuid(2)
+                            });
+                        }
                 }
             }
 
@@ -1522,6 +2014,42 @@ namespace YY.EventLogExportAssistant.ClickHouse
                             Id = cmdReader.GetInt64(0),
                             Name = cmdReader.GetString(1)
                         };
+                }
+            }
+
+            return output;
+        }
+        public List<WorkServers> GetAllWorkServers(long informationSystemId)
+        {
+            List<WorkServers> output = new List<WorkServers>();
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        Id,
+                        Name                        
+                    FROM WorkServers as WS
+                    WHERE InformationSystemId = @InformationSystemId";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    DbType = DbType.Int64,
+                    Value = informationSystemId
+                });
+
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    while (cmdReader.NextResult())
+                        while (cmdReader.Read())
+                        {
+                            output.Add(new WorkServers()
+                            {
+                                InformationSystemId = informationSystemId,
+                                Id = cmdReader.GetInt64(0),
+                                Name = cmdReader.GetString(1)
+                            });
+                        }
                 }
             }
 

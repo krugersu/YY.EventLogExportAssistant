@@ -5,6 +5,8 @@ using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using System;
 using ClickHouse.Ado;
 using Microsoft.Extensions.Configuration;
+using YY.EventLogExportAssistant.ClickHouse.Models;
+using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.ClickHouse
 {
@@ -14,9 +16,11 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         private const int _defaultPortion = 1000;
         private readonly int _portion;
+        private DateTime _maxPeriodRowData;
         private readonly ClickHouseContext _context;
         private InformationSystemsBase _system;
         private EventLogPosition _lastEventLogFilePosition;
+        private ReferencesDataCache _referencesCache;
 
         #endregion
 
@@ -33,6 +37,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         public EventLogOnClickHouse(ClickHouseConnectionSettings clickHouseSettings, int portion)
         {
             _portion = portion;
+            _maxPeriodRowData = DateTime.MinValue;
 
             if (clickHouseSettings == null)
             {
@@ -79,27 +84,25 @@ namespace YY.EventLogExportAssistant.ClickHouse
             };
             Save(rowsData);
         }
+
         public override void Save(IList<RowData> rowsData)
         {
-            
+            if (_maxPeriodRowData == DateTime.MinValue)
+                _maxPeriodRowData = _context.GetRowsDataMaxPeriod(_system);
 
-            //Dictionary<string, List<LogDataElement>> logDataByIndices = new Dictionary<string, List<LogDataElement>>();
+            List<RowDataBulkInsert> newEntities = new List<RowDataBulkInsert>();
+            foreach (var itemRow in rowsData)
+            {
+                if (itemRow == null)
+                    continue;
+                if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
+                    if (_context.RowDataExistOnDatabase(_system, itemRow))
+                        continue;
 
-            //foreach (RowData item in rowsData)
-            //{
-            //    string logDataCurrentIndexName = $"{ _indexName }-LogData-{ item.Period.DateTime.GetIndexSeparationPeriod(_indexSeparationPeriod) }";
-            //    logDataCurrentIndexName = logDataCurrentIndexName.ToLower();
-            //    if (logDataByIndices.ContainsKey(logDataCurrentIndexName) == false)
-            //    {
-            //        logDataByIndices.Add(logDataCurrentIndexName, new List<LogDataElement>());
-            //    }
+                newEntities.Add(new RowDataBulkInsert(_system, itemRow, _referencesCache));
+            }
 
-            //    logDataByIndices[logDataCurrentIndexName].Add(new LogDataElement(_system, item));
-            //}
-
-            //foreach (var indexItems in logDataByIndices)
-            //    _client.SaveLogData(indexItems.Value, indexItems.Key);
-            
+            _context.SaveRowsData(newEntities);
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
@@ -136,6 +139,10 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             foreach (var item in data.WorkServers)
                 _context.AddWorkServerIfNotExist(_system.Id, item);
+
+            if (_referencesCache == null)
+                _referencesCache = new ReferencesDataCache(_system);
+            _context.FillReferencesCacheByDatabaseContext(_system.Id, _referencesCache);
         }
 
         #endregion
