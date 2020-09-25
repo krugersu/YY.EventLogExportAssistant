@@ -2,8 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using YY.EventLogExportAssistant.Database.Models;
+using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportAssistant.ClickHouse
 {
@@ -226,6 +229,157 @@ namespace YY.EventLogExportAssistant.ClickHouse
         #endregion
 
         #region Public Methods
+
+        #region LogFiles
+
+        public EventLogPosition GetLogFilePosition(long informationSystemId)
+        {
+            var cmdGetLastLogFileInfo = _connection.CreateCommand();
+            cmdGetLastLogFileInfo.CommandText =
+                @"SELECT	                
+	                LastEventNumber,
+	                LastCurrentFileReferences,
+	                LastCurrentFileData,
+	                LastStreamPosition
+                FROM LogFiles AS LF
+                WHERE InformationSystemId = @informationSystemId
+                    AND Id IN (
+                        SELECT
+                            MAX(Id) LastId
+                        FROM LogFiles AS LF_LAST
+                        WHERE LF_LAST.InformationSystemId = @informationSystemId
+                    )";
+            cmdGetLastLogFileInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "informationSystemId",
+                Value = informationSystemId
+            });
+
+            EventLogPosition output = null;
+            using (var cmdReader = cmdGetLastLogFileInfo.ExecuteReader())
+            {
+                if (cmdReader.NextResult() && cmdReader.Read())
+                    output = new EventLogPosition(
+                        cmdReader.GetInt64(0),
+                        cmdReader.GetString(1),
+                        cmdReader.GetString(2),
+                        cmdReader.GetInt64(3));
+            }
+
+            return output;
+        }
+        public void SaveLogPosition(InformationSystemsBase system, FileInfo logFileInfo, EventLogPosition position)
+        {
+            var commandAddLogInfo = _connection.CreateCommand();
+            commandAddLogInfo.CommandText =
+                @"INSERT INTO LogFiles (
+	                InformationSystemId,
+	                Id,
+	                FileName,
+	                CreateDate,
+	                ModificationDate,
+	                LastEventNumber,
+	                LastCurrentFileReferences,
+	                LastCurrentFileData,
+	                LastStreamPosition
+                ) VALUES (
+                    @isId,
+	                @newId,
+	                @FileName,
+	                @CreateDate,
+	                @ModificationDate,
+	                @LastEventNumber,
+	                @LastCurrentFileReferences,
+	                @LastCurrentFileData,
+	                @LastStreamPosition     
+                )";
+
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "isId",
+                DbType = DbType.Int64,
+                Value = system.Id
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "newId",
+                DbType = DbType.Int64,
+                Value = GetLogFileInfoNewId(system.Id)
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "FileName",
+                DbType = DbType.AnsiString,
+                Value = logFileInfo.Name
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "CreateDate",
+                DbType = DbType.DateTime,
+                Value = logFileInfo.CreationTimeUtc
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "ModificationDate",
+                DbType = DbType.DateTime,
+                Value = logFileInfo.LastWriteTimeUtc
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "LastEventNumber",
+                DbType = DbType.Int64,
+                Value = position.EventNumber
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "LastCurrentFileReferences",
+                DbType = DbType.AnsiString,
+                Value = position.CurrentFileReferences
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "LastCurrentFileData",
+                DbType = DbType.AnsiString,
+                Value = position.CurrentFileData
+            });
+            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            {
+                ParameterName = "LastStreamPosition",
+                DbType = DbType.Int64,
+                Value = position.StreamPosition
+            });
+
+            commandAddLogInfo.ExecuteNonQuery();
+        }
+        public long GetLogFileInfoNewId(long informationSystemId)
+        {
+            long output = 0;
+
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT
+                        MAX(Id)
+                    FROM LogFiles
+                    WHERE InformationSystemId = @InformationSystemId ";
+                command.Parameters.Add(new ClickHouseParameter
+                {
+                    ParameterName = "InformationSystemId",
+                    Value = informationSystemId
+                });
+                using (var cmdReader = command.ExecuteReader())
+                {
+                    if (cmdReader.NextResult() && cmdReader.Read())
+                        output = cmdReader.GetInt64(0);
+                };
+            }
+
+            output += 1;
+
+            return output;
+        }
+
+        #endregion
 
         #region InformationSystem
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using System.Threading;
 using ClickHouse.Ado;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.ClickHouse;
+using YY.EventLogExportAssistant.Database.Models;
 using YY.EventLogReaderAssistant;
 
 namespace YY.EventLogExportToClickHouse

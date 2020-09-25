@@ -32,9 +32,4 @@
     <ProjectReference Include="..\YY.EventLogExportAssistant.Core\YY.EventLogExportAssistant.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 </Project>

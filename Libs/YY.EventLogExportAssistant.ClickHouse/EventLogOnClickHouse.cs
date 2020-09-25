@@ -56,22 +56,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (_lastEventLogFilePosition != null)
                 return _lastEventLogFilePosition;
 
-            //LogFileElement actualLogFileInfo = _client.GetLastLogFileElement(_system.Name, _indexName);
-            EventLogPosition position = null;
-            //if (actualLogFileInfo != null)
-            //{
-            //    position = new EventLogPosition(
-            //        actualLogFileInfo.LastEventNumber,
-            //        actualLogFileInfo.LastCurrentFileReferences,
-            //        actualLogFileInfo.LastCurrentFileData,
-            //        actualLogFileInfo.LastStreamPosition
-            //    );
-            //}
+            EventLogPosition position = _context.GetLogFilePosition(_system.Id);
+            
             _lastEventLogFilePosition = position;
             return position;
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
+            _context.SaveLogPosition(_system, logFileInfo, position);
+
             _lastEventLogFilePosition = position;
         }
         public override int GetPortionSize()
@@ -88,6 +81,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public override void Save(IList<RowData> rowsData)
         {
+            
+
             //Dictionary<string, List<LogDataElement>> logDataByIndices = new Dictionary<string, List<LogDataElement>>();
 
             //foreach (RowData item in rowsData)
