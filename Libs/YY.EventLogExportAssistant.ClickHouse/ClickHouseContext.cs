@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using YY.EventLogExportAssistant.ClickHouse.Models;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
@@ -21,23 +19,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         private ClickHouseConnection _connection;
 
         #endregion
-
-        #region Public Members
-
-        public List<InformationSystems> InformationSystems { get; }
-        public List<Events> Events { get; }
-        public List<Metadata> Metadata { get; }
-        public List<PrimaryPorts> PrimaryPorts { get; }
-        public List<RowData> RowsData { get; }
-        public List<SecondaryPorts> SecondaryPorts { get; }
-        public List<Severities> Severities { get; }
-        public List<TransactionStatuses> TransactionStatuses { get; }
-        public List<Users> Users { get; }
-        public List<WorkServers> WorkServers { get; }
-        public List<LogFiles> LogFiles { get; }
-
-        #endregion
-
+        
         #region Constructors
 
         public ClickHouseContext(ClickHouseConnectionSettings connectionSettings)

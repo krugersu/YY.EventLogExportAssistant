@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
 
@@ -11,13 +9,7 @@ namespace YY.EventLogExportAssistant.ClickHouse.Models
     {
         #region Public Members
 
-        public DateTime PeriodAsDateTime
-        {
-            get
-            {
-                return Period.DateTime;
-            }
-        }
+        public DateTime PeriodAsDateTime => Period.DateTime;
 
         #endregion
 
@@ -52,10 +44,6 @@ namespace YY.EventLogExportAssistant.ClickHouse.Models
 
         #region Constructors
 
-        public RowDataBulkInsert()
-        {
-            
-        }
         public RowDataBulkInsert(InformationSystemsBase system, EventLogReaderAssistant.Models.RowData sourceRow, ReferencesDataCache referencesCache)
             :base(system, sourceRow, referencesCache)
         {
