@@ -36,7 +36,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 	                Name String,
 	                Presentation String
                 )
-                engine = MergeTree()
+                engine = MergeTree()                
                 PRIMARY KEY (InformationSystemId, Id)
                 ORDER BY (InformationSystemId, Id)
                 SETTINGS index_granularity = 8192;";
@@ -203,6 +203,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 	                SecondaryPortId Int64
                 )
                 engine = MergeTree()
+                PARTITION BY (InformationSystemId, toYYYYMM(Period))
                 PRIMARY KEY (InformationSystemId, Id, Period)
                 ORDER BY (InformationSystemId, Id, Period)
                 SETTINGS index_granularity = 8192;";
