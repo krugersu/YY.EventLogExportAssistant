@@ -17,9 +17,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
         #region Private Members
 
         private ClickHouseConnection _connection;
+        private long logFileLastId = -1;
+        private long applicationLastId = -1;
+        private long computerLastId  = -1;
+        private long eventLastId = -1;
+        private long metadataLastId = -1;
+        private long primaryPortLastId = -1;
+        private long secondaryPortLastId = -1;
+        private long severityPortLastId = -1;
+        private long transactionStatusPortLastId = -1;
+        private long userLastId = -1;
+        private long workServerLastId = -1;
 
         #endregion
-        
+
         #region Constructors
 
         public ClickHouseContext(ClickHouseConnectionSettings connectionSettings)
@@ -204,8 +215,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 )
                 engine = MergeTree()
                 PARTITION BY (InformationSystemId, toYYYYMM(Period))
-                PRIMARY KEY (InformationSystemId, Id, Period)
-                ORDER BY (InformationSystemId, Id, Period)
+                PRIMARY KEY (InformationSystemId, Period, Id)
+                ORDER BY (InformationSystemId, Period, Id)
                 SETTINGS index_granularity = 8192;";
             cmdDDL.ExecuteNonQuery();
 
@@ -494,26 +505,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (logFileLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT
                         MAX(Id)
                     FROM LogFiles
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = logFileLastId;
             }
 
             output += 1;
+            logFileLastId = output;
 
             return output;
         }
@@ -754,26 +775,34 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (applicationLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
-                        MAX(t.Id) AS LastId
-                    FROM Applications t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
+                using (var command = _connection.CreateCommand())
                 {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.CommandText =
+                        @"SELECT 
+                            MAX(t.Id) AS LastId
+                        FROM Applications t
+                        WHERE InformationSystemId = @InformationSystemId ";
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+                }
+            }
+            else
+            {
+                output = applicationLastId;
             }
 
             output += 1;
+            applicationLastId = output;
 
             return output;
         }
@@ -890,26 +919,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (computerLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Computers t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = computerLastId;
             }
 
             output += 1;
+            computerLastId = output;
 
             return output;
         }
@@ -1036,26 +1075,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (eventLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Events t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = eventLastId;
             }
 
             output += 1;
+            eventLastId = output;
 
             return output;
         }
@@ -1081,7 +1130,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
-                    Value = GetEventNewId(informationSystemId)
+                    Value = GetMetadataNewId(informationSystemId)
                 });
                 commandAdd.Parameters.Add(new ClickHouseParameter
                 {
@@ -1189,26 +1238,34 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (metadataLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Metadata t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+                }
+            }
+            else
+            {
+                output = metadataLastId;
             }
 
             output += 1;
+            metadataLastId = output;
 
             return output;
         }
@@ -1325,26 +1382,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (primaryPortLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM PrimaryPorts t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = primaryPortLastId;
             }
 
             output += 1;
+            primaryPortLastId = output;
 
             return output;
         }
@@ -1461,26 +1528,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (secondaryPortLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM SecondaryPorts t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = secondaryPortLastId;
             }
 
             output += 1;
+            secondaryPortLastId = output;
 
             return output;
         }
@@ -1506,7 +1583,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
-                    Value = GetEventNewId(informationSystemId)
+                    Value = GetSeverityNewId(informationSystemId)
                 });
                 commandAdd.Parameters.Add(new ClickHouseParameter
                 {
@@ -1607,26 +1684,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (severityPortLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Severities t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = severityPortLastId;
             }
 
             output += 1;
+            severityPortLastId = output;
 
             return output;
         }
@@ -1652,7 +1739,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
-                    Value = GetEventNewId(informationSystemId)
+                    Value = GetTransactionStatusNewId(informationSystemId)
                 });
                 commandAdd.Parameters.Add(new ClickHouseParameter
                 {
@@ -1753,26 +1840,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (transactionStatusPortLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM TransactionStatuses t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = transactionStatusPortLastId;
             }
 
             output += 1;
+            transactionStatusPortLastId = output;
 
             return output;
         }
@@ -1798,7 +1895,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
-                    Value = GetEventNewId(informationSystemId)
+                    Value = GetUserNewId(informationSystemId)
                 });
                 commandAdd.Parameters.Add(new ClickHouseParameter
                 {
@@ -1906,26 +2003,36 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (userLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Users t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+
+                    ;
+                }
+            }
+            else
+            {
+                output = userLastId;
             }
 
             output += 1;
+            userLastId = output;
 
             return output;
         }
@@ -1951,7 +2058,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
-                    Value = GetComputerNewId(informationSystemId)
+                    Value = GetWorkServerNewId(informationSystemId)
                 });
                 commandAdd.Parameters.Add(new ClickHouseParameter
                 {
@@ -2042,26 +2149,34 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             long output = 0;
 
-            using (var command = _connection.CreateCommand())
+            if (workServerLastId < 0)
             {
-                command.CommandText =
-                    @"SELECT 
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText =
+                        @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM WorkServers t
                     WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
-                {
-                    ParameterName = "InformationSystemId",
-                    Value = informationSystemId
-                });
-                using (var cmdReader = command.ExecuteReader())
-                {
-                    if (cmdReader.NextResult() && cmdReader.Read())
-                        output = cmdReader.GetInt64(0);
-                };
+                    command.Parameters.Add(new ClickHouseParameter
+                    {
+                        ParameterName = "InformationSystemId",
+                        Value = informationSystemId
+                    });
+                    using (var cmdReader = command.ExecuteReader())
+                    {
+                        if (cmdReader.NextResult() && cmdReader.Read())
+                            output = cmdReader.GetInt64(0);
+                    }
+                }
+            }
+            else
+            {
+                output = workServerLastId;
             }
 
             output += 1;
+            workServerLastId = output;
 
             return output;
         }
