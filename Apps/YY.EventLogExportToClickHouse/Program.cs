@@ -51,12 +51,12 @@ namespace YY.EventLogExportToClickHouse
             Console.WriteLine();
             Console.WriteLine();
 
-            var settings = new ClickHouseConnectionSettings(connectionString);
+            //var settings = new ClickHouseConnectionSettings(connectionString);
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);
 
-                EventLogOnClickHouse target = new EventLogOnClickHouse(settings, portion);
+                EventLogOnClickHouse target = new EventLogOnClickHouse(connectionString, portion);
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = informationSystemName,

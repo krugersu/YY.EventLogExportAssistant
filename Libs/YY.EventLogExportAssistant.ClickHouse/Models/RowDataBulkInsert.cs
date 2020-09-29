@@ -10,6 +10,17 @@ namespace YY.EventLogExportAssistant.ClickHouse.Models
         #region Public Members
 
         public DateTime PeriodAsDateTime => Period.DateTime;
+        public readonly string InformationSystemAsString;
+        public readonly string SeverityAsString;
+        public readonly string TransactionStatusAsString;
+        public readonly string UserAsString;
+        public readonly string ComputerAsString;
+        public readonly string ApplicationAsString;
+        public readonly string EventAsString;
+        public readonly string MetadataAsString;
+        public readonly string WorkServerAsString;
+        public readonly string PrimaryPortAsString;
+        public readonly string SecondaryPortAsString;
 
         #endregion
 
@@ -17,27 +28,27 @@ namespace YY.EventLogExportAssistant.ClickHouse.Models
 
         public IEnumerator GetEnumerator()
         {
-            yield return InformationSystemId;
+            yield return InformationSystemAsString;
             yield return Id;
             yield return PeriodAsDateTime;
-            yield return SeverityId;
+            yield return SeverityAsString;
             yield return ConnectId;
             yield return Session;
-            yield return TransactionStatusId;
+            yield return TransactionStatusAsString;
             yield return TransactionDate;
             yield return TransactionId;
-            yield return UserId;
-            yield return ComputerId;
-            yield return ApplicationId;
-            yield return EventId;
+            yield return UserAsString;
+            yield return ComputerAsString;
+            yield return ApplicationAsString;
+            yield return EventAsString;
             yield return Comment;
-            yield return MetadataId;
+            yield return MetadataAsString;
             yield return Data; 
             yield return DataUUID;
             yield return DataPresentation;
-            yield return WorkServerId;
-            yield return PrimaryPortId;
-            yield return SecondaryPortId;
+            yield return WorkServerAsString;
+            yield return PrimaryPortAsString;
+            yield return SecondaryPortAsString;
         }
 
         #endregion
@@ -65,6 +76,18 @@ namespace YY.EventLogExportAssistant.ClickHouse.Models
             if (WorkServerId == null) WorkServerId = -1;
             if (PrimaryPortId == null) PrimaryPortId = -1;
             if (SecondaryPortId == null) SecondaryPortId = -1;
+
+            InformationSystemAsString = system.Name;
+            SeverityAsString = Severities.GetPresentationByName(sourceRow.Severity.ToString());
+            TransactionStatusAsString = TransactionStatuses.GetPresentationByName(sourceRow.TransactionStatus.ToString());
+            UserAsString = sourceRow.User != null ? sourceRow.User.Name : string.Empty;
+            ComputerAsString = sourceRow.Computer != null ? sourceRow.Computer.Name : string.Empty;
+            ApplicationAsString = sourceRow.Application != null ? Applications.GetPresentationByName(sourceRow.Application.Name) : string.Empty;
+            EventAsString = sourceRow.Event != null ? Events.GetPresentationByName(sourceRow.Event.Name) : string.Empty;
+            MetadataAsString = sourceRow.Metadata != null ? sourceRow.Metadata.Name : string.Empty;
+            WorkServerAsString = sourceRow.WorkServer != null ? sourceRow.WorkServer.Name : string.Empty;
+            PrimaryPortAsString = sourceRow.PrimaryPort != null ? sourceRow.PrimaryPort.Name : string.Empty;
+            SecondaryPortAsString = sourceRow.SecondaryPort != null ? sourceRow.SecondaryPort.Name : string.Empty;
         }
 
         #endregion

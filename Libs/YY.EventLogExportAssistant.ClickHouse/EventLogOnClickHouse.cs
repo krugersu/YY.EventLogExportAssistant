@@ -18,7 +18,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         private readonly int _portion;
         private DateTime _maxPeriodRowData;
         private InformationSystemsBase _system;
-        private readonly ClickHouseConnectionSettings _clickHouseSettings;
+        private readonly string _connectionString;
         private EventLogPosition _lastEventLogFilePosition;
         private ReferencesDataCache _referencesCache;
 
@@ -34,22 +34,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
         {
             _portion = portion;
         }
-        public EventLogOnClickHouse(ClickHouseConnectionSettings clickHouseSettings, int portion)
+        public EventLogOnClickHouse(string connectionString, int portion)
         {
             _portion = portion;
             _maxPeriodRowData = DateTime.MinValue;
 
-            if (clickHouseSettings == null)
+            if (connectionString == null)
             {
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .Build();
-                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-
-                clickHouseSettings = new ClickHouseConnectionSettings(connectionString);
+                _connectionString = Configuration.GetConnectionString("EventLogDatabase");
             }
 
-            _clickHouseSettings = clickHouseSettings;
+            _connectionString = connectionString;
         }
 
         #endregion
@@ -62,7 +60,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 return _lastEventLogFilePosition;
 
             EventLogPosition position;
-            using(var context = new ClickHouseContext(_clickHouseSettings))
+            using(var context = new ClickHouseContext(_connectionString))
                 position = context.GetLogFilePosition(_system.Id);
             
             _lastEventLogFilePosition = position;
@@ -70,7 +68,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
-            using (var context = new ClickHouseContext(_clickHouseSettings))
+            using (var context = new ClickHouseContext(_connectionString))
                 context.SaveLogPosition(_system, logFileInfo, position);
 
             _lastEventLogFilePosition = position;
@@ -90,7 +88,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         public override void Save(IList<RowData> rowsData)
         {
-            using (var context = new ClickHouseContext(_clickHouseSettings))
+            using (var context = new ClickHouseContext(_connectionString))
             {
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = context.GetRowsDataMaxPeriod(_system);
@@ -112,12 +110,12 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (var context = new ClickHouseContext(_clickHouseSettings))
+            using (var context = new ClickHouseContext(_connectionString))
                 _system = context.CreateOrUpdateInformationSystem(system.Name, system.Description);
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (var context = new ClickHouseContext(_clickHouseSettings))
+            using (var context = new ClickHouseContext(_connectionString))
             {
                 foreach (var item in data.Applications)
                     context.AddApplicationIfNotExist(_system.Id, item);

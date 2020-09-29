@@ -1,9 +1,12 @@
-﻿using ClickHouse.Ado;
+﻿using ClickHouse.Client.ADO;
+using ClickHouse.Client.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using ClickHouse.Client.ADO.Parameters;
+using ClickHouse.Client.Copy;
 using YY.EventLogExportAssistant.ClickHouse.Models;
 using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Database.Models;
@@ -33,11 +36,11 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         #region Constructors
 
-        public ClickHouseContext(ClickHouseConnectionSettings connectionSettings)
+        public ClickHouseContext(string connectionSettings)
         {
             _connection = new ClickHouseConnection(connectionSettings);
             _connection.Open();
-
+            
             var cmdDDL = _connection.CreateCommand();
             cmdDDL.CommandText =
                 @"create table if not exists Applications
@@ -191,32 +194,32 @@ namespace YY.EventLogExportAssistant.ClickHouse
             cmdDDL.CommandText =
                 @"create table if not exists RowsData
                 (
-	                InformationSystemId Int64,
+	                InformationSystem LowCardinality(String),
 	                Id Int64,
 	                Period DateTime,
-	                SeverityId Int64,
+	                Severity LowCardinality(String),
 	                ConnectId Int64,
 	                Session Int64,
-	                TransactionStatusId Int64,
+	                TransactionStatus LowCardinality(String),
 	                TransactionDate DateTime,
 	                TransactionId Int64,
-	                UserId Int64,
-	                ComputerId Int64,
-	                ApplicationId Int64,
-	                EventId Int64,
+	                User String,
+	                Computer LowCardinality(String),
+	                Application LowCardinality(String),
+	                Event LowCardinality(String),
 	                Comment String,
-	                MetadataId Int64,
+	                Metadata LowCardinality(String),
 	                Data String,
 	                DataUUID String,
 	                DataPresentation String,
-	                WorkServerId Int64,
-	                PrimaryPortId Int64,
-	                SecondaryPortId Int64
+	                WorkServer LowCardinality(String),
+	                PrimaryPort LowCardinality(String),
+	                SecondaryPort LowCardinality(String)
                 )
                 engine = MergeTree()
-                PARTITION BY (InformationSystemId, toYYYYMM(Period))
-                PRIMARY KEY (InformationSystemId, Period, Id)
-                ORDER BY (InformationSystemId, Period, Id)
+                PARTITION BY (InformationSystem, toYYYYMM(Period))
+                PRIMARY KEY (InformationSystem, Period, Id)
+                ORDER BY (InformationSystem, Period, Id)
                 SETTINGS index_granularity = 8192;";
             cmdDDL.ExecuteNonQuery();
 
@@ -277,37 +280,40 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         public void SaveRowsData(List<RowDataBulkInsert> rowsData)
         {
-            var commandBulk = _connection.CreateCommand();
-            commandBulk.CommandText = @"INSERT INTO RowsData 
-            (
-                InformationSystemId,
-                Id,
-                Period,
-                SeverityId,
-                ConnectId,
-                Session,
-                TransactionStatusId,
-                TransactionDate,
-                TransactionId,
-                UserId,
-                ComputerId,
-                ApplicationId,
-                EventId,
-                Comment,
-                MetadataId,
-                Data,
-                DataUUID,
-                DataPresentation,
-                WorkServerId,
-                PrimaryPortId,
-                SecondaryPortId
-            ) VALUES @bulk";
-            commandBulk.Parameters.Add(new ClickHouseParameter
+            using (ClickHouseBulkCopy bulkCopyInterface = new ClickHouseBulkCopy(_connection)
             {
-                ParameterName = "bulk",
-                Value = rowsData
-            });
-            commandBulk.ExecuteNonQuery();
+                DestinationTableName = "RowsData",
+                BatchSize = 100000
+            })
+            {
+                var values = rowsData.Select(i => new object[]
+                {
+                    i.InformationSystemAsString,
+                    i.Id,
+                    i.PeriodAsDateTime,
+                    i.SeverityAsString,
+                    i.ConnectId,
+                    i.Session,
+                    i.TransactionStatusAsString,
+                    i.TransactionDate,
+                    i.TransactionId,
+                    i.UserAsString,
+                    i.ComputerAsString,
+                    i.ApplicationAsString,
+                    i.EventAsString,
+                    i.Comment,
+                    i.MetadataAsString,
+                    i.Data,
+                    i.DataUUID,
+                    i.DataPresentation,
+                    i.WorkServerAsString,
+                    i.PrimaryPortAsString,
+                    i.SecondaryPortAsString
+                }).AsEnumerable();
+
+                var bulkResult = bulkCopyInterface.WriteToServerAsync(values);
+                bulkResult.Wait();
+            }
         }
         public DateTime GetRowsDataMaxPeriod(InformationSystemsBase system)
         {
@@ -319,15 +325,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     @"SELECT
                         MAX(Period) AS MaxPeriod
                     FROM RowsData AS RD
-                    WHERE InformationSystemId = @InformationSystemId ";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystem = {InformationSystem:String} ";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
-                    ParameterName = "InformationSystemId",
-                    Value = system.Id
+                    ParameterName = "InformationSystem",
+                    Value = system.Name
                 });
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = cmdReader.GetDateTime(0);
                 };
             }
@@ -346,22 +352,22 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Period
                     FROM RowsData AS RD
-                    WHERE InformationSystemId = @existInfSysId
-                        AND Id = @existId
-                        AND Period = @existPeriod";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {existInfSysId:Int64}
+                        AND Id = {existId:Int64}
+                        AND Period = {existPeriod:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "existInfSysId",
                     DbType = DbType.Int64,
                     Value = system.Id
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "existId",
                     DbType = DbType.Int64,
                     Value = rowData.RowId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "existPeriod",
                     DbType = DbType.DateTime,
@@ -370,7 +376,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = true;
                 };
             }
@@ -392,23 +398,24 @@ namespace YY.EventLogExportAssistant.ClickHouse
 	                LastCurrentFileData,
 	                LastStreamPosition
                 FROM LogFiles AS LF
-                WHERE InformationSystemId = @informationSystemId
+                WHERE InformationSystemId = {informationSystemId:Int64}
                     AND Id IN (
                         SELECT
                             MAX(Id) LastId
                         FROM LogFiles AS LF_LAST
-                        WHERE LF_LAST.InformationSystemId = @informationSystemId
+                        WHERE LF_LAST.InformationSystemId = {informationSystemId:Int64}
                     )";
-            cmdGetLastLogFileInfo.Parameters.Add(new ClickHouseParameter
+            cmdGetLastLogFileInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "informationSystemId",
+                DbType = DbType.Int64,
                 Value = informationSystemId
             });
 
             EventLogPosition output = null;
             using (var cmdReader = cmdGetLastLogFileInfo.ExecuteReader())
             {
-                if (cmdReader.NextResult() && cmdReader.Read())
+                if (cmdReader.Read())
                     output = new EventLogPosition(
                         cmdReader.GetInt64(0),
                         cmdReader.GetString(1),
@@ -423,76 +430,76 @@ namespace YY.EventLogExportAssistant.ClickHouse
             var commandAddLogInfo = _connection.CreateCommand();
             commandAddLogInfo.CommandText =
                 @"INSERT INTO LogFiles (
-	                InformationSystemId,
-	                Id,
-	                FileName,
-	                CreateDate,
-	                ModificationDate,
-	                LastEventNumber,
-	                LastCurrentFileReferences,
-	                LastCurrentFileData,
-	                LastStreamPosition
+                 InformationSystemId,
+                 Id,
+                 FileName,
+                 CreateDate,
+                 ModificationDate,
+                 LastEventNumber,
+                 LastCurrentFileReferences,
+                 LastCurrentFileData,
+                 LastStreamPosition
                 ) VALUES (
-                    @isId,
-	                @newId,
-	                @FileName,
-	                @CreateDate,
-	                @ModificationDate,
-	                @LastEventNumber,
-	                @LastCurrentFileReferences,
-	                @LastCurrentFileData,
-	                @LastStreamPosition     
+                 {isId:Int64},
+                 {newId:Int64},
+                 {FileName:String},
+                 {CreateDate:DateTime},
+                 {ModificationDate:DateTime},
+                 {LastEventNumber:Int64},
+                 {LastCurrentFileReferences:String},
+                 {LastCurrentFileData:String},
+                 {LastStreamPosition:Int64}     
                 )";
 
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "isId",
                 DbType = DbType.Int64,
                 Value = system.Id
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "newId",
                 DbType = DbType.Int64,
                 Value = GetLogFileInfoNewId(system.Id)
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "FileName",
                 DbType = DbType.AnsiString,
                 Value = logFileInfo.Name
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "CreateDate",
                 DbType = DbType.DateTime,
                 Value = logFileInfo.CreationTimeUtc
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "ModificationDate",
                 DbType = DbType.DateTime,
                 Value = logFileInfo.LastWriteTimeUtc
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "LastEventNumber",
                 DbType = DbType.Int64,
                 Value = position.EventNumber
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "LastCurrentFileReferences",
                 DbType = DbType.AnsiString,
                 Value = position.CurrentFileReferences
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "LastCurrentFileData",
                 DbType = DbType.AnsiString,
                 Value = position.CurrentFileData
             });
-            commandAddLogInfo.Parameters.Add(new ClickHouseParameter
+            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "LastStreamPosition",
                 DbType = DbType.Int64,
@@ -513,15 +520,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT
                         MAX(Id)
                     FROM LogFiles
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -534,7 +541,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
             }
 
             output += 1;
-            logFileLastId = output;
+            //logFileLastId = output;
 
             return output;
         }
@@ -549,20 +556,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO InformationSystems (Id,Name,Description) VALUES (@Id,@Name,@Description)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO InformationSystems (Id,Name,Description) VALUES ({Id:Int64},{Name:String},{Description:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetInformationSystemNewId()
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = name
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Description",
                     DbType = DbType.AnsiString,
@@ -578,15 +585,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     var commandUpdate = _connection.CreateCommand();
                     commandUpdate.CommandText =
                         @"ALTER TABLE InformationSystems
-                        UPDATE Description = @Description
-                        WHERE Id = @Id";
-                    commandUpdate.Parameters.Add(new ClickHouseParameter
+                        UPDATE Description = {Descriptio:String}
+                        WHERE Id = {Id:Int64}";
+                    commandUpdate.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "Id",
                         DbType = DbType.Int64,
                         Value = existItem.Id
                     });
-                    commandUpdate.Parameters.Add(new ClickHouseParameter
+                    commandUpdate.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "Description",
                         DbType = DbType.AnsiString,
@@ -610,8 +617,9 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Description
                     FROM InformationSystems as IS
-                    WHERE IS.Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE IS.Name = {Name:String}";
+
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     Value = name
@@ -619,7 +627,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    //if (cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new InformationSystems()
                         {
                             Id = cmdReader.GetInt64(0),
@@ -643,7 +652,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     FROM InformationSystems as IS";
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = cmdReader.GetInt64(0);
                 };
             }
@@ -663,26 +672,27 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Applications (InformationSystemId,Id,Name,Presentation) VALUES (@InformationSystemId,@Id,@Name,@Presentation)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO Applications (InformationSystemId,Id,Name,Presentation) " +
+                                         "VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},{Presentation:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetApplicationNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.Name
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
@@ -703,15 +713,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Applications as APPS
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -720,7 +730,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Applications()
                         {
                             InformationSystemId = informationSystemId,
@@ -745,8 +755,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Applications as APPS
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -755,17 +765,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Applications()
                         {
-                            output.Add(new Applications()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Presentation = cmdReader.GetString(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Presentation = cmdReader.GetString(2)
+                        });
+                    }
                 }
             }
 
@@ -783,15 +792,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                             MAX(t.Id) AS LastId
                         FROM Applications t
-                        WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                        WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
                 }
@@ -817,20 +826,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Computers (InformationSystemId,Id,Name) VALUES (@InformationSystemId,@Id,@Name)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO Computers (InformationSystemId,Id,Name) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetComputerNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -850,15 +859,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM Computers as CMPS
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -867,7 +876,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Computers()
                         {
                             InformationSystemId = informationSystemId,
@@ -890,8 +899,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM Computers as CMPS
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -900,16 +909,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Computers()
                         {
-                            output.Add(new Computers()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1)
+                        });
+                    }
                 }
             }
 
@@ -927,15 +935,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Computers t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -963,26 +971,26 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Events (InformationSystemId,Id,Name,Presentation) VALUES (@InformationSystemId,@Id,@Name,@Presentation)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO Events (InformationSystemId,Id,Name,Presentation) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},{Presentation:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetEventNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.Name
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
@@ -1003,15 +1011,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Events as EVNTS
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1020,7 +1028,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Events()
                         {
                             InformationSystemId = informationSystemId,
@@ -1045,8 +1053,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Events as EVNTS
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1055,17 +1063,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Events()
                         {
-                            output.Add(new Events()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Presentation = cmdReader.GetString(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Presentation = cmdReader.GetString(2)
+                        });
+                    }
                 }
             }
 
@@ -1083,15 +1090,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Events t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -1119,29 +1126,30 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Metadata (InformationSystemId,Id,Name,Uuid) VALUES (@InformationSystemId,@Id,@Name,@Uuid)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText =
+                    "INSERT INTO Metadata (InformationSystemId,Id,Name,Uuid) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},toUUID({Uuid:String}))";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetMetadataNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.Name
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Uuid",
-                    DbType = DbType.Guid,
+                    DbType = DbType.AnsiString,
                     Value = sourceItem.Uuid
                 });
                 commandAdd.ExecuteNonQuery();
@@ -1159,31 +1167,31 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Uuid
                     FROM Metadata as MT
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name
-                        AND Uuid = @Uuid";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}
+                        AND Uuid = toUUID({Uuid:String})";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = name
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Uuid",
-                    DbType = DbType.Guid,
+                    DbType = DbType.AnsiString,
                     Value = uuid
                 });
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Metadata()
                         {
                             InformationSystemId = informationSystemId,
@@ -1208,8 +1216,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Uuid
                     FROM Metadata as MT
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1218,17 +1226,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Metadata()
                         {
-                            output.Add(new Metadata()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Uuid = cmdReader.GetGuid(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Uuid = cmdReader.GetGuid(2)
+                        });
+                    }
                 }
             }
 
@@ -1246,15 +1253,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Metadata t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
                 }
@@ -1280,20 +1287,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO PrimaryPorts (InformationSystemId,Id,Name) VALUES (@InformationSystemId,@Id,@Name)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO PrimaryPorts (InformationSystemId,Id,Name) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetPrimaryPortNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1313,15 +1320,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM PrimaryPorts as PP
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1330,7 +1337,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new PrimaryPorts()
                         {
                             InformationSystemId = informationSystemId,
@@ -1353,8 +1360,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM PrimaryPorts as PP
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1363,16 +1370,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new PrimaryPorts()
                         {
-                            output.Add(new PrimaryPorts()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1)
+                        });
+                    }
                 }
             }
 
@@ -1390,15 +1396,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM PrimaryPorts t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -1426,20 +1432,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO SecondaryPorts (InformationSystemId,Id,Name) VALUES (@InformationSystemId,@Id,@Name)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO SecondaryPorts (InformationSystemId,Id,Name) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetSecondaryPortNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1459,15 +1465,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM SecondaryPorts as SP
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1476,7 +1482,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new SecondaryPorts()
                         {
                             InformationSystemId = informationSystemId,
@@ -1499,8 +1505,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM SecondaryPorts as SP
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1509,16 +1515,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new SecondaryPorts()
                         {
-                            output.Add(new SecondaryPorts()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1)
+                        });
+                    }
                 }
             }
 
@@ -1536,15 +1541,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM SecondaryPorts t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -1572,26 +1577,26 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Severities (InformationSystemId,Id,Name,Presentation) VALUES (@InformationSystemId,@Id,@Name,@Presentation)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO Severities (InformationSystemId,Id,Name,Presentation) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},{Presentation:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetSeverityNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.ToString()
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
@@ -1612,15 +1617,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Severities as SV
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1629,7 +1634,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Severities()
                         {
                             InformationSystemId = informationSystemId,
@@ -1654,8 +1659,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM Severities as SV
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1664,17 +1669,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Severities()
                         {
-                            output.Add(new Severities()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Presentation = cmdReader.GetString(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Presentation = cmdReader.GetString(2)
+                        });
+                    }
                 }
             }
 
@@ -1692,15 +1696,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Severities t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -1728,26 +1732,26 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO TransactionStatuses (InformationSystemId,Id,Name,Presentation) VALUES (@InformationSystemId,@Id,@Name,@Presentation)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO TransactionStatuses (InformationSystemId,Id,Name,Presentation) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},{Presentation:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetTransactionStatusNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.ToString()
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Presentation",
                     DbType = DbType.AnsiString,
@@ -1768,15 +1772,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM TransactionStatuses as TS
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -1785,7 +1789,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new TransactionStatuses()
                         {
                             InformationSystemId = informationSystemId,
@@ -1810,8 +1814,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Presentation
                     FROM TransactionStatuses as TS
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1820,17 +1824,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new TransactionStatuses()
                         {
-                            output.Add(new TransactionStatuses()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Presentation = cmdReader.GetString(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Presentation = cmdReader.GetString(2)
+                        });
+                    }
                 }
             }
 
@@ -1848,15 +1851,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM TransactionStatuses t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -1884,29 +1887,29 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO Users (InformationSystemId,Id,Name,Uuid) VALUES (@InformationSystemId,@Id,@Name,@Uuid)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO Users (InformationSystemId,Id,Name,Uuid) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String},toUUID({Uuid:String}))";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetUserNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = sourceItem.Name
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Uuid",
-                    DbType = DbType.Guid,
+                    DbType = DbType.AnsiString,
                     Value = sourceItem.Uuid
                 });
                 commandAdd.ExecuteNonQuery();
@@ -1924,31 +1927,31 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Uuid
                     FROM Users as USR
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name
-                        AND Uuid = @Uuid";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}
+                        AND Uuid = toUUID({Uuid:String})";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
                     Value = name
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Uuid",
-                    DbType = DbType.Guid,
+                    DbType = DbType.AnsiString,
                     Value = uuid
                 });
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new Users()
                         {
                             InformationSystemId = informationSystemId,
@@ -1973,8 +1976,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Name,
                         Uuid
                     FROM Users as USR
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -1983,17 +1986,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new Users()
                         {
-                            output.Add(new Users()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1),
-                                Uuid = cmdReader.GetGuid(2)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1),
+                            Uuid = cmdReader.GetGuid(2)
+                        });
+                    }
                 }
             }
 
@@ -2011,15 +2013,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM Users t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
 
@@ -2047,20 +2049,20 @@ namespace YY.EventLogExportAssistant.ClickHouse
             if (existItem == null)
             {
                 var commandAdd = _connection.CreateCommand();
-                commandAdd.CommandText = "INSERT INTO WorkServers (InformationSystemId,Id,Name) VALUES (@InformationSystemId,@Id,@Name)";
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.CommandText = "INSERT INTO WorkServers (InformationSystemId,Id,Name) VALUES ({InformationSystemId:Int64},{Id:Int64},{Name:String})";
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Id",
                     DbType = DbType.Int64,
                     Value = GetWorkServerNewId(informationSystemId)
                 });
-                commandAdd.Parameters.Add(new ClickHouseParameter
+                commandAdd.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -2080,15 +2082,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM WorkServers as WS
-                    WHERE InformationSystemId = @InformationSystemId
-                        AND Name = @Name";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}
+                        AND Name = {Name:String}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
                     Value = informationSystemId
                 });
-                command.Parameters.Add(new ClickHouseParameter
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "Name",
                     DbType = DbType.AnsiString,
@@ -2097,7 +2099,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    if (cmdReader.NextResult() && cmdReader.Read())
+                    if (cmdReader.Read())
                         output = new WorkServers()
                         {
                             InformationSystemId = informationSystemId,
@@ -2120,8 +2122,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         Id,
                         Name                        
                     FROM WorkServers as WS
-                    WHERE InformationSystemId = @InformationSystemId";
-                command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64}";
+                command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "InformationSystemId",
                     DbType = DbType.Int64,
@@ -2130,16 +2132,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                 using (var cmdReader = command.ExecuteReader())
                 {
-                    while (cmdReader.NextResult())
-                        while (cmdReader.Read())
+                    while (cmdReader.Read())
+                    {
+                        output.Add(new WorkServers()
                         {
-                            output.Add(new WorkServers()
-                            {
-                                InformationSystemId = informationSystemId,
-                                Id = cmdReader.GetInt64(0),
-                                Name = cmdReader.GetString(1)
-                            });
-                        }
+                            InformationSystemId = informationSystemId,
+                            Id = cmdReader.GetInt64(0),
+                            Name = cmdReader.GetString(1)
+                        });
+                    }
                 }
             }
 
@@ -2157,15 +2158,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT 
                         MAX(t.Id) AS LastId
                     FROM WorkServers t
-                    WHERE InformationSystemId = @InformationSystemId ";
-                    command.Parameters.Add(new ClickHouseParameter
+                    WHERE InformationSystemId = {InformationSystemId:Int64} ";
+                    command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystemId",
                         Value = informationSystemId
                     });
                     using (var cmdReader = command.ExecuteReader())
                     {
-                        if (cmdReader.NextResult() && cmdReader.Read())
+                        if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
                 }

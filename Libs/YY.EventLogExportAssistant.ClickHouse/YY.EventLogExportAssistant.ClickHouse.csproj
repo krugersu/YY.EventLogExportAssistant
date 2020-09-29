@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="ClickHouse.Ado" Version="1.2.4" />
+    <PackageReference Include="ClickHouse.Client" Version="2.2.1.285" />
   </ItemGroup>
 
   <ItemGroup>
