@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using System.Threading;
-using ClickHouse.Ado;
 using YY.EventLogExportAssistant;
 using YY.EventLogExportAssistant.ClickHouse;
 
@@ -51,7 +50,6 @@ namespace YY.EventLogExportToClickHouse
             Console.WriteLine();
             Console.WriteLine();
 
-            //var settings = new ClickHouseConnectionSettings(connectionString);
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);

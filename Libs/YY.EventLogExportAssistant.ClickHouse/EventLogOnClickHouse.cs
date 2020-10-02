@@ -3,9 +3,7 @@ using System.IO;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using System;
-using ClickHouse.Ado;
 using Microsoft.Extensions.Configuration;
-using YY.EventLogExportAssistant.ClickHouse.Models;
 using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.ClickHouse
@@ -20,7 +18,6 @@ namespace YY.EventLogExportAssistant.ClickHouse
         private InformationSystemsBase _system;
         private readonly string _connectionString;
         private EventLogPosition _lastEventLogFilePosition;
-        private ReferencesDataCache _referencesCache;
 
         #endregion
 
@@ -61,7 +58,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             EventLogPosition position;
             using(var context = new ClickHouseContext(_connectionString))
-                position = context.GetLogFilePosition(_system.Id);
+                position = context.GetLogFilePosition(_system);
             
             _lastEventLogFilePosition = position;
             return position;
@@ -93,7 +90,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 if (_maxPeriodRowData == DateTime.MinValue)
                     _maxPeriodRowData = context.GetRowsDataMaxPeriod(_system);
 
-                List<RowDataBulkInsert> newEntities = new List<RowDataBulkInsert>();
+                List<RowData> newEntities = new List<RowData>();
                 foreach (var itemRow in rowsData)
                 {
                     if (itemRow == null)
@@ -102,55 +99,18 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         if (context.RowDataExistOnDatabase(_system, itemRow))
                             continue;
 
-                    newEntities.Add(new RowDataBulkInsert(_system, itemRow, _referencesCache));
+                    newEntities.Add(itemRow);
                 }
 
-                context.SaveRowsData(newEntities);
+                context.SaveRowsData(_system, newEntities);
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
         {
-            using (var context = new ClickHouseContext(_connectionString))
-                _system = context.CreateOrUpdateInformationSystem(system.Name, system.Description);
+            _system = system;
         }
         public override void UpdateReferences(ReferencesData data)
         {
-            using (var context = new ClickHouseContext(_connectionString))
-            {
-                foreach (var item in data.Applications)
-                    context.AddApplicationIfNotExist(_system.Id, item);
-
-                foreach (var item in data.Computers)
-                    context.AddComputerIfNotExist(_system.Id, item);
-
-                foreach (var item in data.Events)
-                    context.AddEventIfNotExist(_system.Id, item);
-
-                foreach (var item in data.Metadata)
-                    context.AddMetadataIfNotExist(_system.Id, item);
-
-                foreach (var item in data.PrimaryPorts)
-                    context.AddPrimaryPortIfNotExist(_system.Id, item);
-
-                foreach (var item in data.SecondaryPorts)
-                    context.AddSecondaryPortIfNotExist(_system.Id, item);
-
-                foreach (var item in data.Severities)
-                    context.AddSeverityIfNotExist(_system.Id, item);
-
-                foreach (var item in data.TransactionStatuses)
-                    context.AddTransactionStatusIfNotExist(_system.Id, item);
-
-                foreach (var item in data.Users)
-                    context.AddUserIfNotExist(_system.Id, item);
-
-                foreach (var item in data.WorkServers)
-                    context.AddWorkServerIfNotExist(_system.Id, item);
-
-                if (_referencesCache == null)
-                    _referencesCache = new ReferencesDataCache(_system);
-                context.FillReferencesCacheByDatabaseContext(_system.Id, _referencesCache);
-            }
         }
 
         #endregion
