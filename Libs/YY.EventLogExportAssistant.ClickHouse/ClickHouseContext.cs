@@ -159,18 +159,18 @@ namespace YY.EventLogExportAssistant.ClickHouse
             {
                 command.CommandText =
                     @"SELECT
-                        InformationSystemId,
+                        InformationSystem,
                         Id,
                         Period
                     FROM RowsData AS RD
-                    WHERE InformationSystemId = {existInfSysId:Int64}
+                    WHERE InformationSystem = {existInfSysId:String}
                         AND Id = {existId:Int64}
-                        AND Period = {existPeriod:Int64}";
+                        AND Period = {existPeriod:DateTime}";
                 command.Parameters.Add(new ClickHouseDbParameter
                 {
                     ParameterName = "existInfSysId",
-                    DbType = DbType.Int64,
-                    Value = system.Id
+                    DbType = DbType.AnsiString,
+                    Value = system.Name
                 });
                 command.Parameters.Add(new ClickHouseDbParameter
                 {
@@ -227,11 +227,21 @@ namespace YY.EventLogExportAssistant.ClickHouse
             using (var cmdReader = cmdGetLastLogFileInfo.ExecuteReader())
             {
                 if (cmdReader.Read())
+                {
+                    string fileData = cmdReader.GetString(2);
+                    if (fileData.Length > 1 && fileData[0] == '\\' && fileData[1] != '\\')
+                        fileData = "\\" + fileData;
+
+                    string fileReferences = cmdReader.GetString(1);
+                    if (fileReferences.Length > 1 && fileReferences[0] == '\\' && fileReferences[1] != '\\')
+                        fileReferences = "\\" + fileReferences;
+
                     output = new EventLogPosition(
                         cmdReader.GetInt64(0),
-                        cmdReader.GetString(1),
-                        cmdReader.GetString(2),
+                        fileReferences,
+                        fileData,
                         cmdReader.GetInt64(3));
+                }
             }
 
             return output;
