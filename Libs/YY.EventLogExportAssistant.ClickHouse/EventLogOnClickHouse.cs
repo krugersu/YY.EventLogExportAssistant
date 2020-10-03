@@ -102,6 +102,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 }
 
                 context.SaveRowsData(_system, newEntities);
+                context.RemoveArchiveLogFileRecords(_system);
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)

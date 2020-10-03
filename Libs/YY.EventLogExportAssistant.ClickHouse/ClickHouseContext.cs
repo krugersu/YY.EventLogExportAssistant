@@ -341,7 +341,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         @"SELECT
                         MAX(Id)
                     FROM LogFiles
-                    WHERE InformationSystem = {InformationSystem:String} ";
+                    WHERE InformationSystem = {InformationSystem:String}";
                     command.Parameters.Add(new ClickHouseDbParameter
                     {
                         ParameterName = "InformationSystem",
@@ -364,9 +364,28 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
             return output;
         }
+        public void RemoveArchiveLogFileRecords(InformationSystemsBase system)
+        {
+            var commandRemoveArchiveLogInfo = _connection.CreateCommand();
+            commandRemoveArchiveLogInfo.CommandText =
+                @"ALTER TABLE LogFiles DELETE
+                WHERE InformationSystem = {InformationSystem:String}
+                    AND Id < (
+                    SELECT MAX(Id) AS LastId
+                    FROM LogFiles lf
+                    WHERE InformationSystem = {InformationSystem:String}
+                )";
+            commandRemoveArchiveLogInfo.Parameters.Add(new ClickHouseDbParameter
+            {
+                ParameterName = "InformationSystem",
+                DbType = DbType.AnsiString,
+                Value = system.Name
+            });
+            commandRemoveArchiveLogInfo.ExecuteNonQuery();
+        }
 
         #endregion
-        
+
         public void Dispose()
         {
             if (_connection != null)
