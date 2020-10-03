@@ -4,7 +4,6 @@ using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 using System;
 using Microsoft.Extensions.Configuration;
-using YY.EventLogExportAssistant.Database;
 
 namespace YY.EventLogExportAssistant.ClickHouse
 {

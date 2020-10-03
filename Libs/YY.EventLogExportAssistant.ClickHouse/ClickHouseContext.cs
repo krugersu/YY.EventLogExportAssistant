@@ -1,5 +1,4 @@
 ﻿using ClickHouse.Client.ADO;
-using ClickHouse.Client.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,6 +6,8 @@ using System.IO;
 using System.Linq;
 using ClickHouse.Client.ADO.Parameters;
 using ClickHouse.Client.Copy;
+using YY.EventLogExportAssistant.Database.Models;
+using YY.EventLogExportAssistant.Helpers;
 using YY.EventLogReaderAssistant;
 using RowData = YY.EventLogReaderAssistant.Models.RowData;
 
@@ -102,16 +103,16 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     system.Name,
                     i.RowId,
                     i.Period.DateTime,
-                    i.Severity.ToString(),
+                    Severities.GetPresentationByName(i.Severity.ToString()),
                     i.ConnectId ?? 0,
                     i.Session ?? 0,
-                    i.TransactionStatus.ToString(),
+                    TransactionStatuses.GetPresentationByName(i.TransactionStatus.ToString()),
                     i.TransactionDate ?? DateTime.MinValue,
                     i.TransactionId ?? 0,
                     i.User?.Name ?? string.Empty,
                     i.Computer?.Name ?? string.Empty,
-                    i.Application?.Name ?? string.Empty,
-                    i.Event?.Name ?? string.Empty,
+                    Applications.GetPresentationByName(i.Application?.Name ?? string.Empty),
+                    Events.GetPresentationByName(i.Event?.Name ?? string.Empty),
                     i.Comment ?? string.Empty,
                     i.Metadata?.Name ?? string.Empty,
                     i.Data ?? string.Empty,
@@ -146,7 +147,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     if (cmdReader.Read())
                         output = cmdReader.GetDateTime(0);
-                };
+                }
             }
 
             return output;
@@ -189,7 +190,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     if (cmdReader.Read())
                         output = true;
-                };
+                }
             }
 
             return output;
@@ -228,13 +229,12 @@ namespace YY.EventLogExportAssistant.ClickHouse
             {
                 if (cmdReader.Read())
                 {
-                    string fileData = cmdReader.GetString(2);
-                    if (fileData.Length > 1 && fileData[0] == '\\' && fileData[1] != '\\')
-                        fileData = "\\" + fileData;
-
-                    string fileReferences = cmdReader.GetString(1);
-                    if (fileReferences.Length > 1 && fileReferences[0] == '\\' && fileReferences[1] != '\\')
-                        fileReferences = "\\" + fileReferences;
+                    string fileData = cmdReader.GetString(2)
+                        .Replace("\\\\","\\")
+                        .FixNetworkPath();
+                    string fileReferences = cmdReader.GetString(1)
+                        .Replace("\\\\", "\\")
+                        .FixNetworkPath();
 
                     output = new EventLogPosition(
                         cmdReader.GetInt64(0),
@@ -251,25 +251,25 @@ namespace YY.EventLogExportAssistant.ClickHouse
             var commandAddLogInfo = _connection.CreateCommand();
             commandAddLogInfo.CommandText =
                 @"INSERT INTO LogFiles (
-                 InformationSystem,
-                 Id,
-                 FileName,
-                 CreateDate,
-                 ModificationDate,
-                 LastEventNumber,
-                 LastCurrentFileReferences,
-                 LastCurrentFileData,
-                 LastStreamPosition
+                    InformationSystem,
+                    Id,
+                    FileName,
+                    CreateDate,
+                    ModificationDate,
+                    LastEventNumber,
+                    LastCurrentFileReferences,
+                    LastCurrentFileData,
+                    LastStreamPosition
                 ) VALUES (
-                 {isId:String},
-                 {newId:Int64},
-                 {FileName:String},
-                 {CreateDate:DateTime},
-                 {ModificationDate:DateTime},
-                 {LastEventNumber:Int64},
-                 {LastCurrentFileReferences:String},
-                 {LastCurrentFileData:String},
-                 {LastStreamPosition:Int64}     
+                    {isId:String},
+                    {newId:Int64},
+                    {FileName:String},
+                    {CreateDate:DateTime},
+                    {ModificationDate:DateTime},
+                    {LastEventNumber:Int64},
+                    {LastCurrentFileReferences:String},
+                    {LastCurrentFileData:String},
+                    {LastStreamPosition:Int64}     
                 )";
 
             commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
@@ -312,13 +312,13 @@ namespace YY.EventLogExportAssistant.ClickHouse
             {
                 ParameterName = "LastCurrentFileReferences",
                 DbType = DbType.AnsiString,
-                Value = position.CurrentFileReferences
+                Value = position.CurrentFileReferences.Replace("\\", "\\\\")
             });
             commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
                 ParameterName = "LastCurrentFileData",
                 DbType = DbType.AnsiString,
-                Value = position.CurrentFileData
+                Value = position.CurrentFileData.Replace("\\", "\\\\")
             });
             commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
             {
@@ -352,8 +352,6 @@ namespace YY.EventLogExportAssistant.ClickHouse
                         if (cmdReader.Read())
                             output = cmdReader.GetInt64(0);
                     }
-
-                    ;
                 }
             }
             else

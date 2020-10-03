@@ -25,7 +25,6 @@ namespace YY.EventLogExportToClickHouse
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
 
-            IConfigurationSection connectionStringSection = Configuration.GetSection("ConnectionStrings");
             string connectionString = Configuration.GetConnectionString("EventLogDatabase");
 
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
