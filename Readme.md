@@ -13,6 +13,7 @@
 С помощью библиотеки **[YY.EventLogReaderAssistant](https://github.com/YPermitin/YY.EventLogReaderAssistant)** реализовано чтение данных журнала регистрации как текстового формата (*.lgf, *.lgp), так и нового формата в виде SQLite-базы (*.lgd).
 
 ### Состояние сборки
+
 | Windows |  Linux |
 |:-------:|:------:|
 | [![Build status](https://ci.appveyor.com/api/projects/status/lm4hex3gooyvaes2?svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogexportassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogExportAssistant) |
@@ -207,6 +208,9 @@ static void Main()
         // "EventLogOnTarget" и устанавливаем в нем информационную систему для выгрузки.
         // Для SQL Server - "EventLogOnSQLServer"
         // Для PostgreSQL - "EventLogOnPostgreSQL"
+        // Для ClickHouse - "EventLogOnClickHouse"
+        // Для ElasticSearch - "EventLogOnElasticSearch"
+        // Для MySQL - "EventLogOnMySQL"
         // Можно создать собственный класс для выгрузки в произвольное хранилище.
         EventLogOnSQLServer target = new EventLogOnSQLServer(optionsBuilder.Options, portion);
         target.SetInformationSystem(new InformationSystemsBase()
@@ -225,6 +229,7 @@ static void Main()
         exporter.AfterExportData += AfterExportData;         
 
         // 6. Выгрузка данных
+        _beginPortionExport = DateTime.Now;
         if (useWatchMode)
         {
             // При настройке "WatchMode" = true выгружаем все накопившиеся данные,
@@ -262,7 +267,6 @@ static void Main()
 
 private static void BeforeExportData(BeforeExportDataEventArgs e)
 {
-    _beginPortionExport = DateTime.Now;
     _lastPortionRows = e.Rows.Count;
     _totalRows += e.Rows.Count;
 
@@ -279,6 +283,8 @@ private static void AfterExportData(AfterExportDataEventArgs e)
     Console.WriteLine();
     Console.WriteLine();
     Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+    
+    _beginPortionExport = DateTime.Now;
 }
 
 #endregion
