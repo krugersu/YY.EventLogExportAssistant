@@ -65,6 +65,7 @@ namespace YY.EventLogExportToClickHouse
                 exporter.AfterExportData += AfterExportData;
                 exporter.OnErrorExportData += OnErrorExportData;
 
+                _beginPortionExport = DateTime.Now;
                 if (useWatchMode)
                 {
                     while (true)
@@ -97,7 +98,6 @@ namespace YY.EventLogExportToClickHouse
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
-            _beginPortionExport = DateTime.Now;
             _lastPortionRows = e.Rows.Count;
             _totalRows += e.Rows.Count;
 
@@ -114,6 +114,8 @@ namespace YY.EventLogExportToClickHouse
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+
+            _beginPortionExport = DateTime.Now;
         }
         private static void OnErrorExportData(OnErrorExportDataEventArgs e)
         {

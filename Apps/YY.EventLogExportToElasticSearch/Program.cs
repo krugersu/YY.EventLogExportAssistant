@@ -79,6 +79,7 @@ namespace YY.EventLogExportToElasticSearch
                 exporter.AfterExportData += AfterExportData;
                 exporter.OnErrorExportData += OnErrorExportData;
 
+                _beginPortionExport = DateTime.Now;
                 if (useWatchMode)
                 {
                     while (true)
@@ -111,7 +112,6 @@ namespace YY.EventLogExportToElasticSearch
 
         private static void BeforeExportData(BeforeExportDataEventArgs e)
         {
-            _beginPortionExport = DateTime.Now;
             _lastPortionRows = e.Rows.Count;
             _totalRows += e.Rows.Count;
 
@@ -128,6 +128,8 @@ namespace YY.EventLogExportToElasticSearch
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
+
+            _beginPortionExport = DateTime.Now;
         }
 
         private static void OnErrorExportData(OnErrorExportDataEventArgs e)
