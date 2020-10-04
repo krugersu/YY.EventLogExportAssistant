@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
-using Nest;
+using System.Threading;
 using YY.EventLogExportAssistant;
-using YY.EventLogExportAssistant.ElasticSearch;
+using YY.EventLogExportAssistant.ClickHouse;
 
-namespace YY.EventLogExportToElasticSearch
+namespace YY.EventLogExportToClickHouse
 {
     class Program
     {
@@ -26,6 +25,8 @@ namespace YY.EventLogExportToElasticSearch
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
 
+            string connectionString = Configuration.GetConnectionString("EventLogDatabase");
+
             IConfigurationSection eventLogSection = Configuration.GetSection("EventLog");
             string eventLogPath = eventLogSection.GetValue("SourcePath", string.Empty);
             int watchPeriodSeconds = eventLogSection.GetValue("WatchPeriod", 60);
@@ -36,14 +37,6 @@ namespace YY.EventLogExportToElasticSearch
             IConfigurationSection informationSystemSection = Configuration.GetSection("InformationSystem");
             string informationSystemName = informationSystemSection.GetValue("Name", string.Empty);
             string informationSystemDescription = informationSystemSection.GetValue("Description", string.Empty);
-
-            IConfigurationSection elasticSearchSection = Configuration.GetSection("ElasticSearch");
-            Uri nodeAddress = elasticSearchSection.GetValue<Uri>("Node");
-            string indexName = elasticSearchSection.GetValue<string>("IndexName");
-            string indexSeparation = elasticSearchSection.GetValue<string>("IndexSeparationPeriod");
-            int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
-            int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
-
 
             if (string.IsNullOrEmpty(eventLogPath))
             {
@@ -56,23 +49,16 @@ namespace YY.EventLogExportToElasticSearch
             Console.WriteLine();
             Console.WriteLine();
 
-            ConnectionSettings elasticSettings = new ConnectionSettings(nodeAddress)
-                .DefaultIndex(indexName)
-                .MaximumRetries(maximumRetries)
-                .MaxRetryTimeout(TimeSpan.FromSeconds(maxRetryTimeout));
-
             using (EventLogExportMaster exporter = new EventLogExportMaster())
             {
                 exporter.SetEventLogPath(eventLogPath);
 
-                EventLogOnElasticSearch target = new EventLogOnElasticSearch(elasticSettings, portion);
+                EventLogOnClickHouse target = new EventLogOnClickHouse(connectionString, portion);
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = informationSystemName,
                     Description = informationSystemDescription
                 });
-                target.SetIndexName(indexName);
-                target.SetIndexSeparationPeriod(indexSeparation);
                 exporter.SetTarget(target);
 
                 exporter.BeforeExportData += BeforeExportData;
@@ -116,22 +102,21 @@ namespace YY.EventLogExportToElasticSearch
             _totalRows += e.Rows.Count;
 
             Console.SetCursorPosition(0, 0);
-            Console.WriteLine("[{0}] Last read: {1}                         ", DateTime.Now, e.Rows.Count);
+            Console.WriteLine("[{0}] Last read: {1}             ", DateTime.Now, e.Rows.Count);
         }
         private static void AfterExportData(AfterExportDataEventArgs e)
         {
             _endPortionExport = DateTime.Now;
             var duration = _endPortionExport - _beginPortionExport;
 
-            Console.WriteLine("[{0}] Total read: {1}                        ", DateTime.Now, _totalRows);
-            Console.WriteLine("[{0}] {1} / {2} (sec.)                       ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
+            Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
+            Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");
 
             _beginPortionExport = DateTime.Now;
         }
-
         private static void OnErrorExportData(OnErrorExportDataEventArgs e)
         {
             Console.WriteLine(

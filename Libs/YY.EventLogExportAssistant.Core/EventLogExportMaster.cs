@@ -194,13 +194,15 @@ namespace YY.EventLogExportAssistant
             _dataToSend.Add(sender.CurrentRow);
 
             if (_dataToSend.Count >= _portionSize)
-            {
                 SendDataCurrentPortion(sender);
-            }
         }
         private void EventLogReader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
             FileInfo _lastEventLogDataFileInfo = new FileInfo(args.FileName);
+
+            if (_dataToSend.Count >= 0)
+                SendDataCurrentPortion(sender);
+
             EventLogPosition position = sender.GetCurrentPosition();
             _target.SaveLogPosition(_lastEventLogDataFileInfo, position);
         }

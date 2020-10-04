@@ -7,6 +7,7 @@
 | YY.EventLogExportAssistant.PostgreSQL | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.PostgreSQL) | Пакет для экспорта в базу PostgreSQL |
 | YY.EventLogExportAssistant.MySQL | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.MySQL.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.MySQL) | Пакет для экспорта в базу MySQL |
 | YY.EventLogExportAssistant.ElasticSearch | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.ElasticSearch) | Пакет для экспорта в индексы ElasticSearch |
+| YY.EventLogExportAssistant.ClickHouse | [![NuGet version](https://badge.fury.io/nu/YY.EventLogExportAssistant.ClickHouse.svg)](https://badge.fury.io/nu/YY.EventLogExportAssistant.ClickHouse) | Пакет для экспорта в базу ClickHouse |
 
 Решение для экспорта данных журнала регистрации платформы 1С:Предприятие 8.x в нестандартные хранилища данных.
 С помощью библиотеки **[YY.EventLogReaderAssistant](https://github.com/YPermitin/YY.EventLogReaderAssistant)** реализовано чтение данных журнала регистрации как текстового формата (*.lgf, *.lgp), так и нового формата в виде SQLite-базы (*.lgd).
@@ -28,11 +29,13 @@
   * YY.EventLogExportAssistant.PostgreSQL - функционал для экспорта данных в базу PostgreSQL.
   * YY.EventLogExportAssistant.MySQL - функционал для экспорта данных в базу MySQL.
   * YY.EventLogExportAssistant.ElasticSearch - функционал для экспорта данных в индексы ElasticSearch.
+  * YY.EventLogExportAssistant.ClickHouse - функционал для экспорта данных в базу ClickHouse.
 * Примеры приложений
   * YY.EventLogExportToSQLServer - пример приложения для экспорта данных в базу SQL Server.
   * YY.EventLogExportToPostgreSQL - пример приложения для экспорта данных в базу PostgreSQL.
   * YY.EventLogExportToMySQL - пример приложения для экспорта данных в базу MySQL.
   * YY.EventLogExportToElasticSearch - пример приложения для экспорта данных в индексы ElasticSearch.
+  * YY.EventLogExportToClickHouse - пример приложения для экспорта данных в базу ClickHouse.
 
 ## Требования и совместимость
 
@@ -43,19 +46,21 @@
 * PostgreSQL 9.6 и выше.
 * MySQL 5.7 и выше.
 * ElasticSearch 7.6 и выше.
+* ClickHouse 20.9 и выше.
 
 В большинстве случаев работоспособность подтверждается и на более старых версиях ПО, но меньше тестируется. Основная разработка ведется для Microsoft Windows, но некоторый функционал проверялся под *.nix.*
 
 ## Пример использования
 
-Репозиторий содержит три примера консольных приложений для экспорта данных:
+Репозиторий содержит несколько примеров консольных приложений для экспорта данных:
 
 * YY.EventLogExportToSQLServer
 * YY.EventLogExportToPostgreSQL
 * YY.EventLogExportToMySQL
 * YY.EventLogExportToElasticSearch
+* YY.EventLogExportToClickHouse
 
-Для удобства приведем небольшой пример для выгрузки данных журнала регистрации в базу SQL Server.
+Для удобства приведем основной небольшой пример для выгрузки данных журнала регистрации в базу SQL Server.
 
 ### Конфигурация
 
@@ -80,6 +85,15 @@
 ```
 
 Секция **"ConnectionStrings"** содержит строку подключения **"EventLogDatabase"** к базе данных для экспорта. База будет создана автоматически при первом запуске приложения. Также можно создать ее вручную, главное, чтобы структура была соответствующей. Имя строки подключения **"EventLogDatabase"** - это значение по умолчанию. Контекст приложения будет использовать ее автоматически, если это не переопределено разработчиком явно.
+
+Примеры строк подключения:
+
+  * **SQLServer**: "Data Source=<Имя или адрес сервера>;Initial Catalog=<Имя базы данных>;Integrated Security=True"
+  * **PostgreSQL**: "User ID=<Имя пользователя>;Password=<Пароль>;Host=<Имя или адрес сервера>;Port=5432;Database=<Имя базы данных>;"
+  * **MySQL**: "Server=<Имя или адрес сервера>;Database=<Имя базы данных>;Uid=<Имя пользователя>;Pwd=<Пароль>;"
+  * **ClickHouse**: "Host=<Имя или адрес сервера>;Port=8123;Username=<Имя пользователя>;password=<Пароль>;Database=<Имя базы данных>;"
+
+Подробнее о настройке подключения можете прочитать в официальной документации к каждой из СУБД.
 
 Секция **"InformationSystem"** содержит название информационной системы и ее описание. Информационная система позволяет разделять хранение журналов регистрации разных баз 1С в одной базе данных.
 
@@ -299,6 +313,7 @@ private static void AfterExportData(AfterExportDataEventArgs e)
 | 2 | PostgreSQL | 10000 | 0.32 | 0.8 | 97 |
 | 3 | MySQL | 10000 | 2.91 | 3 | 130 |
 | 4 | ElasticSearch | 10000 | 0.67 | 0.9 | 48 |
+| 5 | ClickHouse | 10000 | 0.08 | 1.2 | 70 |
 
 В целом не важно какая СУБД используется для хранения данных журнала регистрации. Разница в производительности на уровне статистической погрешности. В обоих вариантах время выгрузки около 35 тыс. записей журнала регистрации в минуту. Не часто можно встретить информационную базу, которая генерирует такой объем записей, но и она не будет препятствием для использования этой библиотеки выгрузки.
 

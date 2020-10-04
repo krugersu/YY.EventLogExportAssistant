@@ -25,8 +25,8 @@ namespace YY.EventLogExportAssistant.SQLServer
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .Build();
 
-                string connectinString = Configuration.GetConnectionString("EventLogDatabase");
-                optionsBuilder.UseSqlServer(connectinString);
+                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
         public bool UseExplicitKeyIndicesInitialization()

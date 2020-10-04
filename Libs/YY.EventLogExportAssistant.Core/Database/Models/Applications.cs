@@ -26,9 +26,9 @@ namespace YY.EventLogExportAssistant.Database.Models
 
         #endregion
 
-        #region Private Static Methods
+        #region Public Static Methods
 
-        private static string GetPresentationByName(string name)
+        public static string GetPresentationByName(string name)
         {
             return _mapPresentation.TryGetValue(name, out string output) ? output : name;
         }

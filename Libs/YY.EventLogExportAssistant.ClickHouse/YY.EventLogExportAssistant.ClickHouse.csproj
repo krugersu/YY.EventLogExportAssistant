@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.0.0.11</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0.1</Version>
     <Authors>Permitin Yuriy</Authors>
-    <Product>Event log export assistant for MySQL</Product>
-    <Description>Library for exprorting 1C:Enterprise 8.x platform's event log files to MySQL database</Description>
+    <Company>Permitin YuriyPermitin Yuriy</Company>
+    <Product>Event log export assistant to ClickHouse</Product>
+    <Description>Library for exprorting 1C:Enterprise 8.x platform's event log files to ClickHouse</Description>
     <Copyright>Copyright (c) 2020 Permitin Yury</Copyright>
     <PackageProjectUrl>https://github.com/YPermitin/YY.EventLogExportAssistant</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/YPermitin/YY.EventLogExportAssistant</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageTags>event, log, 1C, enterprise, export, sqlserver</PackageTags>
+    <PackageTags>event, log, 1C, enterprise, export, elasticsearch, elk</PackageTags>
     <PackageReleaseNotes>Just beginning...</PackageReleaseNotes>
-    <PackageIcon>icon.png</PackageIcon>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.0.11</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,9 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.8" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.2.2" />
+    <PackageReference Include="ClickHouse.Client" Version="2.2.1.285" />
   </ItemGroup>
 
   <ItemGroup>

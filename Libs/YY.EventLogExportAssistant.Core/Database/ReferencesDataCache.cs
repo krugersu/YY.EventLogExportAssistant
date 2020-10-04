@@ -104,7 +104,7 @@ namespace YY.EventLogExportAssistant.Database
             UsersDictionary = Users.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
             WorkServersDictionary = WorkServers.GroupBy(e => e.Name).ToDictionary(e => e.Key, e => e.ToList());
         }
-
+        
         #endregion
 
         #region Private Methods
