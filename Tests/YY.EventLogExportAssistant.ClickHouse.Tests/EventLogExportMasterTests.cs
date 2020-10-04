@@ -107,22 +107,22 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
             {
-                //configFilePath = "travisci-appsettings.json";
-                //IConfiguration Configuration = new ConfigurationBuilder()
-                //    .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
-                //    .Build();
-                //string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                //try
-                //{
-                //    _optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                //    _optionsBuilder.UseNpgsql(connectionString);
-                //    using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, new EventLogPostgreSQLActions()))
-                //        context.Database.EnsureDeleted();
-                //}
-                //catch
-                //{
-                //    configFilePath = "appveyor-appsettings.json";
-                //}
+                configFilePath = "travisci-appsettings.json";
+                IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
+                    .Build();
+                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
+                try
+                {
+                    using (var context = new ClickHouseContext(connectionString))
+                    {
+                        var someValue = context.GetHashCode();
+                    }
+                }
+                catch
+                {
+                    configFilePath = "appveyor-appsettings.json";
+                }
             }
 
             if (!File.Exists(configFilePath))
