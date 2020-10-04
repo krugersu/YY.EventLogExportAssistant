@@ -18,7 +18,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         private readonly string _connectionString;
         private EventLogPosition _lastEventLogFilePosition;
         private int _stepsToClearLogFiles = 1000;
-        private int _currentStepToClearLogFiles = 0;
+        private int _currentStepToClearLogFiles;
 
         #endregion
 
