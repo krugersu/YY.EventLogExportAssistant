@@ -33,7 +33,6 @@ script:
   - dotnet test Tests/YY.EventLogExportAssistant.PostgreSQL.Tests/YY.EventLogExportAssistant.PostgreSQL.Tests.csproj
   - dotnet test Tests/YY.EventLogExportAssistant.ElasticSearch.Tests/YY.EventLogExportAssistant.ElasticSearch.Tests.csproj
   - dotnet test Tests/YY.EventLogExportAssistant.MySQL.Tests/YY.EventLogExportAssistant.MySQL.Tests.csproj
-  - dotnet test Tests/YY.EventLogExportAssistant.ClickHouse.Tests/YY.EventLogExportAssistant.ClickHouse.Tests.csproj
 deploy:
   skip_cleanup: true
   provider: script
