@@ -15,6 +15,12 @@ namespace YY.EventLogExportAssistant.ClickHouse
 {
     public class ClickHouseContext : IDisposable
     {
+        #region Private Static Members
+
+        private static readonly string _emptyGuidAsString = Guid.Empty.ToString();
+
+        #endregion
+
         #region Private Members
 
         private ClickHouseConnection _connection;
@@ -44,11 +50,13 @@ namespace YY.EventLogExportAssistant.ClickHouse
 	                TransactionDate DateTime Codec(Delta, LZ4),
 	                TransactionId Int64 Codec(DoubleDelta, LZ4),
 	                User LowCardinality(String),
+                    UserUUID LowCardinality(String),
 	                Computer LowCardinality(String),
 	                Application LowCardinality(String),
 	                Event LowCardinality(String),
 	                Comment String Codec(ZSTD),
 	                Metadata LowCardinality(String),
+                    MetadataUUID LowCardinality(String),
 	                Data String Codec(ZSTD),
 	                DataUUID UUID Codec(ZSTD),
 	                DataPresentation String Codec(ZSTD),
@@ -110,11 +118,13 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     i.TransactionDate ?? DateTime.MinValue,
                     i.TransactionId ?? 0,
                     i.User?.Name ?? string.Empty,
+                    i.User?.Uuid.ToString() ?? _emptyGuidAsString,
                     i.Computer?.Name ?? string.Empty,
                     Applications.GetPresentationByName(i.Application?.Name ?? string.Empty),
                     Events.GetPresentationByName(i.Event?.Name ?? string.Empty),
                     i.Comment ?? string.Empty,
                     i.Metadata?.Name ?? string.Empty,
+                    i.Metadata?.Uuid.ToString() ?? _emptyGuidAsString,
                     i.Data ?? string.Empty,
                     (i.DataUuid ?? string.Empty).NormalizeShortUUID(),
                     i.DataPresentation ?? string.Empty,
