@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using ClickHouse.Client.ADO.Parameters;
 using ClickHouse.Client.Copy;
+using YY.EventLogExportAssistant.ClickHouse.Helpers;
 using YY.EventLogExportAssistant.Database.Models;
 using YY.EventLogExportAssistant.Helpers;
 using YY.EventLogReaderAssistant;
@@ -23,6 +24,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         #region Private Members
 
+        private string _databaseName;
         private ClickHouseConnection _connection;
         private long logFileLastId = -1;
 
@@ -32,6 +34,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         public ClickHouseContext(string connectionSettings)
         {
+            CheckDatabaseSettings(connectionSettings);
+
             _connection = new ClickHouseConnection(connectionSettings);
             _connection.Open();
             
@@ -334,7 +338,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
             {
                 ParameterName = "LastStreamPosition",
                 DbType = DbType.Int64,
-                Value = position.StreamPosition
+                Value = position?.StreamPosition ?? 0
             });
 
             commandAddLogInfo.ExecuteNonQuery();
@@ -406,6 +410,19 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 _connection.Dispose();
                 _connection = null;
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void CheckDatabaseSettings(string connectionSettings)
+        {
+            var connectionParams = ClickHouseHelpers.GetConnectionParams(connectionSettings);
+            var databaseParam = connectionParams.FirstOrDefault(e => e.Key.ToUpper() == "DATABASE");
+            _databaseName = databaseParam.Value;
+
+            ClickHouseHelpers.CreateDatabaseIfNotExist(connectionSettings);
         }
 
         #endregion
