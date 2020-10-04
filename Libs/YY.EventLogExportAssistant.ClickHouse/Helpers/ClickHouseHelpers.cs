@@ -11,7 +11,7 @@ namespace YY.EventLogExportAssistant.ClickHouse.Helpers
         {
             var connectionParams = connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries)
                 .Select(p => p.Split('=', StringSplitOptions.RemoveEmptyEntries))
-                .Select(i => new { Name = i[0], Value = i[1] });
+                .Select(i => new { Name = i[0], Value = i.Length > 1 ? i[1] : string.Empty });
 
             return connectionParams.ToDictionary(o => o.Name, o => o.Value);
         }
