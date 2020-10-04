@@ -41,58 +41,10 @@ namespace YY.EventLogExportAssistant.ClickHouse
             
             var cmdDDL = _connection.CreateCommand();
 
-            cmdDDL.CommandText =
-                @"create table if not exists RowsData
-                (
-	                InformationSystem LowCardinality(String),
-	                Id Int64 Codec(DoubleDelta, LZ4),
-	                Period DateTime Codec(Delta, LZ4),
-	                Severity LowCardinality(String),
-	                ConnectId Int64 Codec(DoubleDelta, LZ4),
-	                Session Int64 Codec(DoubleDelta, LZ4),
-	                TransactionStatus LowCardinality(String),
-	                TransactionDate DateTime Codec(Delta, LZ4),
-	                TransactionId Int64 Codec(DoubleDelta, LZ4),
-	                User LowCardinality(String),
-                    UserUUID LowCardinality(String),
-	                Computer LowCardinality(String),
-	                Application LowCardinality(String),
-	                Event LowCardinality(String),
-	                Comment String Codec(ZSTD),
-	                Metadata LowCardinality(String),
-                    MetadataUUID LowCardinality(String),
-	                Data String Codec(ZSTD),
-	                DataUUID UUID Codec(ZSTD),
-	                DataPresentation String Codec(ZSTD),
-	                WorkServer LowCardinality(String),
-	                PrimaryPort LowCardinality(String),
-	                SecondaryPort LowCardinality(String)
-                )
-                engine = MergeTree()
-                PARTITION BY (InformationSystem, toYYYYMM(Period))
-                PRIMARY KEY (InformationSystem, Period, Id)
-                ORDER BY (InformationSystem, Period, Id)
-                SETTINGS index_granularity = 8192;";
+            cmdDDL.CommandText = Resources.Query_CreateTable_RowsData;
             cmdDDL.ExecuteNonQuery();
 
-            cmdDDL.CommandText =
-                @"create table if not exists LogFiles
-                (
-	                InformationSystem LowCardinality(String),
-	                Id Int64 Codec(DoubleDelta, LZ4),
-	                FileName LowCardinality(String),
-	                CreateDate DateTime Codec(Delta, LZ4),
-	                ModificationDate DateTime Codec(Delta, LZ4),
-	                LastEventNumber Int64 Codec(DoubleDelta, LZ4),
-	                LastCurrentFileReferences LowCardinality(String),
-	                LastCurrentFileData LowCardinality(String),
-	                LastStreamPosition Int64 Codec(DoubleDelta, LZ4)
-                )
-                engine = MergeTree()
-                PARTITION BY (InformationSystem, toYYYYMM(CreateDate))
-                PRIMARY KEY (InformationSystem, Id)
-                ORDER BY (InformationSystem, Id)
-                SETTINGS index_granularity = 8192;";
+            cmdDDL.CommandText = Resources.Query_CreateTable_LogFiles;
             cmdDDL.ExecuteNonQuery();
         }
 
