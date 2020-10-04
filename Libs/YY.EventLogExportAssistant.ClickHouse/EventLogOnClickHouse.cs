@@ -17,6 +17,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
         private InformationSystemsBase _system;
         private readonly string _connectionString;
         private EventLogPosition _lastEventLogFilePosition;
+        private int _stepsToClearLogFiles = 1000;
+        private int _currentStepToClearLogFiles = 0;
 
         #endregion
 
@@ -65,7 +67,15 @@ namespace YY.EventLogExportAssistant.ClickHouse
         public override void SaveLogPosition(FileInfo logFileInfo, EventLogPosition position)
         {
             using (var context = new ClickHouseContext(_connectionString))
+            {
                 context.SaveLogPosition(_system, logFileInfo, position);
+                if (_currentStepToClearLogFiles == 0 || _currentStepToClearLogFiles >= _stepsToClearLogFiles)
+                {
+                    context.RemoveArchiveLogFileRecords(_system);
+                    _currentStepToClearLogFiles = 0;
+                }
+                _currentStepToClearLogFiles += 1;
+            }
 
             _lastEventLogFilePosition = position;
         }
@@ -100,9 +110,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
                     newEntities.Add(itemRow);
                 }
-
                 context.SaveRowsData(_system, newEntities);
-                context.RemoveArchiveLogFileRecords(_system);
             }
         }
         public override void SetInformationSystem(InformationSystemsBase system)
