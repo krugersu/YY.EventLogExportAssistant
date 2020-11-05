@@ -104,7 +104,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     if (itemRow == null)
                         continue;
-                    if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period.DateTime <= _maxPeriodRowData)
+                    if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
                         if (context.RowDataExistOnDatabase(_system, itemRow))
                             continue;
 
