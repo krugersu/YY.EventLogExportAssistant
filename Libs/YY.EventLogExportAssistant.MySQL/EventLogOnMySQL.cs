@@ -94,7 +94,7 @@ namespace YY.EventLogExportAssistant.MySQL
                 {
                     if (itemRow == null)
                         continue;
-                    if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period.DateTime <= _maxPeriodRowData)
+                    if (_maxPeriodRowData != DateTime.MinValue && itemRow.Period <= _maxPeriodRowData)
                         if (_context.RowDataExistOnDatabase(_system, itemRow))
                             continue;
 

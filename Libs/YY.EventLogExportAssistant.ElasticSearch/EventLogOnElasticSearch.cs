@@ -109,7 +109,7 @@ namespace YY.EventLogExportAssistant.ElasticSearch
 
             foreach (RowData item in rowsData)
             {
-                string logDataCurrentIndexName = $"{ _indexName }-LogData-{ item.Period.DateTime.GetIndexSeparationPeriod(_indexSeparationPeriod) }";
+                string logDataCurrentIndexName = $"{ _indexName }-LogData-{ item.Period.GetIndexSeparationPeriod(_indexSeparationPeriod) }";
                 logDataCurrentIndexName = logDataCurrentIndexName.ToLower();
                 if (logDataByIndices.ContainsKey(logDataCurrentIndexName) == false)
                 {

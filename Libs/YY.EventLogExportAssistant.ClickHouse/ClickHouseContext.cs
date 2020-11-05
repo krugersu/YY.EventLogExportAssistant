@@ -66,7 +66,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     system.Name,
                     i.RowId,
-                    i.Period.DateTime,
+                    i.Period,
                     Severities.GetPresentationByName(i.Severity.ToString()),
                     i.ConnectId ?? 0,
                     i.Session ?? 0,
@@ -149,7 +149,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                 {
                     ParameterName = "existPeriod",
                     DbType = DbType.DateTime,
-                    Value = rowData.Period.DateTime
+                    Value = rowData.Period
                 });
 
                 using (var cmdReader = command.ExecuteReader())
