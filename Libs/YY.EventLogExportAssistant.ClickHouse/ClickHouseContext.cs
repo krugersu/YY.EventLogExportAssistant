@@ -71,7 +71,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     i.ConnectId ?? 0,
                     i.Session ?? 0,
                     TransactionStatuses.GetPresentationByName(i.TransactionStatus.ToString()),
-                    i.TransactionDate ?? DateTime.MinValue,
+                    i.TransactionDate ?? new DateTime(1970,1,1),
                     i.TransactionId ?? 0,
                     i.User?.Name ?? string.Empty,
                     i.User?.Uuid.ToString() ?? _emptyGuidAsString,
