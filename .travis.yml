@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dist: focal
+dist: bionic
 dotnet: 3.1
 services:
   - postgresql
