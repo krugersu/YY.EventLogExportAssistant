@@ -3,9 +3,9 @@ mono: none
 dist: xenial
 dotnet: 3.1
 services:
+  - clickhouse
   - postgresql
   - mysql
-  - clickhouse
 addons:
   postgresql: "10"
 before_install:
@@ -16,6 +16,12 @@ before_install:
 - echo -e '-XX:+DisableExplicitGC\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dlog4j.skipJansi=true\n-server\n' | sudo tee -a /etc/elasticsearch/jvm.options
 - sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
 - sudo systemctl start elasticsearch
+- sudo apt-get install apt-transport-https ca-certificates dirmngr
+- sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
+- echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
+- sudo apt-get update
+- sudo apt-get install -y clickhouse-server clickhouse-client
+- sudo service clickhouse-server start
 install:
   - dotnet restore
 before_script:
