@@ -10,3 +10,5 @@ sudo apt-get update
 sudo apt-get install -y clickhouse-server clickhouse-client
 
 sudo service clickhouse-server start
+
+clickhouse-client --query "SELECT 'Connection OK'"
