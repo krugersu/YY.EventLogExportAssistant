@@ -51,6 +51,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C
 		Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql
+		Scripts\travisci-install-clickhouse.sh = Scripts\travisci-install-clickhouse.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{9C060815-539F-46E8-83AD-89F573568BC5}"
@@ -87,7 +88,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportToClickHouse", "Apps\YY.EventLogExportToClickHouse\YY.EventLogExportToClickHouse.csproj", "{922D62B9-D5A7-4806-B2BC-D7C9631B7939}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YY.EventLogExportAssistant.ClickHouse.Tests", "Tests\YY.EventLogExportAssistant.ClickHouse.Tests\YY.EventLogExportAssistant.ClickHouse.Tests.csproj", "{F958CA9D-F065-4955-AAF2-E76CAB1712AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogExportAssistant.ClickHouse.Tests", "Tests\YY.EventLogExportAssistant.ClickHouse.Tests\YY.EventLogExportAssistant.ClickHouse.Tests.csproj", "{F958CA9D-F065-4955-AAF2-E76CAB1712AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
