@@ -112,17 +112,18 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
                 string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                try
-                {
-                    using (var context = new ClickHouseContext(connectionString))
-                    {
-                        var someValue = context.GetHashCode();
-                    }
-                }
-                catch
-                {
-                    configFilePath = "appveyor-appsettings.json";
-                }
+                // Для AppVeyor тест пока не запускаем
+                //try
+                //{
+                //    using (var context = new ClickHouseContext(connectionString))
+                //    {
+                //        var someValue = context.GetHashCode();
+                //    }
+                //}
+                //catch
+                //{
+                //    configFilePath = "appveyor-appsettings.json";
+                //}
             }
 
             if (!File.Exists(configFilePath))
