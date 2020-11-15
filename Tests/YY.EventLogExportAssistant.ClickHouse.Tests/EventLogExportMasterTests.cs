@@ -29,8 +29,10 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
         public EventLogExportMasterTests()
         {
             string configFilePath = GetConfigFile();
+            Console.WriteLine($"Config file: {configFilePath}");
 
             _settings = new CommonTestSettings(configFilePath, null);
+            Console.WriteLine($"Connection string: {_settings.ConnectionString}");
         }
 
         #endregion
