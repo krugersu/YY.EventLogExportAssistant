@@ -19,6 +19,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
         #region Private Static Members
 
         private static readonly string _emptyGuidAsString = Guid.Empty.ToString();
+        private static readonly DateTime _minDateTime = new DateTime(1970, 1, 1);
 
         #endregion
 
@@ -71,7 +72,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     i.ConnectId ?? 0,
                     i.Session ?? 0,
                     TransactionStatuses.GetPresentationByName(i.TransactionStatus.ToString()),
-                    i.TransactionDate ?? new DateTime(1970,1,1),
+                    (i.TransactionDate == null || i.TransactionDate < _minDateTime ? _minDateTime : i.TransactionDate),
                     i.TransactionId ?? 0,
                     i.User?.Name ?? string.Empty,
                     i.User?.Uuid.ToString() ?? _emptyGuidAsString,
