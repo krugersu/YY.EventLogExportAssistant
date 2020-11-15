@@ -54,7 +54,7 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
 
         private void ExportToClickHouse(EventLogExportSettings eventLogSettings)
         {
-            ClickHouseHelpers.DropDatabaseIfNotExist(_settings.ConnectionString);
+            ClickHouseHelpers.DropDatabaseIfExist(_settings.ConnectionString);
 
             EventLogOnClickHouse target = new EventLogOnClickHouse(_settings.ConnectionString, eventLogSettings.Portion);
             target.SetInformationSystem(new InformationSystemsBase()
@@ -112,17 +112,18 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
                 string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                try
-                {
-                    using (var context = new ClickHouseContext(connectionString))
-                    {
-                        var someValue = context.GetHashCode();
-                    }
-                }
-                catch
-                {
-                    configFilePath = "appveyor-appsettings.json";
-                }
+                // Для AppVeyor тест пока не запускаем
+                //try
+                //{
+                //    using (var context = new ClickHouseContext(connectionString))
+                //    {
+                //        var someValue = context.GetHashCode();
+                //    }
+                //}
+                //catch
+                //{
+                //    configFilePath = "appveyor-appsettings.json";
+                //}
             }
 
             if (!File.Exists(configFilePath))

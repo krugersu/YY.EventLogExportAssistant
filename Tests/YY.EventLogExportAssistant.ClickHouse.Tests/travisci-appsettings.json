@@ -1,6 +1,6 @@
 ﻿{
   "ConnectionStrings": {
-    "EventLogDatabase": "Host=localhost;Port=5432;Database=EventLogExportTest;Username=default;Password="
+    "EventLogDatabase": "Host=127.0.0.1;Port=5432;Database=EventLogExportTest;Username=default;password=defaultpassword;"
   },
   "LGF": {
     "InformationSystem": {

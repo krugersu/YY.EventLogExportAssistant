@@ -1,11 +1,10 @@
 language: csharp
 mono: none
-dist: xenial
+dist: bionic
 dotnet: 3.1
 services:
   - postgresql
   - mysql
-  - clickhouse
 addons:
   postgresql: "10"
 before_install:
@@ -16,6 +15,7 @@ before_install:
 - echo -e '-XX:+DisableExplicitGC\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dlog4j.skipJansi=true\n-server\n' | sudo tee -a /etc/elasticsearch/jvm.options
 - sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
 - sudo systemctl start elasticsearch
+- sudo chmod +x ./Scripts/travisci-install-clickhouse.sh && ./Scripts/travisci-install-clickhouse.sh
 install:
   - dotnet restore
 before_script:
@@ -33,6 +33,7 @@ script:
   - dotnet test Tests/YY.EventLogExportAssistant.PostgreSQL.Tests/YY.EventLogExportAssistant.PostgreSQL.Tests.csproj
   - dotnet test Tests/YY.EventLogExportAssistant.ElasticSearch.Tests/YY.EventLogExportAssistant.ElasticSearch.Tests.csproj
   - dotnet test Tests/YY.EventLogExportAssistant.MySQL.Tests/YY.EventLogExportAssistant.MySQL.Tests.csproj
+  #- dotnet test Tests/YY.EventLogExportAssistant.ClickHouse.Tests/YY.EventLogExportAssistant.ClickHouse.Tests.csproj
 deploy:
   skip_cleanup: true
   provider: script
