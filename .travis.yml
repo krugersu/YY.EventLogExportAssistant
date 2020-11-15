@@ -1,7 +1,6 @@
 language: csharp
 mono: none
-os: linux
-dist: bionic
+dist: trusty
 dotnet: 3.1
 services:
   - postgresql
