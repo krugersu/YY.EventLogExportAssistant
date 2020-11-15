@@ -36,7 +36,7 @@ namespace YY.EventLogExportAssistant.ClickHouse.Helpers
                 }
             }
         }
-        public static void DropDatabaseIfNotExist(string connectionSettings)
+        public static void DropDatabaseIfExist(string connectionSettings)
         {
             var connectionParams = GetConnectionParams(connectionSettings);
             var databaseParam = connectionParams.FirstOrDefault(e => e.Key.ToUpper() == "DATABASE");
