@@ -6,4 +6,4 @@ dotnet nuget push ./Libs/YY.EventLogExportAssistant.SQLServer/bin/Release/YY.Eve
 dotnet nuget push ./Libs/YY.EventLogExportAssistant.PostgreSQL/bin/Release/YY.EventLogExportAssistant.PostgreSQL.*.nupkg -k $1 -s https://api.nuget.org/v3/index.json --skip-duplicate
 dotnet nuget push ./Libs/YY.EventLogExportAssistant.ElasticSearch/bin/Release/YY.EventLogExportAssistant.ElasticSearch.*.nupkg -k $1 -s https://api.nuget.org/v3/index.json --skip-duplicate
 dotnet nuget push ./Libs/YY.EventLogExportAssistant.MySQL/bin/Release/YY.EventLogExportAssistant.MySQL.*.nupkg -k $1 -s https://api.nuget.org/v3/index.json --skip-duplicate
-#dotnet nuget push ./Libs/YY.EventLogExportAssistant.ClickHouse/bin/Release/YY.EventLogExportAssistant.ClickHouse.*.nupkg -k $1 -s https://api.nuget.org/v3/index.json --skip-duplicate
+dotnet nuget push ./Libs/YY.EventLogExportAssistant.ClickHouse/bin/Release/YY.EventLogExportAssistant.ClickHouse.*.nupkg -k $1 -s https://api.nuget.org/v3/index.json --skip-duplicate
