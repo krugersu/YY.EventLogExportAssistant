@@ -15,5 +15,5 @@ sudo service clickhouse-server start
 
 sleep 30
 
-clickhouse-client --query "SELECT 'Connection OK'"
-clickhouse-client --query "SELECT version()"
+clickhouse-client --query "SELECT 'Connection OK'" --password defaultpassword
+clickhouse-client --query "SELECT version()" --password defaultpassword
