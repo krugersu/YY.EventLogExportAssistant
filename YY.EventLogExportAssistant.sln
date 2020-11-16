@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
+		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
 		LICENSE = LICENSE
 		Readme.md = Readme.md
 	EndProjectSection
@@ -48,10 +49,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C
 		Scripts\appveyor-install-apps.ps1 = Scripts\appveyor-install-apps.ps1
 		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
 		Scripts\deploy.sh = Scripts\deploy.sh
+		Scripts\install-clickhouse.sh = Scripts\install-clickhouse.sh
 		Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql
-		Scripts\travisci-install-clickhouse.sh = Scripts\travisci-install-clickhouse.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{9C060815-539F-46E8-83AD-89F573568BC5}"

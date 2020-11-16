@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
+    - name: Install ClickHouse
+      run: sudo chmod +x ./Scripts/install-clickhouse.sh && ./Scripts/install-clickhouse.sh
     - name: Install dependencies
       run: dotnet restore
     - name: Build
