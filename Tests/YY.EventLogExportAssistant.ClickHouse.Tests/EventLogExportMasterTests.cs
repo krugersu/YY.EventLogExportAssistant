@@ -54,6 +54,8 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
 
         private void ExportToClickHouse(EventLogExportSettings eventLogSettings)
         {
+            Console.WriteLine(_settings.ConnectionString);
+
             ClickHouseHelpers.DropDatabaseIfExist(_settings.ConnectionString);
 
             EventLogOnClickHouse target = new EventLogOnClickHouse(_settings.ConnectionString, eventLogSettings.Portion);
