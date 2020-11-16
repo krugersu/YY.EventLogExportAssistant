@@ -9,12 +9,13 @@ sudo apt-get update
 
 sudo apt-get install -y clickhouse-server clickhouse-client
 
+sudo sed -i 's/<password><\/password>/<password>defaultpassword<\/password>/g' /etc/clickhouse-server/users.xml
+
 sudo cat /etc/clickhouse-server/config.xml
 sudo cat /etc/clickhouse-server/users.xml
-sudo ls /etc/clickhouse-server/users.d
 
 #sudo sed -i 's/<!-- <listen_host>0.0.0.0<\/listen_host> -->/<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
-#sudo sed -i 's/<password><\/password>/<password>defaultpassword<\/password>/g' /etc/clickhouse-server/users.xml
+
 
 sudo service clickhouse-server start
 
