@@ -10,15 +10,15 @@ sudo apt-get update
 sudo apt-get install -y clickhouse-server clickhouse-client
 
 sudo sed -i 's/<password><\/password>/<password>defaultpassword<\/password>/g' /etc/clickhouse-server/users.xml
-sudo sed -i 's/<!-- <listen_host>0.0.0.0<\/listen_host> -->/<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
-sudo sed -i 's/<listen_host>::1<\/listen_host>/<!-- <listen_host>::1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
-sudo sed -i 's/<listen_host>127.0.0.1<\/listen_host>/<!-- <listen_host>127.0.0.1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
+#sudo sed -i 's/<!-- <listen_host>0.0.0.0<\/listen_host> -->/<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
+#sudo sed -i 's/<listen_host>::1<\/listen_host>/<!-- <listen_host>::1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
+#sudo sed -i 's/<listen_host>127.0.0.1<\/listen_host>/<!-- <listen_host>127.0.0.1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
 
-sudo cat /etc/clickhouse-server/config.xml
-sudo cat /etc/clickhouse-server/users.xml
+#sudo cat /etc/clickhouse-server/config.xml
+#sudo cat /etc/clickhouse-server/users.xml
 
-sudo service clickhouse-server stop
-sleep 30
+#sudo service clickhouse-server stop
+#sleep 30
 
 sudo service clickhouse-server start
 sleep 30
