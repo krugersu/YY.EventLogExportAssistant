@@ -2,14 +2,14 @@ name: .NET Core
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ develop ]
+    branches: [ master, develop ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -17,9 +17,13 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
+    - name: Install ClickHouse
+      run: sudo chmod +x ./Scripts/install-clickhouse.sh && ./Scripts/install-clickhouse.sh
     - name: Install dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: Test
+    - name: Test Core
       run: dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
+    - name: Test ClickHouse
+      run: dotnet test Tests/YY.EventLogExportAssistant.ClickHouse.Tests/YY.EventLogExportAssistant.ClickHouse.Tests.csproj
