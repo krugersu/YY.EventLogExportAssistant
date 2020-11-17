@@ -14,7 +14,7 @@ sudo sed -i 's/<password><\/password>/<password>defaultpassword<\/password>/g' /
 #sudo sed -i 's/<listen_host>::1<\/listen_host>/<!-- <listen_host>::1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
 #sudo sed -i 's/<listen_host>127.0.0.1<\/listen_host>/<!-- <listen_host>127.0.0.1<\/listen_host> -->/g' /etc/clickhouse-server/config.xml
 
-#sudo cat /etc/clickhouse-server/config.xml
+sudo cat /etc/clickhouse-server/config.xml
 #sudo cat /etc/clickhouse-server/users.xml
 
 #sudo service clickhouse-server stop
