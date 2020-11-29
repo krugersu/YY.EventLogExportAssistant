@@ -26,7 +26,7 @@ namespace YY.EventLogExportAssistant.MySQL
                     .Build();
 
                 string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                optionsBuilder.UseMySql(connectionString);
+                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             }
         }
         public bool UseExplicitKeyIndicesInitialization()

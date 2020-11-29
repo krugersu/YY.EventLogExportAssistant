@@ -32,7 +32,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 new EventLogMySQLActions());
 
             _optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-            _optionsBuilder.UseMySql(_settings.ConnectionString);
+            _optionsBuilder.UseMySql(_settings.ConnectionString, ServerVersion.AutoDetect(_settings.ConnectionString));
 
             using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, _settings.DBMSActions))
                 context.Database.EnsureDeleted();
@@ -104,7 +104,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
                 try
                 {
                     _optionsBuilder = new DbContextOptionsBuilder<EventLogContext>();
-                    _optionsBuilder.UseMySql(connectionString);
+                    _optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     using (EventLogContext context = EventLogContext.Create(_optionsBuilder.Options, new EventLogMySQLActions()))
                         context.Database.EnsureDeleted();
                 }
