@@ -17,6 +17,7 @@ namespace YY.EventLogExportAssistant
         private EventLogReader _reader;
         private readonly List<RowData> _dataToSend;
         private int _portionSize;
+        private TimeZoneInfo _logTimeZoneInfo;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
         public event BeforeExportDataHandler BeforeExportData;
@@ -34,17 +35,25 @@ namespace YY.EventLogExportAssistant
             _referenceDataHash = string.Empty;
             _dataToSend = new List<RowData>();
             _portionSize = 0;
+            _logTimeZoneInfo = TimeZoneInfo.Local;
         }
 
         #endregion
 
         #region Public Methods
 
-        public void SetEventLogPath(string eventLogPath)
+        public void SetEventLogPath(string eventLogPath, TimeZoneInfo timeZone)
         {
             _eventLogPath = eventLogPath;
-            if(!string.IsNullOrEmpty(_eventLogPath))
+            if (!string.IsNullOrEmpty(_eventLogPath))
+            {
                 _reader = EventLogReader.CreateReader(_eventLogPath);
+                _reader.SetTimeZone(timeZone);
+            }
+        }
+        public void SetEventLogPath(string eventLogPath)
+        {
+            SetEventLogPath(eventLogPath, TimeZoneInfo.Local);
         }
         public void SetTarget(IEventLogOnTarget target)
         {
@@ -112,6 +121,10 @@ namespace YY.EventLogExportAssistant
             }
             if (_dataToSend.Count > 0)
                 SendDataCurrentPortion(_reader);
+        }
+        public TimeZoneInfo GetTimeZone()
+        {
+            return _logTimeZoneInfo;
         }
         public void Dispose()
         {
