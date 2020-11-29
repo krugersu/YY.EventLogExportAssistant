@@ -1,4 +1,6 @@
-﻿namespace YY.EventLogExportAssistant
+﻿using System;
+
+namespace YY.EventLogExportAssistant
 {
     public interface IEventLogExportMaster
     {
@@ -6,5 +8,6 @@
         void SetTarget(IEventLogOnTarget target);
         bool NewDataAvailable();
         void SendData();
+        TimeZoneInfo GetTimeZone();
     }
 }
