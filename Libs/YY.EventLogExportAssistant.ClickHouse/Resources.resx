@@ -131,9 +131,9 @@
 	LastStreamPosition Int64 Codec(DoubleDelta, LZ4)
 )
 engine = MergeTree()
-PARTITION BY (InformationSystem, toYYYYMM(CreateDate))
-PRIMARY KEY (InformationSystem, Id)
-ORDER BY (InformationSystem, Id)
+PARTITION BY toYYYYMM(CreateDate)
+PRIMARY KEY CreateDate
+ORDER BY CreateDate
 SETTINGS index_granularity = 8192;</value>
     <comment>Создание таблицы для хранения данных лога обработки файлов</comment>
   </data>
@@ -165,9 +165,9 @@ SETTINGS index_granularity = 8192;</value>
     SecondaryPort LowCardinality(String)
 )
 engine = MergeTree()
-PARTITION BY (InformationSystem, toYYYYMM(Period))
-PRIMARY KEY (InformationSystem, Period, Id)
-ORDER BY (InformationSystem, Period, Id)
+PARTITION BY toYYYYMM(Period)
+PRIMARY KEY Period
+ORDER BY Period
 SETTINGS index_granularity = 8192;</value>
     <comment>Создание таблицы для хранения данных журнала регистрации</comment>
   </data>

@@ -74,7 +74,8 @@ namespace YY.EventLogExportAssistant.ClickHouse {
         ///	LastStreamPosition Int64 Codec(DoubleDelta, LZ4)
         ///)
         ///engine = MergeTree()
-        ///PARTITION BY (InformationSystem, toYYYYMM(Crea [остаток строки не уместился]&quot;;.
+        ///PARTITION BY toYYYYMM(CreateDate)
+        ///PRIMARY KEY [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string Query_CreateTable_LogFiles {
             get {
