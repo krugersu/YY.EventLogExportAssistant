@@ -13,14 +13,9 @@ namespace YY.EventLogExportAssistant.SQLServer
     {
         #region Private Member Variables
 
-        private const int _defaultPortion = 1000;
-        private readonly int _portion;
         private readonly DbContextOptions<EventLogContext> _databaseOptions;
-        private InformationSystemsBase _system;
-        private DateTime _maxPeriodRowData;
         private readonly IEventLogContextExtensionActions _databaseActions;
         private ReferencesDataCache _referencesCache;
-        private EventLogPosition _lastEventLogFilePosition;
 
         #endregion
 

@@ -37,6 +37,7 @@ namespace YY.EventLogExportToClickHouse
             IConfigurationSection informationSystemSection = Configuration.GetSection("InformationSystem");
             string informationSystemName = informationSystemSection.GetValue("Name", string.Empty);
             string informationSystemDescription = informationSystemSection.GetValue("Description", string.Empty);
+            string timeZoneName = informationSystemSection.GetValue("TimeZone", string.Empty);
 
             if (string.IsNullOrEmpty(eventLogPath))
             {
@@ -53,11 +54,15 @@ namespace YY.EventLogExportToClickHouse
             {
                 exporter.SetEventLogPath(eventLogPath);
 
-                EventLogOnClickHouse target = new EventLogOnClickHouse(connectionString, portion);
+                EventLogOnClickHouse target = new EventLogOnClickHouse(
+                    connectionString, 
+                    portion, 
+                    new ClickHouseExtendedActions());
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = informationSystemName,
-                    Description = informationSystemDescription
+                    Description = informationSystemDescription,
+                    TimeZoneName = timeZoneName
                 });
                 exporter.SetTarget(target);
 
@@ -77,8 +82,8 @@ namespace YY.EventLogExportToClickHouse
                         while (exporter.NewDataAvailable())
                         {
                             exporter.SendData();
-                            Thread.Sleep(watchPeriodSecondsMs);
                         }
+                        Thread.Sleep(watchPeriodSecondsMs);
                     }
                 }
                 else

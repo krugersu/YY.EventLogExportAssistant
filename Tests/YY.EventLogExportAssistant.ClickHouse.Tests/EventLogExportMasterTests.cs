@@ -1,14 +1,9 @@
 using System;
-using System.Data.Entity.Infrastructure;
 using System.IO;
-using System.Linq;
 using ClickHouse.Client.ADO;
 using ClickHouse.Client.ADO.Parameters;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 using YY.EventLogExportAssistant.ClickHouse.Helpers;
-using YY.EventLogExportAssistant.Database;
 using YY.EventLogExportAssistant.Tests.Helpers;
 using YY.EventLogExportAssistant.Tests.Helpers.Models;
 using YY.EventLogReaderAssistant;
@@ -110,22 +105,6 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
             if (!File.Exists(configFilePath))
             {
                 configFilePath = "ci-appsettings.json";
-                IConfiguration Configuration = new ConfigurationBuilder()
-                    .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
-                    .Build();
-                string connectionString = Configuration.GetConnectionString("EventLogDatabase");
-                // Для AppVeyor тест пока не запускаем
-                //try
-                //{
-                //    using (var context = new ClickHouseContext(connectionString))
-                //    {
-                //        var someValue = context.GetHashCode();
-                //    }
-                //}
-                //catch
-                //{
-                //    configFilePath = "appveyor-appsettings.json";
-                //}
             }
 
             if (!File.Exists(configFilePath))

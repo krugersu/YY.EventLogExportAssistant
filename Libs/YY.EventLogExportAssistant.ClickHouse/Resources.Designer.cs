@@ -61,6 +61,15 @@ namespace YY.EventLogExportAssistant.ClickHouse {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Не указан каталог с файлами данных журнала регистрации..
+        /// </summary>
+        internal static string EventLog_CatalogNotFound {
+            get {
+                return ResourceManager.GetString("EventLog_CatalogNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на CREATE TABLE IF NOT EXISTS LogFiles
         ///(
         ///	InformationSystem LowCardinality(String),
@@ -72,10 +81,10 @@ namespace YY.EventLogExportAssistant.ClickHouse {
         ///	LastCurrentFileReferences LowCardinality(String),
         ///	LastCurrentFileData LowCardinality(String),
         ///	LastStreamPosition Int64 Codec(DoubleDelta, LZ4)
+        ///    {TemplateFields}
         ///)
         ///engine = MergeTree()
-        ///PARTITION BY toYYYYMM(CreateDate)
-        ///PRIMARY KEY [остаток строки не уместился]&quot;;.
+        ///PARTITION BY toYYYYMM(Cr [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string Query_CreateTable_LogFiles {
             get {

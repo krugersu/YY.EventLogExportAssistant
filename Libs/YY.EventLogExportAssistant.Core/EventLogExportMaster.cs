@@ -17,7 +17,6 @@ namespace YY.EventLogExportAssistant
         private EventLogReader _reader;
         private readonly List<RowData> _dataToSend;
         private int _portionSize;
-        private TimeZoneInfo _logTimeZoneInfo;
 
         public delegate void BeforeExportDataHandler(BeforeExportDataEventArgs e);
         public event BeforeExportDataHandler BeforeExportData;
@@ -35,25 +34,20 @@ namespace YY.EventLogExportAssistant
             _referenceDataHash = string.Empty;
             _dataToSend = new List<RowData>();
             _portionSize = 0;
-            _logTimeZoneInfo = TimeZoneInfo.Local;
         }
 
         #endregion
 
         #region Public Methods
 
-        public void SetEventLogPath(string eventLogPath, TimeZoneInfo timeZone)
+        public void SetEventLogPath(string eventLogPath)
         {
             _eventLogPath = eventLogPath;
             if (!string.IsNullOrEmpty(_eventLogPath))
             {
                 _reader = EventLogReader.CreateReader(_eventLogPath);
-                _reader.SetTimeZone(timeZone);
+                _reader.SetTimeZone(_target != null ? _target.GetTimeZone() : TimeZoneInfo.Local);
             }
-        }
-        public void SetEventLogPath(string eventLogPath)
-        {
-            SetEventLogPath(eventLogPath, TimeZoneInfo.Local);
         }
         public void SetTarget(IEventLogOnTarget target)
         {
@@ -61,6 +55,7 @@ namespace YY.EventLogExportAssistant
             if (_target != null)
             {
                 _portionSize = _target.GetPortionSize();
+                _reader.SetTimeZone(_target.GetTimeZone());
             }
         }
         public bool NewDataAvailable()
@@ -74,7 +69,6 @@ namespace YY.EventLogExportAssistant
 
             EventLogPosition lastPosition = _target.GetLastPosition();
 
-            bool newDataExist;
             _reader.AfterReadFile -= EventLogReader_AfterReadFile;
             _reader.AfterReadEvent -= EventLogReader_AfterReadEvent;
             _reader.OnErrorEvent -= EventLogReader_OnErrorEvent;
@@ -95,8 +89,7 @@ namespace YY.EventLogExportAssistant
             }
 
             _reader.SetCurrentPosition(lastPosition);
-            newDataExist = _reader.Read();
-
+            var newDataExist = _reader.Read();
             return newDataExist;
         }
         public void SendData()
@@ -121,10 +114,6 @@ namespace YY.EventLogExportAssistant
             }
             if (_dataToSend.Count > 0)
                 SendDataCurrentPortion(_reader);
-        }
-        public TimeZoneInfo GetTimeZone()
-        {
-            return _logTimeZoneInfo;
         }
         public void Dispose()
         {

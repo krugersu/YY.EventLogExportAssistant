@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using YY.EventLogReaderAssistant;
 using YY.EventLogReaderAssistant.Models;
@@ -14,5 +15,6 @@ namespace YY.EventLogExportAssistant
         void Save(RowData rowData);
         void Save(IList<RowData> rowsData);
         void UpdateReferences(ReferencesData data);
+        TimeZoneInfo GetTimeZone();
     }
 }

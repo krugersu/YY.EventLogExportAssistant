@@ -61,7 +61,7 @@ namespace YY.EventLogExportToMySQL
                 target.SetInformationSystem(new InformationSystemsBase()
                 {
                     Name = informationSystemName,
-                    Description = informationSystemDescription
+                    Description = informationSystemDescription,
                 });
                 exporter.SetTarget(target);
 
@@ -81,8 +81,8 @@ namespace YY.EventLogExportToMySQL
                         while (exporter.NewDataAvailable())
                         {
                             exporter.SendData();
-                            Thread.Sleep(watchPeriodSecondsMs);
                         }
+                        Thread.Sleep(watchPeriodSecondsMs);
                     }
                 }
                 else
