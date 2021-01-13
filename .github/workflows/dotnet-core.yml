@@ -29,3 +29,5 @@ jobs:
       run: dotnet test Tests/YY.EventLogExportAssistant.Core.Tests/YY.EventLogExportAssistant.Core.Tests.csproj
     - name: Test ClickHouse
       run: dotnet test Tests/YY.EventLogExportAssistant.ClickHouse.Tests/YY.EventLogExportAssistant.ClickHouse.Tests.csproj
+    - name: Test MySQL
+      run: dotnet test Tests/YY.EventLogExportAssistant.MySQL.Tests/YY.EventLogExportAssistant.MySQL.Tests.csproj
