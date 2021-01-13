@@ -41,6 +41,7 @@ namespace YY.EventLogExportAssistant.Database.Models
         public string Presentation
         {
             get => GetPresentationByName(Name);
+            // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 

@@ -14,13 +14,9 @@ namespace YY.EventLogExportAssistant.ElasticSearch
     {
         #region Private Member Variables
 
-        private const int _defaultPortion = 1000;
-        private readonly int _portion;
         private readonly ElasticClient _client;
-        private InformationSystemsBase _system;
         private string _indexName;
         private IndexSeparationPeriod _indexSeparationPeriod;
-        private EventLogPosition _lastEventLogFilePosition;
 
         #endregion
 
@@ -129,7 +125,8 @@ namespace YY.EventLogExportAssistant.ElasticSearch
             {
                 Id = system.Id,
                 Name = system.Name,
-                Description = system.Description
+                Description = system.Description,
+                TimeZoneName = system.TimeZoneName
             };
 
             if (_indexName == null)
@@ -145,19 +142,16 @@ namespace YY.EventLogExportAssistant.ElasticSearch
         {
             if (separation != null && Enum.TryParse(separation, true, out IndexSeparationPeriod separationValue))
             {
-                SetIndexSaparationPeriod(separationValue);
+                SetIndexSeparationPeriod(separationValue);
             }
             else
             {
-                SetIndexSaparationPeriod(IndexSeparationPeriod.None);
+                SetIndexSeparationPeriod(IndexSeparationPeriod.None);
             }
         }
-        public void SetIndexSaparationPeriod(IndexSeparationPeriod separation)
+        public void SetIndexSeparationPeriod(IndexSeparationPeriod separation)
         {
             _indexSeparationPeriod = separation;
-        }
-        public override void UpdateReferences(ReferencesData data)
-        {
         }
 
         #endregion

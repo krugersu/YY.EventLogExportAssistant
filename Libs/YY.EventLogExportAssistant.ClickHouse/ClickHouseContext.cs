@@ -7,6 +7,7 @@ using System.Linq;
 using ClickHouse.Client.ADO.Parameters;
 using ClickHouse.Client.Copy;
 using YY.EventLogExportAssistant.ClickHouse.Helpers;
+using YY.EventLogExportAssistant.ClickHouse.Models;
 using YY.EventLogExportAssistant.Database.Models;
 using YY.EventLogExportAssistant.Helpers;
 using YY.EventLogReaderAssistant;
@@ -25,27 +26,40 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         #region Private Members
 
-        private string _databaseName;
         private ClickHouseConnection _connection;
         private long logFileLastId = -1;
+        private IExtendedActions _extendedActions;
 
         #endregion
 
         #region Constructors
 
-        public ClickHouseContext(string connectionSettings)
+        public ClickHouseContext(string connectionSettings) : this(connectionSettings, null)
         {
+        }
+        public ClickHouseContext(string connectionSettings, IExtendedActions extendedActions)
+        {
+            _extendedActions = extendedActions;
             CheckDatabaseSettings(connectionSettings);
 
             _connection = new ClickHouseConnection(connectionSettings);
             _connection.Open();
-            
-            var cmdDDL = _connection.CreateCommand();
 
-            cmdDDL.CommandText = Resources.Query_CreateTable_RowsData;
+            var cmdDDL = _connection.CreateCommand();
+            var onModelCreatingParameters = new OnDatabaseModelConfiguringParameters()
+            {
+                Query_CreateTable_LogFiles = Resources.Query_CreateTable_LogFiles,
+                Query_CreateTable_RowsData = Resources.Query_CreateTable_RowsData
+            };
+
+            _extendedActions?.OnDatabaseModelConfiguring(this, onModelCreatingParameters);
+
+            cmdDDL.CommandText = onModelCreatingParameters.Query_CreateTable_RowsData
+                .Replace("{TemplateFields}", string.Empty);
             cmdDDL.ExecuteNonQuery();
 
-            cmdDDL.CommandText = Resources.Query_CreateTable_LogFiles;
+            cmdDDL.CommandText = onModelCreatingParameters.Query_CreateTable_LogFiles
+                .Replace("{TemplateFields}", string.Empty);
             cmdDDL.ExecuteNonQuery();
         }
 
@@ -57,6 +71,9 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         public void SaveRowsData(InformationSystemsBase system, List<RowData> rowsData)
         {
+            if (rowsData == null || rowsData.Count == 0)
+                return;
+
             using (ClickHouseBulkCopy bulkCopyInterface = new ClickHouseBulkCopy(_connection)
             {
                 DestinationTableName = "RowsData",
@@ -89,6 +106,8 @@ namespace YY.EventLogExportAssistant.ClickHouse
                     i.PrimaryPort?.Name ?? string.Empty,
                     i.SecondaryPort?.Name ?? string.Empty
                 }).AsEnumerable();
+
+                _extendedActions?.BeforeSaveData(system, rowsData, ref values);
 
                 var bulkResult = bulkCopyInterface.WriteToServerAsync(values);
                 bulkResult.Wait();
@@ -291,7 +310,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
             {
                 ParameterName = "LastStreamPosition",
                 DbType = DbType.Int64,
-                Value = position?.StreamPosition ?? 0
+                Value = position.StreamPosition ?? 0
             });
 
             commandAddLogInfo.ExecuteNonQuery();
@@ -371,10 +390,6 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         private void CheckDatabaseSettings(string connectionSettings)
         {
-            var connectionParams = ClickHouseHelpers.GetConnectionParams(connectionSettings);
-            var databaseParam = connectionParams.FirstOrDefault(e => e.Key.ToUpper() == "DATABASE");
-            _databaseName = databaseParam.Value;
-
             ClickHouseHelpers.CreateDatabaseIfNotExist(connectionSettings);
         }
 

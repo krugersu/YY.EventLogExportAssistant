@@ -26,7 +26,7 @@ namespace YY.EventLogExportAssistant.Helpers
                                   + "-"
                                   + value.Substring(4, 12);
 
-            if (Guid.TryParse(GUIDAsString, out Guid parseResult))
+            if (Guid.TryParse(GUIDAsString, out _))
                 return GUIDAsString;
             else
                 return _emptyGuid;

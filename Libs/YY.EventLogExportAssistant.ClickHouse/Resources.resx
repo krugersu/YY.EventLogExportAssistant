@@ -129,6 +129,7 @@
 	LastCurrentFileReferences LowCardinality(String),
 	LastCurrentFileData LowCardinality(String),
 	LastStreamPosition Int64 Codec(DoubleDelta, LZ4)
+    {TemplateFields}
 )
 engine = MergeTree()
 PARTITION BY toYYYYMM(CreateDate)
@@ -163,6 +164,7 @@ SETTINGS index_granularity = 8192;</value>
     WorkServer LowCardinality(String),
     PrimaryPort LowCardinality(String),
     SecondaryPort LowCardinality(String)
+    {TemplateFields}
 )
 engine = MergeTree()
 PARTITION BY toYYYYMM(Period)
@@ -170,5 +172,8 @@ PRIMARY KEY Period
 ORDER BY Period
 SETTINGS index_granularity = 8192;</value>
     <comment>Создание таблицы для хранения данных журнала регистрации</comment>
+  </data>
+  <data name="EventLog_CatalogNotFound" xml:space="preserve">
+    <value>Не указан каталог с файлами данных журнала регистрации.</value>
   </data>
 </root>

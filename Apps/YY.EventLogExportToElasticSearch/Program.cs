@@ -91,8 +91,8 @@ namespace YY.EventLogExportToElasticSearch
                         while (exporter.NewDataAvailable())
                         {
                             exporter.SendData();
-                            Thread.Sleep(watchPeriodSecondsMs);
                         }
+                        Thread.Sleep(watchPeriodSecondsMs);
                     }
                 }
                 else

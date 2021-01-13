@@ -109,6 +109,7 @@ namespace YY.EventLogExportAssistant.Database.Models
         [MaxLength(500)]
         public string Presentation {
             get => GetPresentationByName(Name);
+            // ReSharper disable once ValueParameterNotUsed
             set { }
         }
 
