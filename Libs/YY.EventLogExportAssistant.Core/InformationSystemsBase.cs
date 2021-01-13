@@ -9,7 +9,7 @@ namespace YY.EventLogExportAssistant
         public virtual long Id { get; set; }
         public virtual string Name { get; set; }
         public virtual string Description { get; set; }
-        public string TimeZoneName { get; set; }
+        public virtual string TimeZoneName { get; set; }
 
         #endregion
 

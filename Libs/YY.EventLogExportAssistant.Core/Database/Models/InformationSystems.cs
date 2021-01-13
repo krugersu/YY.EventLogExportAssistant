@@ -11,6 +11,8 @@ namespace YY.EventLogExportAssistant.Database.Models
         public override string Name { get; set; }
         [MaxLength(500)]
         public override string Description { get; set; }
+        [MaxLength(500)] 
+        public override string TimeZoneName { get; set; }
 
         #endregion
 
