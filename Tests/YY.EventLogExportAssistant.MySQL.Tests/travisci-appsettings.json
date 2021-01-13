@@ -1,6 +1,6 @@
 ﻿{
   "ConnectionStrings": {
-    "EventLogDatabase": "server=127.0.0.1;database=EventLogExportTest;user=root;password=128935"
+    "EventLogDatabase": "server=127.0.0.1;database=EventLogExportTest;user=root;password=Password12!"
   },
   "LGF": {
     "InformationSystem": {

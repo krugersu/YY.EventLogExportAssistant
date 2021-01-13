@@ -23,7 +23,7 @@ jobs:
     #  run: sudo chmod +x ./Scripts/install-mysql.sh && ./Scripts/install-mysql.sh
     - uses: mirromutth/mysql-action@v1.1
       with:
-        mysql root password: 129035
+        mysql root password: Password12!
     - name: Install dependencies
       run: dotnet restore
     - name: Build
