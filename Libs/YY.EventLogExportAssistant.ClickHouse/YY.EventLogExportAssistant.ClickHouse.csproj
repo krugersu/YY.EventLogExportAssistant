@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClickHouse.Client" Version="2.3.0.326" />
+    <PackageReference Include="ClickHouse.Client" Version="3.0.0.357" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
   </ItemGroup>
 
