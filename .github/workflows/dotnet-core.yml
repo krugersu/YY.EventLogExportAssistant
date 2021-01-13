@@ -20,7 +20,7 @@ jobs:
     - name: Install ClickHouse
       run: sudo chmod +x ./Scripts/install-clickhouse.sh && ./Scripts/install-clickhouse.sh
     - name: Install MySQL
-      run: sudo chmod +x ./Scripts/install-clickhouse.sh && ./Scripts/install-mysql.sh
+      run: sudo chmod +x ./Scripts/install-mysql.sh && ./Scripts/install-mysql.sh
     - name: Install dependencies
       run: dotnet restore
     - name: Build
