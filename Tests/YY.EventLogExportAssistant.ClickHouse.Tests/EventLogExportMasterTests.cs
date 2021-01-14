@@ -81,7 +81,9 @@ namespace YY.EventLogExportAssistant.ClickHouse.Tests
                     using (var cmdReader = cmd.ExecuteReader())
                     {
                         if (cmdReader.Read())
-                            rowsInDB = cmdReader.GetInt64(0);
+                        {
+                            rowsInDB = Convert.ToInt64(cmdReader.GetValue(0));
+                        }
                         else
                             rowsInDB = 0;
                     }

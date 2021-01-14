@@ -50,6 +50,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF6C
 		Scripts\appveyor-runTests.ps1 = Scripts\appveyor-runTests.ps1
 		Scripts\deploy.sh = Scripts\deploy.sh
 		Scripts\install-clickhouse.sh = Scripts\install-clickhouse.sh
+		Scripts\install-mysql.sh = Scripts\install-mysql.sh
 		Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\MySQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\PostgreSQL. Скрипт создания базы для хранения данных журнала регистрации.sql
 		Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql = Scripts\SQL Server. Скрипт создания базы для хранения данных журнала регистрации.sql

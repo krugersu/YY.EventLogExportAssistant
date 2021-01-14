@@ -41,7 +41,7 @@
     <None Update="TestData\LGFFormat\20200516230000.lgp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="travisci-appsettings.json">
+    <None Update="githubactions-appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -96,7 +96,7 @@ namespace YY.EventLogExportAssistant.MySQL.Tests
             string configFilePath = "appsettings.json";
             if (!File.Exists(configFilePath))
             {
-                configFilePath = "travisci-appsettings.json";
+                configFilePath = "githubactions-appsettings.json";
                 IConfiguration Configuration = new ConfigurationBuilder()
                     .AddJsonFile(configFilePath, optional: true, reloadOnChange: true)
                     .Build();
