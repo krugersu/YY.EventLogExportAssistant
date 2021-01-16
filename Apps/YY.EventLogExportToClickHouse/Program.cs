@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using System.Threading;
 using YY.EventLogExportAssistant;
@@ -12,6 +13,7 @@ namespace YY.EventLogExportToClickHouse
 
         private static long _totalRows;
         private static long _lastPortionRows;
+        private static DateTime _lastEventPeriod;
         private static DateTime _beginPortionExport;
         private static DateTime _endPortionExport;
 
@@ -105,6 +107,7 @@ namespace YY.EventLogExportToClickHouse
         {
             _lastPortionRows = e.Rows.Count;
             _totalRows += e.Rows.Count;
+            _lastEventPeriod = e.Rows.LastOrDefault()?.Period ?? DateTime.MinValue;
 
             Console.SetCursorPosition(0, 0);
             Console.WriteLine("[{0}] Last read: {1}             ", DateTime.Now, e.Rows.Count);
@@ -116,6 +119,7 @@ namespace YY.EventLogExportToClickHouse
 
             Console.WriteLine("[{0}] Total read: {1}            ", DateTime.Now, _totalRows);
             Console.WriteLine("[{0}] {1} / {2} (sec.)           ", DateTime.Now, _lastPortionRows, duration.TotalSeconds);
+            Console.WriteLine("[{0}] Last period: {1}            ", DateTime.Now, _lastEventPeriod);
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Нажмите 'q' для завершения отслеживания изменений...");

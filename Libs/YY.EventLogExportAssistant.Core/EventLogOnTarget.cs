@@ -49,12 +49,7 @@ namespace YY.EventLogExportAssistant
         }
         public TimeZoneInfo GetTimeZone()
         {
-            string timeZoneName = _system.TimeZoneName;
-            if (string.IsNullOrEmpty(timeZoneName))
-            {
-                return TimeZoneInfo.Local;
-            }
-            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneName);
+            return _system.TimeZone;
         }
 
         #endregion

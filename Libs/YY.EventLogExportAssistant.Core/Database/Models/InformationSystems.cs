@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace YY.EventLogExportAssistant.Database.Models
 {
@@ -11,8 +13,17 @@ namespace YY.EventLogExportAssistant.Database.Models
         public override string Name { get; set; }
         [MaxLength(500)]
         public override string Description { get; set; }
-        [MaxLength(500)] 
-        public override string TimeZoneName { get; set; }
+        [MaxLength(500)]
+        public override string TimeZoneName
+        {
+            get => _timeZoneName;
+            set
+            {
+                _timeZoneName = value;
+                _timeZone = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(t => t.Id == _timeZoneName);
+                _timeZoneRecognized = (_timeZone != null);
+            }
+        }
 
         #endregion
 
