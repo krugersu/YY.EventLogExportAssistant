@@ -28,7 +28,7 @@ namespace YY.EventLogExportAssistant.ClickHouse
 
         private ClickHouseConnection _connection;
         private long logFileLastId = -1;
-        private IExtendedActions _extendedActions;
+        private readonly IExtendedActions _extendedActions;
 
         #endregion
 
@@ -234,86 +234,32 @@ namespace YY.EventLogExportAssistant.ClickHouse
         }
         public void SaveLogPosition(InformationSystemsBase system, FileInfo logFileInfo, EventLogPosition position)
         {
-            var commandAddLogInfo = _connection.CreateCommand();
-            commandAddLogInfo.CommandText =
-                @"INSERT INTO LogFiles (
-                    InformationSystem,
-                    Id,
-                    FileName,
-                    CreateDate,
-                    ModificationDate,
-                    LastEventNumber,
-                    LastCurrentFileReferences,
-                    LastCurrentFileData,
-                    LastStreamPosition
-                ) VALUES (
-                    {isId:String},
-                    {newId:Int64},
-                    {FileName:String},
-                    {CreateDate:DateTime},
-                    {ModificationDate:DateTime},
-                    {LastEventNumber:Int64},
-                    {LastCurrentFileReferences:String},
-                    {LastCurrentFileData:String},
-                    {LastStreamPosition:Int64}     
-                )";
+            using (ClickHouseBulkCopy bulkCopyInterface = new ClickHouseBulkCopy(_connection)
+            {
+                DestinationTableName = "LogFiles",
+                BatchSize = 100000
+            })
+            {
+                long logFileNewId = GetLogFileInfoNewId(system);
+                IEnumerable<object[]> values = new List<object[]>()
+                {
+                    new object[]
+                    {
+                        system.Name,
+                        logFileNewId,
+                        logFileInfo.Name,
+                        logFileInfo.CreationTimeUtc,
+                        logFileInfo.LastWriteTimeUtc,
+                        position.EventNumber,
+                        position.CurrentFileReferences.Replace("\\", "\\\\"),
+                        position.CurrentFileData.Replace("\\", "\\\\"),
+                        position.StreamPosition ?? 0
+                    }
+                }.AsEnumerable();
 
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "isId",
-                DbType = DbType.Int64,
-                Value = system.Name
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "newId",
-                DbType = DbType.Int64,
-                Value = GetLogFileInfoNewId(system)
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "FileName",
-                DbType = DbType.AnsiString,
-                Value = logFileInfo.Name
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "CreateDate",
-                DbType = DbType.DateTime,
-                Value = logFileInfo.CreationTimeUtc
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "ModificationDate",
-                DbType = DbType.DateTime,
-                Value = logFileInfo.LastWriteTimeUtc
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "LastEventNumber",
-                DbType = DbType.Int64,
-                Value = position.EventNumber
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "LastCurrentFileReferences",
-                DbType = DbType.AnsiString,
-                Value = position.CurrentFileReferences.Replace("\\", "\\\\")
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "LastCurrentFileData",
-                DbType = DbType.AnsiString,
-                Value = position.CurrentFileData.Replace("\\", "\\\\")
-            });
-            commandAddLogInfo.Parameters.Add(new ClickHouseDbParameter
-            {
-                ParameterName = "LastStreamPosition",
-                DbType = DbType.Int64,
-                Value = position.StreamPosition ?? 0
-            });
-
-            commandAddLogInfo.ExecuteNonQuery();
+                var bulkResult = bulkCopyInterface.WriteToServerAsync(values);
+                bulkResult.Wait();
+            }
         }
         public long GetLogFileInfoNewId(InformationSystemsBase system)
         {
