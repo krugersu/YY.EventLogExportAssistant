@@ -31,7 +31,7 @@ namespace YY.EventLogExportAssistant.ClickHouse.Helpers
                 {
                     defaultConnection.Open();
                     var cmdDefault = defaultConnection.CreateCommand();
-                    cmdDefault.CommandText = $"CREATE DATABASE IF NOT EXISTS {databaseName}";
+                    cmdDefault.CommandText = $"CREATE DATABASE IF NOT EXISTS {databaseName} Engine=Ordinary;";
                     cmdDefault.ExecuteNonQuery();
                 }
             }
