@@ -109,9 +109,9 @@ namespace YY.EventLogExportAssistant.ElasticSearch.Helpers
             LogFileElement data,
             string indexName)
         {
-            var indexHistoryResponse = client.Index(data, idx => idx.Index(indexName.GetHistoryLogFilesIndexName()));
-            if (!indexHistoryResponse.ApiCall.Success)
-                throw indexHistoryResponse.ApiCall.OriginalException;
+            var indexActualResponse = client.Index(data, idx => idx.Index(indexName.GetActualLogFilesIndexName()));
+            if (!indexActualResponse.ApiCall.Success)
+                throw indexActualResponse.ApiCall.OriginalException;
         }
     }
 }
