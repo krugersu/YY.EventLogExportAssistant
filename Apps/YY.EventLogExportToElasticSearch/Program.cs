@@ -44,6 +44,8 @@ namespace YY.EventLogExportToElasticSearch
             int maximumRetries = elasticSearchSection.GetValue<int>("MaximumRetries");
             int maxRetryTimeout = elasticSearchSection.GetValue<int>("MaxRetryTimeout");
 
+            IConfigurationSection applicationSection = Configuration.GetSection("Application");
+            bool waitAfterFinish = applicationSection.GetValue("WaitAfterFinish", false);
 
             if (string.IsNullOrEmpty(eventLogPath))
             {
@@ -102,8 +104,11 @@ namespace YY.EventLogExportToElasticSearch
 
             Console.WriteLine();
             Console.WriteLine();
-            Console.WriteLine("Для выхода нажмите любую клавишу...");
-            Console.Read();
+            if (waitAfterFinish)
+            {
+                Console.WriteLine("Для выхода нажмите любую клавишу...");
+                Console.Read();
+            }
         }
 
         #endregion
